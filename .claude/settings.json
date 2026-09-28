@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(pytest:*)",
+      "PowerShell(ruff check:*)",
+      "PowerShell(ruff format:*)",
+      "PowerShell(python manage.py check:*)",
+      "PowerShell(python manage.py makemigrations:*)",
+      "PowerShell(python manage.py migrate:*)",
+      "PowerShell(python manage.py runserver:*)",
+      "PowerShell(git status:*)",
+      "PowerShell(git diff:*)"
+    ]
+  }
+}

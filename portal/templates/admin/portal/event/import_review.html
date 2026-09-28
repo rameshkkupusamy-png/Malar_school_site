@@ -1,0 +1,96 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .review-table { width: 100%; }
+  .review-table td { vertical-align: top; }
+  .review-table input[type="text"] { width: 100%; box-sizing: border-box; min-width: 10rem; }
+  .review-table .row-error td { background: var(--message-error-bg, #ffefef); }
+  .review-hint { color: var(--body-quiet-color, #666); }
+  .review-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  &rsaquo; <a href="{% url 'admin:portal_event_changelist' %}">Events</a>
+  &rsaquo; <a href="{% url 'admin:portal_event_import' %}">Import</a>
+  &rsaquo; Review
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  {% if batch.row_errors %}
+    <p><strong>{{ batch.row_errors|length }} row{{ batch.row_errors|length|pluralize }} couldn't be imported.</strong> Fix them in your file and upload it again, or add those events by hand.</p>
+    <ul class="errorlist">{% for error in batch.row_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  {% if published_count %}
+    <p>{{ published_count }} event{{ published_count|pluralize }} from this file {{ published_count|pluralize:"is,are" }} already published.</p>
+  {% endif %}
+
+  {% if formset.forms %}
+    <p class="review-hint">These are drafts. Leave <em>Start time</em> empty for all-day events, and set <em>End date</em> for events lasting several days.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      {% if formset.non_form_errors %}<ul class="errorlist">{% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+
+      <div class="results">
+        <table class="review-table">
+          <thead>
+            <tr>
+              <th scope="col"><input type="checkbox" id="select-all" aria-label="Tick all events"></th>
+              <th scope="col">Title</th>
+              <th scope="col">Start date</th>
+              <th scope="col">Start time</th>
+              <th scope="col">End date</th>
+              <th scope="col">End time</th>
+              <th scope="col">Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for form in formset %}
+              {% with event_id=form.event_id.value|stringformat:"s" %}
+              <tr class="{% cycle 'row1' 'row2' %}{% if form.errors %} row-error{% endif %}">
+                <td>
+                  {{ form.event_id }}
+                  <input type="checkbox" name="selected" value="{{ event_id }}" class="select-row" aria-label="Tick {{ form.title.value }}"{% if event_id in selected_ids %} checked{% endif %}>
+                </td>
+                <td>{{ form.title }}{{ form.title.errors }}{{ form.non_field_errors }}</td>
+                <td>{{ form.start_date }}{{ form.start_date.errors }}</td>
+                <td>{{ form.start_time }}{{ form.start_time.errors }}</td>
+                <td>{{ form.end_date }}{{ form.end_date.errors }}</td>
+                <td>{{ form.end_time }}{{ form.end_time.errors }}</td>
+                <td>{{ form.location }}{{ form.location.errors }}</td>
+              </tr>
+              {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="review-actions">
+        <button type="submit" name="action" value="publish" class="button default">Publish ticked events</button>
+        <label><input type="checkbox" name="email_parents" value="1"> Email parents about the events I publish</label>
+      </div>
+      <div class="review-actions">
+        <button type="submit" name="action" value="save" class="button">Save changes as drafts</button>
+        <button type="submit" name="action" value="delete" class="button">Delete ticked drafts</button>
+      </div>
+    </form>
+
+    <script>
+      document.getElementById("select-all").addEventListener("change", function () {
+        document.querySelectorAll(".select-row").forEach((box) => { box.checked = this.checked; });
+      });
+    </script>
+  {% else %}
+    <p>No drafts left from this file.</p>
+    <p><a href="{% url 'admin:portal_event_changelist' %}">Go to all events</a> or <a href="{% url 'admin:portal_event_import' %}">import another file</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

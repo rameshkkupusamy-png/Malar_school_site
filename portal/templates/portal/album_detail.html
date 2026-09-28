@@ -1,0 +1,30 @@
+{% extends "portal/base.html" %}
+
+{% block title %}{{ album.title }}, {{ school_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>{{ album.title }}</h1>
+  {% if album.event %}<p class="meta">From <a href="{{ album.event.get_absolute_url }}">{{ album.event.title }}</a></p>{% endif %}
+  {% if album.description %}<div class="prose">{{ album.description|linebreaks }}</div>{% endif %}
+</header>
+
+{% with photos=album.photos.all %}
+  {% if photos %}
+    <ul class="photos">
+      {% for photo in photos %}
+        <li>
+          <figure>
+            <a href="{{ photo.image.url }}"><img src="{{ photo.image.url }}" alt="{{ photo.caption }}" loading="lazy"></a>
+            {% if photo.caption %}<figcaption>{{ photo.caption }}</figcaption>{% endif %}
+          </figure>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="meta">No photos in this album yet.</p>
+  {% endif %}
+{% endwith %}
+
+<p class="more"><a href="{% url 'portal:album_list' %}">Back to all photos</a></p>
+{% endblock %}

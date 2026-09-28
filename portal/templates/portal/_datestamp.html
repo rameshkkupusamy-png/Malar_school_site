@@ -1,0 +1,5 @@
+<time class="stamp{% if large %} stamp--large{% endif %}" datetime="{{ event.starts_at|date:'c' }}">
+  <span class="stamp-month">{{ event.starts_at|date:"M" }}</span>
+  <span class="stamp-day">{{ event.starts_at|date:"j" }}</span>
+  <span class="stamp-weekday">{{ event.starts_at|date:"D" }}</span>
+</time>

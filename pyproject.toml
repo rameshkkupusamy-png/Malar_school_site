@@ -1,0 +1,20 @@
+[project]
+name = "school-portal"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "school_portal.settings"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+# Django's class-level list options (list_display, ordering, ...) are the framework idiom.
+ignore = ["RUF012"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests build local wall-clock times and pass them through timezone.make_aware().
+"tests/*" = ["DTZ001"]

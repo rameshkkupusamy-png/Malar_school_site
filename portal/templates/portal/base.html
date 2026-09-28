@@ -1,0 +1,44 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ school_name }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+  <link rel="stylesheet" href="{% static 'portal/style.css' %}">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  {% with current=request.resolver_match.url_name|default:"" %}
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="{% url 'portal:home' %}">{{ school_name }}</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>Events</a>
+        <a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>News</a>
+        <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>Photos</a>
+      </nav>
+    </div>
+  </header>
+  {% endwith %}
+
+  <main id="main" class="wrap">
+    {% if messages %}
+      <ul class="messages" role="status">
+        {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>{{ school_name }}</p>
+      <p><a href="{% url 'admin:index' %}">Staff sign in</a></p>
+    </div>
+  </footer>
+</body>
+</html>

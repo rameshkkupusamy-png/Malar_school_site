@@ -1,0 +1,24 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Events, {{ school_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>Events</h1>
+  <nav class="tabs" aria-label="Which events">
+    <a href="{% url 'portal:event_list' %}"{% if not show_past %} aria-current="page"{% endif %}>Upcoming</a>
+    <a href="{% url 'portal:event_list' %}?show=past"{% if show_past %} aria-current="page"{% endif %}>Past</a>
+  </nav>
+</header>
+
+{% if page.object_list %}
+  <ul class="event-list">
+    {% for event in page.object_list %}{% include "portal/_event_row.html" %}{% endfor %}
+  </ul>
+  {% if show_past %}{% include "portal/_pager.html" with extra="show=past" %}{% else %}{% include "portal/_pager.html" %}{% endif %}
+{% elif show_past %}
+  <p class="meta">No past events yet.</p>
+{% else %}
+  <p class="meta">No upcoming events yet. <a href="{% url 'portal:home' %}#subscribe-title">Sign up for emails</a> to hear when one is added.</p>
+{% endif %}
+{% endblock %}

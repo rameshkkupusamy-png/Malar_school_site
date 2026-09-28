@@ -1,0 +1,8 @@
+<li class="event-row">
+  {% include "portal/_datestamp.html" %}
+  <div>
+    <h3><a href="{{ event.get_absolute_url }}">{{ event.title }}</a></h3>
+    <p class="meta">{% include "portal/_event_time.html" %}</p>
+    {% if event.location %}<p class="meta">{{ event.location }}</p>{% endif %}
+  </div>
+</li>

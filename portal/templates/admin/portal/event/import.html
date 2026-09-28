@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  &rsaquo; <a href="{% url 'admin:portal_event_changelist' %}">Events</a>
+  &rsaquo; Import
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" style="max-width: 48rem">
+  <p>Add a whole term's events at once. Nothing goes live until you check the events and publish them.</p>
+
+  <ol>
+    <li><a href="{% url 'admin:portal_event_import_template' %}">Download the Excel template</a> and fill in one event per row. The second sheet explains each column.</li>
+    <li>Upload the file here.</li>
+    <li>Check the events on the next page, then tick them and click <strong>Publish</strong>.</li>
+  </ol>
+
+  {% if file_errors %}
+    <ul class="errorlist">{% for error in file_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if row_errors %}
+    <p>Problems found:</p>
+    <ul class="errorlist">{% for error in row_errors %}<li>{{ error }}</li>{% endfor %}</ul>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      {% for field in form %}
+        <div class="form-row">
+          {{ field.errors }}
+          {{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" class="default" value="Upload and check">
+    </div>
+  </form>
+
+  {% if recent_imports %}
+    <h2>Recent uploads</h2>
+    <ul>
+      {% for item in recent_imports %}
+        <li><a href="{% url 'admin:portal_event_import_review' item.pk %}">{{ item.original_name }}</a>, {{ item.created_at|date:"j M Y, P" }}{% if item.uploaded_by %} by {{ item.uploaded_by }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+{% endblock %}

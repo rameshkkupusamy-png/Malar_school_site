@@ -1,0 +1,32 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Photos, {{ school_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>Photos</h1>
+</header>
+
+{% if page.object_list %}
+  <ul class="albums">
+    {% for album in page.object_list %}
+      <li>
+        <a class="album" href="{{ album.get_absolute_url }}">
+          {% with cover=album.cover %}
+            {% if cover %}
+              <img src="{{ cover.image.url }}" alt="" loading="lazy">
+            {% else %}
+              <span class="album-empty">No photos yet</span>
+            {% endif %}
+          {% endwith %}
+          <span class="album-title">{{ album.title }}</span>
+        </a>
+        <p class="meta">{{ album.photos.all|length }} photo{{ album.photos.all|length|pluralize }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+  {% include "portal/_pager.html" %}
+{% else %}
+  <p class="meta">No photo albums yet.</p>
+{% endif %}
+{% endblock %}

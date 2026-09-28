@@ -1,0 +1,35 @@
+{% extends "portal/base.html" %}
+
+{% block title %}{{ event.title }}, {{ school_name }}{% endblock %}
+
+{% block content %}
+<article>
+  <header class="event-head">
+    {% include "portal/_datestamp.html" %}
+    <div>
+      <h1>{{ event.title }}</h1>
+      <p class="meta">{% include "portal/_event_time.html" %}</p>
+      {% if event.location %}<p class="meta">{{ event.location }}</p>{% endif %}
+    </div>
+  </header>
+
+  {% if event.image %}
+    <img class="feature-image" src="{{ event.image.url }}" alt="">
+  {% endif %}
+
+  {% if event.description %}
+    <div class="prose">{{ event.description|linebreaks }}</div>
+  {% endif %}
+
+  {% if albums %}
+    <section class="related" aria-labelledby="photos-title">
+      <h2 id="photos-title">Photos from this event</h2>
+      <ul class="plain-list">
+        {% for album in albums %}<li><a href="{{ album.get_absolute_url }}">{{ album.title }}</a></li>{% endfor %}
+      </ul>
+    </section>
+  {% endif %}
+
+  <p class="more"><a href="{% url 'portal:event_list' %}">Back to all events</a></p>
+</article>
+{% endblock %}

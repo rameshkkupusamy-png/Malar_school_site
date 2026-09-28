@@ -1,0 +1,18 @@
+{% extends "portal/base.html" %}
+
+{% block title %}Stop event emails, {{ school_name }}{% endblock %}
+
+{% block content %}
+<section class="prose">
+  <h1>Stop event emails</h1>
+  {% if subscriber.is_active %}
+    <p>{{ subscriber.email }} will no longer get an email when events are added.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="button" type="submit">Stop emails</button>
+    </form>
+  {% else %}
+    <p>{{ subscriber.email }} already doesn't get event emails. To start them again, sign up on the <a href="{% url 'portal:home' %}#subscribe-title">home page</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
