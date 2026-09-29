@@ -1,11 +1,12 @@
 {% extends "portal/base.html" %}
+{% load i18n %}
 
 {% block title %}{{ album.title }}, {{ school_name }}{% endblock %}
 
 {% block content %}
 <header class="page-head">
   <h1>{{ album.title }}</h1>
-  {% if album.event %}<p class="meta">From <a href="{{ album.event.get_absolute_url }}">{{ album.event.title }}</a></p>{% endif %}
+  {% if album.event %}<p class="meta">{% translate "From" %} <a href="{{ album.event.get_absolute_url }}">{{ album.event.title }}</a></p>{% endif %}
   {% if album.description %}<div class="prose">{{ album.description|linebreaks }}</div>{% endif %}
 </header>
 
@@ -22,9 +23,9 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p class="meta">No photos in this album yet.</p>
+    <p class="meta">{% translate "No photos in this album yet." %}</p>
   {% endif %}
 {% endwith %}
 
-<p class="more"><a href="{% url 'portal:album_list' %}">Back to all photos</a></p>
+<p class="more"><a href="{% url 'portal:album_list' %}">{% translate "Back to all photos" %}</a></p>
 {% endblock %}

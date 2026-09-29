@@ -1,0 +1,10 @@
+{% load i18n %}{% get_current_language as current_language %}
+{# Each button names its language in that language, so people can find their own. #}
+<form class="language-switcher" action="{% url 'set_language' %}" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <span class="visually-hidden">{% translate "Language" %}:</span>
+  <button type="submit" name="language" value="ta" lang="ta" title="தமிழ்"{% if current_language == "ta" %} aria-current="true"{% endif %}>தமிழ்</button>
+  <button type="submit" name="language" value="ms" lang="ms" title="Bahasa Melayu"{% if current_language == "ms" %} aria-current="true"{% endif %}>BM</button>
+  <button type="submit" name="language" value="en" lang="en" title="English"{% if current_language == "en" %} aria-current="true"{% endif %}>EN</button>
+</form>

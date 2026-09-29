@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load i18n %}
 
 {% block title %}{{ event.title }}, {{ school_name }}{% endblock %}
 
@@ -23,13 +24,13 @@
 
   {% if albums %}
     <section class="related" aria-labelledby="photos-title">
-      <h2 id="photos-title">Photos from this event</h2>
+      <h2 id="photos-title">{% translate "Photos from this event" %}</h2>
       <ul class="plain-list">
         {% for album in albums %}<li><a href="{{ album.get_absolute_url }}">{{ album.title }}</a></li>{% endfor %}
       </ul>
     </section>
   {% endif %}
 
-  <p class="more"><a href="{% url 'portal:event_list' %}">Back to all events</a></p>
+  <p class="more"><a href="{% url 'portal:event_list' %}">{% translate "Back to all events" %}</a></p>
 </article>
 {% endblock %}

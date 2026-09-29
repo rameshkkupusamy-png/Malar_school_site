@@ -1,4 +1,5 @@
 {% extends "portal/base.html" %}
+{% load i18n %}
 
 {% block title %}{{ announcement.title }}, {{ school_name }}{% endblock %}
 
@@ -7,6 +8,6 @@
   <h1>{{ announcement.title }}</h1>
   <p class="meta"><time datetime="{{ announcement.published_at|date:'c' }}">{{ announcement.published_at|date:"j F Y" }}</time></p>
   {{ announcement.body|linebreaks }}
-  <p class="more"><a href="{% url 'portal:announcement_list' %}">Back to all news</a></p>
+  <p class="more"><a href="{% url 'portal:announcement_list' %}">{% translate "Back to all news" %}</a></p>
 </article>
 {% endblock %}

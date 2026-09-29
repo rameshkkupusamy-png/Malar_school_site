@@ -1,0 +1,39 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  &rsaquo; <a href="{% url 'admin:portal_staffmember_changelist' %}">Staff members</a>
+  &rsaquo; Import
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" style="max-width: 48rem">
+  <p>Add many teachers at once. Everyone in the file can then sign in with Google using that email address.</p>
+
+  <ol>
+    <li>Make a spreadsheet with one teacher per row: their email address, and their name if you like. A heading row is fine.</li>
+    <li>Upload it here. People already on the list are left as they are.</li>
+    <li>Tell the teachers to open this site's <strong>/admin/</strong> page and click <strong>Sign in with Google</strong>.</li>
+  </ol>
+
+  {% if error %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endif %}
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      {% for field in form %}
+        <div class="form-row">
+          {{ field.errors }}
+          {{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" class="default" value="Add to the staff list">
+    </div>
+  </form>
+</div>
+{% endblock %}

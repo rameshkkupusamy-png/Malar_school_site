@@ -6,23 +6,32 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
+from django.utils import translation
 from django.utils.html import format_html
+from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
 
-from .forms import DraftEventForm, DraftEventFormSet, EventImportForm
+from .forms import DraftEventForm, DraftEventFormSet, EventImportForm, StaffImportForm
 from .imports import FileRejected, build_template, parse_file
-from .models import Album, Announcement, Event, EventImport, Photo, Subscriber
+from .models import Album, Announcement, Event, EventImport, Photo, StaffMember, Subscriber
 from .notifications import notify_subscribers
+from .staff_list import MAX_BYTES, StaffFileRejected, add_staff_from_rows, read_rows
 
 admin.site.site_header = f"{settings.SCHOOL_NAME} admin"
 admin.site.site_title = f"{settings.SCHOOL_NAME} admin"
 admin.site.index_title = "Manage the school portal"
+admin.site.login_template = "admin/staff_login.html"
+
+
+def in_all_languages(*fields):
+    """Search every language version of these fields."""
+    return [f"{field}_{code}" for field in fields for code in ("ta", "ms", "en")]
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(TranslationAdmin):
     list_display = ["title", "starts_at", "all_day", "location", "is_published", "notified_at"]
     list_filter = ["is_published", "all_day", "starts_at"]
-    search_fields = ["title", "description", "location"]
+    search_fields = in_all_languages("title", "description", "location")
     date_hierarchy = "starts_at"
     readonly_fields = ["notified_at"]
     actions = ["email_subscribers"]
@@ -99,12 +108,15 @@ class EventAdmin(admin.ModelAdmin):
                     row_errors = result.errors
                 else:
                     uploaded.seek(0)
-                    with transaction.atomic():
+                    language = form.cleaned_data["language"]
+                    # The spreadsheet's text is filed under the language staff picked.
+                    with transaction.atomic(), translation.override(language):
                         batch = EventImport.objects.create(
                             file=uploaded,
                             original_name=uploaded.name,
                             uploaded_by=request.user,
                             row_errors=result.errors,
+                            language=language,
                         )
                         for parsed in result.events:
                             Event.objects.create(
@@ -140,6 +152,11 @@ class EventAdmin(admin.ModelAdmin):
     def import_review_view(self, request, pk):
         self._check_import_permission(request)
         batch = get_object_or_404(EventImport, pk=pk)
+        # Show and save the text in the language the spreadsheet was written in.
+        with translation.override(batch.language):
+            return self._import_review(request, batch)
+
+    def _import_review(self, request, batch):
         drafts = batch.events.filter(is_published=False).order_by("starts_at")
         drafts_by_id = {event.pk: event for event in drafts}
         selected_ids = {int(i) for i in request.POST.getlist("selected") if i.isdigit()}
@@ -196,7 +213,7 @@ class EventAdmin(admin.ModelAdmin):
             "admin/portal/event/import_review.html",
             self._context(
                 request,
-                f"Review events from {batch.original_name}",
+                f"Review events from {batch.original_name} ({batch.get_language_display()})",
                 batch=batch,
                 formset=formset,
                 selected_ids={str(i) for i in selected_ids},
@@ -227,31 +244,103 @@ class EventImportAdmin(admin.ModelAdmin):
 
 
 @admin.register(Announcement)
-class AnnouncementAdmin(admin.ModelAdmin):
+class AnnouncementAdmin(TranslationAdmin):
     list_display = ["title", "published_at", "is_pinned", "is_published"]
     list_editable = ["is_pinned", "is_published"]
     list_filter = ["is_pinned", "is_published"]
-    search_fields = ["title", "body"]
+    search_fields = in_all_languages("title", "body")
     date_hierarchy = "published_at"
 
 
-class PhotoInline(admin.TabularInline):
+class PhotoInline(TranslationTabularInline):
     model = Photo
     extra = 3
     fields = ["image", "caption", "order"]
 
 
 @admin.register(Album)
-class AlbumAdmin(admin.ModelAdmin):
+class AlbumAdmin(TranslationAdmin):
     list_display = ["title", "event", "is_published", "created_at"]
     list_filter = ["is_published"]
-    search_fields = ["title"]
+    search_fields = in_all_languages("title")
     autocomplete_fields = ["event"]
     inlines = [PhotoInline]
 
 
+@admin.register(StaffMember)
+class StaffMemberAdmin(admin.ModelAdmin):
+    list_display = ["email", "name", "is_active", "last_sign_in", "added_at"]
+    list_editable = ["is_active"]
+    list_filter = ["is_active"]
+    search_fields = ["email", "name"]
+    fields = ["email", "name", "is_active"]
+    actions = ["remove_access"]
+
+    change_list_template = "admin/portal/staffmember/change_list.html"
+
+    def get_urls(self):
+        view = self.admin_site.admin_view
+        return [
+            path("import/", view(self.import_view), name="portal_staffmember_import"),
+        ] + super().get_urls()
+
+    def import_view(self, request):
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+        form = StaffImportForm(request.POST or None, request.FILES or None)
+        error = None
+        if request.method == "POST" and form.is_valid():
+            uploaded = form.cleaned_data["file"]
+            try:
+                if uploaded.size > MAX_BYTES:
+                    raise StaffFileRejected(
+                        "The file is over 2 MB. Remove extra sheets or columns."
+                    )
+                result = add_staff_from_rows(read_rows(uploaded.file, uploaded.name))
+            except StaffFileRejected as rejected:
+                error = str(rejected)
+            else:
+                note = f"Added {len(result.added)} staff member(s)."
+                if result.already_listed:
+                    note += f" {len(result.already_listed)} were already on the list."
+                self.message_user(request, note, messages.SUCCESS)
+                if result.rows_without_email:
+                    rows = ", ".join(str(n) for n in result.rows_without_email[:20])
+                    self.message_user(
+                        request,
+                        f"No email address in row(s) {rows}, so they were skipped. "
+                        "A heading row is skipped this way too.",
+                        messages.WARNING,
+                    )
+                return redirect("admin:portal_staffmember_changelist")
+        return TemplateResponse(
+            request,
+            "admin/portal/staffmember/import.html",
+            {
+                **self.admin_site.each_context(request),
+                "opts": self.model._meta,
+                "title": "Add staff from a spreadsheet",
+                "form": form,
+                "error": error,
+            },
+        )
+
+    @admin.display(description="last signed in")
+    def last_sign_in(self, obj):
+        return obj.user.last_login if obj.user_id and obj.user.last_login else "Never"
+
+    @admin.action(description="Remove sign-in access for selected staff")
+    def remove_access(self, request, queryset):
+        for member in queryset:
+            member.is_active = False
+            member.save()
+        self.message_user(
+            request, f"Removed access for {queryset.count()} staff member(s).", messages.SUCCESS
+        )
+
+
 @admin.register(Subscriber)
 class SubscriberAdmin(admin.ModelAdmin):
-    list_display = ["email", "name", "is_active", "created_at"]
-    list_filter = ["is_active"]
+    list_display = ["email", "name", "language", "is_active", "created_at"]
+    list_filter = ["is_active", "language"]
     search_fields = ["email", "name"]

@@ -11,3 +11,6 @@ staticfiles/
 .playwright-mcp/
 test-results/
 .claude/hooks/.last-pass
+site-photos/
+translation-review.xlsx
+important.txt

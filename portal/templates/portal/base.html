@@ -1,31 +1,40 @@
-{% load static %}<!doctype html>
-<html lang="en">
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ school_name }}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'portal/favicon.png' %}">
+  <link rel="apple-touch-icon" href="{% static 'portal/apple-touch-icon.png' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Serif+Display:ital,wght@1,500;1,600&family=Noto+Serif+Tamil:wght@500&display=swap">
   <link rel="stylesheet" href="{% static 'portal/style.css' %}">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
+  <a class="skip" href="#main">{% translate "Skip to content" %}</a>
 
   {% with current=request.resolver_match.url_name|default:"" %}
   <header class="site-header">
     <div class="wrap">
-      <a class="brand" href="{% url 'portal:home' %}">{{ school_name }}</a>
-      <nav class="site-nav" aria-label="Main">
-        <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>Events</a>
-        <a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>News</a>
-        <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>Photos</a>
-      </nav>
+      <a class="brand" href="{% url 'portal:home' %}">
+        <img class="brand-crest" src="{% static 'portal/crest.png' %}" alt="" width="52" height="44">
+        <span>{{ school_name }}</span>
+      </a>
+      <div class="header-end">
+        <nav class="site-nav" aria-label="{% translate 'Main' %}">
+          <a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>{% translate "News" %}</a>
+          <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>{% translate "Events" %}</a>
+          <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>{% translate "Photos" %}</a>
+        </nav>
+        {% include "portal/_language_switcher.html" %}
+      </div>
     </div>
   </header>
   {% endwith %}
 
-  <main id="main" class="wrap">
+  <main id="main" class="{% block main_class %}wrap page{% endblock %}">
     {% if messages %}
       <ul class="messages" role="status">
         {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
@@ -36,8 +45,19 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>{{ school_name }}</p>
-      <p><a href="{% url 'admin:index' %}">Staff sign in</a></p>
+      <div class="footer-school">
+        <img class="footer-crest" src="{% static 'portal/crest.png' %}" alt="" width="65" height="55">
+        <div>
+          <p class="footer-name">{{ school_name }}</p>
+          <p class="footer-motto" lang="ms">{{ school_motto }}</p>
+        </div>
+      </div>
+      <nav class="footer-links" aria-label="{% translate 'Footer' %}">
+        <a href="{% url 'portal:announcement_list' %}">{% translate "News" %}</a>
+        <a href="{% url 'portal:event_list' %}">{% translate "Events" %}</a>
+        <a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>
+        <a href="{% url 'admin:index' %}">{% translate "Staff sign in" %}</a>
+      </nav>
     </div>
   </footer>
 </body>

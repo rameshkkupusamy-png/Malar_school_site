@@ -1,7 +1,7 @@
-{% if page.paginator.num_pages > 1 %}
-<nav class="pager" aria-label="Pages">
-  {% if page.has_previous %}<a class="button button--quiet" href="?{% if extra %}{{ extra }}&amp;{% endif %}page={{ page.previous_page_number }}">Newer</a>{% endif %}
-  <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
-  {% if page.has_next %}<a class="button button--quiet" href="?{% if extra %}{{ extra }}&amp;{% endif %}page={{ page.next_page_number }}">Older</a>{% endif %}
+{% load i18n %}{% if page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="{% translate 'Pages' %}">
+  {% if page.has_previous %}<a class="button button--quiet" href="?{% if extra %}{{ extra }}&amp;{% endif %}page={{ page.previous_page_number }}">{% translate "Newer" %}</a>{% endif %}
+  <span>{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+  {% if page.has_next %}<a class="button button--quiet" href="?{% if extra %}{{ extra }}&amp;{% endif %}page={{ page.next_page_number }}">{% translate "Older" %}</a>{% endif %}
 </nav>
 {% endif %}

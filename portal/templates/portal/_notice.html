@@ -1,5 +1,5 @@
-<li class="notice{% if item.is_pinned %} notice--pinned{% endif %}">
-  {% if item.is_pinned %}<p class="pin-label">Pinned</p>{% endif %}
+{% load i18n %}<li class="notice{% if item.is_pinned %} notice--pinned{% endif %}">
+  {% if item.is_pinned %}<p class="pin-label">{% translate "Pinned" %}</p>{% endif %}
   <h3><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h3>
   <p class="meta"><time datetime="{{ item.published_at|date:'c' }}">{{ item.published_at|date:"j F Y" }}</time></p>
   <p>{% if short %}{{ item.body|truncatewords:20 }}{% else %}{{ item.body|truncatewords:50 }}{% endif %}</p>

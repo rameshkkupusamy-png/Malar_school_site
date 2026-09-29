@@ -41,6 +41,13 @@ def site(transactional_db):
     return {"event": event, "news": news, "album": album}
 
 
+def use_language(page, live_server, language):
+    """Pretend the visitor picked this language in the switcher."""
+    page.context.add_cookies(
+        [{"name": "django_language", "value": language, "url": live_server.url}]
+    )
+
+
 def page_paths(site):
     return [
         "/",
@@ -65,8 +72,12 @@ def collect_errors(page):
     return errors
 
 
+@pytest.mark.parametrize("language", ["ta", "ms", "en"])
 @pytest.mark.parametrize("viewport", [PHONE, DESKTOP], ids=["phone", "desktop"])
-def test_public_pages_load_without_errors_or_sideways_scroll(page, live_server, site, viewport):
+def test_public_pages_load_without_errors_or_sideways_scroll(
+    page, live_server, site, viewport, language
+):
+    use_language(page, live_server, language)
     page.set_viewport_size(viewport)
     errors = collect_errors(page)
 
@@ -90,6 +101,7 @@ def test_every_page_has_a_title_and_one_main_heading(page, live_server, site):
 
 
 def test_parent_can_sign_up_for_event_emails(page, live_server, site):
+    use_language(page, live_server, "en")
     page.set_viewport_size(PHONE)
     page.goto(live_server.url + "/")
 

@@ -1,18 +1,20 @@
 {% extends "portal/base.html" %}
+{% load i18n %}
 
-{% block title %}Stop event emails, {{ school_name }}{% endblock %}
+{% block title %}{% translate "Stop event emails" %}, {{ school_name }}{% endblock %}
 
 {% block content %}
 <section class="prose">
-  <h1>Stop event emails</h1>
+  <h1>{% translate "Stop event emails" %}</h1>
   {% if subscriber.is_active %}
-    <p>{{ subscriber.email }} will no longer get an email when events are added.</p>
+    <p>{% blocktranslate with email=subscriber.email %}{{ email }} will no longer get an email when events are added.{% endblocktranslate %}</p>
     <form method="post">
       {% csrf_token %}
-      <button class="button" type="submit">Stop emails</button>
+      <button class="button" type="submit">{% translate "Stop emails" %}</button>
     </form>
   {% else %}
-    <p>{{ subscriber.email }} already doesn't get event emails. To start them again, sign up on the <a href="{% url 'portal:home' %}#subscribe-title">home page</a>.</p>
+    <p>{% blocktranslate with email=subscriber.email %}{{ email }} already doesn't get event emails.{% endblocktranslate %}
+      <a href="{% url 'portal:home' %}#subscribe-title">{% translate "Sign up again on the home page" %}</a></p>
   {% endif %}
 </section>
 {% endblock %}

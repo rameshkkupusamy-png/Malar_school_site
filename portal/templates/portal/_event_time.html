@@ -1,1 +1,4 @@
-{% if event.all_day %}{{ event.starts_at|date:"l j F" }}{% if event.ends_at and event.ends_at|date:"Ymd" != event.starts_at|date:"Ymd" %} to {{ event.ends_at|date:"l j F" }}{% endif %}{% else %}{{ event.starts_at|date:"l j F, P" }}{% if event.ends_at %}{% if event.ends_at|date:"Ymd" == event.starts_at|date:"Ymd" %} to {{ event.ends_at|date:"P" }}{% else %} to {{ event.ends_at|date:"l j F, P" }}{% endif %}{% endif %}{% endif %}
+{% load i18n %}{% comment %}
+  The date formats are translatable so each language can order them its own way:
+  Tamil puts பிற்பகல் (p.m.) before the time.
+{% endcomment %}{% if event.all_day %}{{ event.starts_at|date:_("l j F") }}{% if event.ends_at and event.ends_at|date:"Ymd" != event.starts_at|date:"Ymd" %} {% translate "to" context "time range" %} {{ event.ends_at|date:_("l j F") }}{% endif %}{% else %}{{ event.starts_at|date:_("l j F, P") }}{% if event.ends_at %}{% if event.ends_at|date:"Ymd" == event.starts_at|date:"Ymd" %} {% translate "to" context "time range" %} {{ event.ends_at|date:_("P") }}{% else %} {% translate "to" context "time range" %} {{ event.ends_at|date:_("l j F, P") }}{% endif %}{% endif %}{% endif %}

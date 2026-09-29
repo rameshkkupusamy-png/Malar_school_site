@@ -164,7 +164,7 @@ def upload_sample(admin_client):
             ["Broken", "not a date", None, None, None, None, None],
         ]
     )
-    return admin_client.post(IMPORT_URL, {"file": upload})
+    return admin_client.post(IMPORT_URL, {"file": upload, "language": "en"})
 
 
 def review_post(batch, action, selected=(), **overrides):
@@ -215,7 +215,7 @@ def test_drafts_are_not_public(admin_client, client):
 
 def test_file_with_no_valid_rows_creates_nothing(admin_client):
     upload = xlsx_file([["Broken", "nope", None, None, None, None, None]])
-    response = admin_client.post(IMPORT_URL, {"file": upload})
+    response = admin_client.post(IMPORT_URL, {"file": upload, "language": "en"})
     assert response.status_code == 200
     assert b"No events could be imported" in response.content
     assert not EventImport.objects.exists()

@@ -1,10 +1,22 @@
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+
+LANGUAGE_CODES = ("ta", "ms", "en")
+
+
+def require_one_language(obj, field: str, message: str) -> None:
+    """Posts may be written in Tamil, Malay or English, but not left empty in all three."""
+    values = [getattr(obj, f"{field}_{code}", None) for code in LANGUAGE_CODES]
+    if not any(v and v.strip() for v in values):
+        raise ValidationError({f"{field}_ta": message})
 
 
 class EventQuerySet(models.QuerySet):
@@ -63,6 +75,7 @@ class Event(models.Model):
         return self.starts_at <= now and (self.ends_at is None or self.ends_at >= now)
 
     def clean(self) -> None:
+        require_one_language(self, "title", "Give the event a title in at least one language.")
         if self.ends_at and self.starts_at and self.ends_at < self.starts_at:
             raise ValidationError({"ends_at": "The end must be after the start."})
 
@@ -85,6 +98,12 @@ class EventImport(models.Model):
         "auth.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
     row_errors = models.JSONField(default=list, blank=True)
+    language = models.CharField(
+        max_length=5,
+        choices=settings.LANGUAGES,
+        default="ta",
+        help_text="The language the spreadsheet is written in; its text is saved under it.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -121,6 +140,10 @@ class Announcement(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("portal:announcement_detail", args=[self.pk])
 
+    def clean(self) -> None:
+        require_one_language(self, "title", "Give the update a title in at least one language.")
+        require_one_language(self, "body", "Write the update in at least one language.")
+
 
 class Album(models.Model):
     title = models.CharField(max_length=200)
@@ -140,6 +163,9 @@ class Album(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("portal:album_detail", args=[self.pk])
 
+    def clean(self) -> None:
+        require_one_language(self, "title", "Give the album a title in at least one language.")
+
     @property
     def cover(self):
         return self.photos.first()
@@ -158,12 +184,63 @@ class Photo(models.Model):
         return self.caption or f"Photo {self.pk}"
 
 
+class StaffMember(models.Model):
+    """An email address allowed to sign in to the admin with Google.
+
+    The Django user is created the first time the person signs in. Turning off
+    "can sign in" (or deleting the entry) deactivates that user straight away.
+    """
+
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(
+        "can sign in", default=True, help_text="Untick to remove this person's access."
+    )
+    user = models.OneToOneField(
+        "auth.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="staff_member",
+        editable=False,
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["email"]
+        verbose_name = "staff member"
+
+    def __str__(self) -> str:
+        return self.name or self.email
+
+    def save(self, *args, **kwargs) -> None:
+        self.email = self.email.strip().lower()
+        super().save(*args, **kwargs)
+        if self.user_id and self.user.is_active != self.is_active:
+            self.user.is_active = self.is_active
+            self.user.save(update_fields=["is_active"])
+
+
+@receiver(post_delete, sender=StaffMember)
+def _deactivate_removed_staff(sender, instance, **kwargs):
+    if instance.user_id and not instance.user.is_superuser:
+        instance.user.is_active = False
+        instance.user.save(update_fields=["is_active"])
+
+
 class Subscriber(models.Model):
     """A parent or guardian who gets an email when staff announce an event."""
 
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField("subscribed", default=True)
+    language = models.CharField(
+        "email language",
+        max_length=5,
+        choices=settings.LANGUAGES,
+        default="ta",
+        help_text="Emails are sent in this language: the one the parent used to sign up.",
+    )
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

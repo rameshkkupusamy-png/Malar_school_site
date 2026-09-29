@@ -24,7 +24,9 @@ def main() -> int:
     ruff = str(RUFF) if RUFF.exists() else "ruff"
     subprocess.run([ruff, "format", "--quiet", str(path)], cwd=ROOT, check=False)
     check = subprocess.run(
-        [ruff, "check", "--fix", "--quiet", str(path)],
+        # Unused imports are reported, not deleted: an import is often added one edit
+        # before the code that uses it.
+        [ruff, "check", "--fix", "--extend-unfixable", "F401", "--quiet", str(path)],
         cwd=ROOT,
         capture_output=True,
         text=True,

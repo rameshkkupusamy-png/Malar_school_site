@@ -1,66 +1,106 @@
 {% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block main_class %}home{% endblock %}
 
 {% block content %}
-{% if next_event %}
-  <section class="next" aria-labelledby="next-title">
-    {% include "portal/_datestamp.html" with event=next_event large=True %}
-    <div>
-      <p class="next-when">
-        {% if next_event.is_happening %}Happening now{% else %}Next at school, in {{ next_event.starts_at|timeuntil }}{% endif %}
+<section class="band band--hero{% if hero_image %} band--photo{% endif %}" aria-labelledby="lead-title">
+  {% if hero_image %}<img class="band-img" src="{{ hero_image.url }}" alt="">{% endif %}
+  <div class="band-frame band-frame--down" aria-hidden="true"></div>
+  <div class="band-body wrap">
+    {% if lead_news %}
+      <p class="chip{% if lead_news.is_pinned %} chip--pinned{% endif %}">
+        {% if lead_news.is_pinned %}{% translate "Pinned" %}{% else %}{% translate "Latest news" %}{% endif %},
+        <time datetime="{{ lead_news.published_at|date:'c' }}">{{ lead_news.published_at|date:"j F Y" }}</time>
       </p>
-      <h1 id="next-title">{{ next_event.title }}</h1>
-      <p>{% include "portal/_event_time.html" with event=next_event %}</p>
-      {% if next_event.location %}<p>{{ next_event.location }}</p>{% endif %}
-      <p><a class="button button--light" href="{{ next_event.get_absolute_url }}">See event details</a></p>
-    </div>
-  </section>
-{% else %}
-  <section class="next next--empty">
-    <h1>Nothing on the calendar yet</h1>
-    <p>New events will show up here as soon as staff add them. Sign up below to get an email when they do.</p>
-  </section>
+      <h1 id="lead-title">{{ lead_news.title }}</h1>
+      <p class="band-lead">{{ lead_news.body|truncatewords:40 }}</p>
+      <p><a class="button button--torch" href="{{ lead_news.get_absolute_url }}">{% translate "Read the full update" %}</a></p>
+    {% elif hero_event %}
+      <p class="chip">
+        {% if hero_event.is_happening %}{% translate "Happening now" %}{% else %}{% blocktranslate with time=hero_event.starts_at|timeuntil %}Next at school, in {{ time }}{% endblocktranslate %}{% endif %}
+      </p>
+      <h1 id="lead-title">{{ hero_event.title }}</h1>
+      <p class="band-meta">{% include "portal/_event_time.html" with event=hero_event %}</p>
+      {% if hero_event.location %}<p class="band-meta">{{ hero_event.location }}</p>{% endif %}
+      <p><a class="button button--torch" href="{{ hero_event.get_absolute_url }}">{% translate "See event details" %}</a></p>
+    {% else %}
+      <h1 id="lead-title">{% blocktranslate %}Welcome to {{ school_name }}{% endblocktranslate %}</h1>
+      <p class="band-lead">{% translate "News, events and photos from school, for parents and guardians." %}</p>
+      <p><a class="button button--torch" href="#subscribe-title">{% translate "Get event emails" %}</a></p>
+    {% endif %}
+  </div>
+  {% if hero_credit %}<p class="band-credit">{{ hero_credit }}</p>{% endif %}
+</section>
+
+<section class="split wrap" aria-labelledby="news-title">
+  <div class="split-intro">
+    <h2 id="news-title">{% if lead_news %}{% translate "More news" %}{% else %}{% translate "News from school" %}{% endif %}</h2>
+    <p class="meta">{% translate "Updates from teachers and the school office." %}</p>
+    <p class="more"><a href="{% url 'portal:announcement_list' %}">{% translate "All news" %}</a></p>
+  </div>
+  <div class="split-content">
+    {% if more_news %}
+      <ul class="notices">
+        {% for item in more_news %}{% include "portal/_notice.html" with short=True %}{% endfor %}
+      </ul>
+    {% elif lead_news %}
+      <p class="meta">{% translate "No other news right now. New updates from school will appear here." %}</p>
+    {% else %}
+      <p class="meta">{% translate "No news right now. Updates from school will appear here." %}</p>
+    {% endif %}
+  </div>
+</section>
+
+<section class="split split--reverse wrap" aria-labelledby="events-title">
+  <div class="split-intro">
+    <h2 id="events-title">{% translate "Coming up" %}</h2>
+    <p class="meta">{% translate "What's happening at school over the next few weeks." %}</p>
+    <p class="more"><a href="{% url 'portal:event_list' %}">{% translate "All upcoming events" %}</a></p>
+  </div>
+  <div class="split-content">
+    {% if coming_up %}
+      <ul class="event-list">
+        {% for event in coming_up %}{% include "portal/_event_row.html" %}{% endfor %}
+      </ul>
+    {% elif hero_event %}
+      <p class="meta">{% translate "Nothing else is planned yet. New events appear here as soon as staff add them." %}</p>
+    {% else %}
+      <p class="meta">{% translate "Nothing is planned yet. New events appear here as soon as staff add them." %}</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if featured_album and band_photo %}
+<section class="band band--photo band--album" aria-labelledby="album-title">
+  <img class="band-img" src="{{ band_photo.image.url }}" alt="">
+  <div class="band-frame band-frame--up band-frame--down" aria-hidden="true"></div>
+  <div class="band-body band-body--end wrap">
+    <h2 id="album-title">{{ featured_album.title }}</h2>
+    {% if featured_album.description %}<p class="band-lead">{{ featured_album.description|truncatewords:30 }}</p>{% endif %}
+    <p><a class="button button--torch" href="{{ featured_album.get_absolute_url }}">{% translate "See the photos" %}</a></p>
+  </div>
+  {% if band_photo.caption %}<p class="band-credit">{{ band_photo.caption }}</p>{% endif %}
+</section>
 {% endif %}
 
-<div class="columns">
-  <section aria-labelledby="later-title">
-    <h2 id="later-title">Coming up</h2>
-    {% if later_events %}
-      <ul class="event-list">
-        {% for event in later_events %}{% include "portal/_event_row.html" %}{% endfor %}
-      </ul>
-      <p class="more"><a href="{% url 'portal:event_list' %}">All upcoming events</a></p>
-    {% else %}
-      <p class="meta">No other events planned yet.</p>
-    {% endif %}
-  </section>
-
-  <section aria-labelledby="news-title">
-    <h2 id="news-title">News</h2>
-    {% if announcements %}
-      <ul class="notices">
-        {% for item in announcements %}{% include "portal/_notice.html" with short=True %}{% endfor %}
-      </ul>
-      <p class="more"><a href="{% url 'portal:announcement_list' %}">All news</a></p>
-    {% else %}
-      <p class="meta">No news right now.</p>
-    {% endif %}
-  </section>
-</div>
-
-<section class="subscribe" aria-labelledby="subscribe-title">
-  <h2 id="subscribe-title">Get an email when events are added</h2>
-  <p class="meta">For parents and guardians. You can stop the emails at any time from a link in each one.</p>
-  <form method="post" action="{% url 'portal:subscribe' %}" class="form-row">
-    {% csrf_token %}
-    <div class="field">
-      <label for="{{ subscribe_form.email.id_for_label }}">{{ subscribe_form.email.label }}</label>
-      {{ subscribe_form.email }}
-    </div>
-    <div class="field">
-      <label for="{{ subscribe_form.name.id_for_label }}">{{ subscribe_form.name.label }} (optional)</label>
-      {{ subscribe_form.name }}
-    </div>
-    <button class="button" type="submit">Sign up for emails</button>
-  </form>
+<section class="band band--signup" aria-labelledby="subscribe-title">
+  <div class="band-frame band-frame--up" aria-hidden="true"></div>
+  <div class="band-body wrap">
+    <h2 id="subscribe-title">{% translate "Get an email when events are added" %}</h2>
+    <p class="band-lead">{% translate "For parents and guardians. You can stop the emails at any time from a link in each one." %}</p>
+    <form method="post" action="{% url 'portal:subscribe' %}" class="form-row">
+      {% csrf_token %}
+      <div class="field">
+        <label for="{{ subscribe_form.email.id_for_label }}">{{ subscribe_form.email.label }}</label>
+        {{ subscribe_form.email }}
+      </div>
+      <div class="field">
+        <label for="{{ subscribe_form.name.id_for_label }}">{{ subscribe_form.name.label }} {% translate "(optional)" %}</label>
+        {{ subscribe_form.name }}
+      </div>
+      <button class="button button--torch" type="submit">{% translate "Sign up for emails" %}</button>
+    </form>
+  </div>
 </section>
 {% endblock %}

@@ -1,14 +1,14 @@
-{% autoescape off %}Hello{% if subscriber.name %} {{ subscriber.name }}{% endif %},
+{% load i18n %}{% autoescape off %}{% if subscriber.name %}{% blocktranslate with name=subscriber.name %}Hello {{ name }},{% endblocktranslate %}{% else %}{% translate "Hello," %}{% endif %}
 
-{{ school_name }} has a new event:
+{% blocktranslate %}{{ school_name }} has a new event:{% endblocktranslate %}
 
 {{ event.title }}
 {% include "portal/_event_time.html" %}{% if event.location %}
 {{ event.location }}{% endif %}
 
-Details: {{ event_url }}
+{% translate "Details:" %} {{ event_url }}
 
 --
-You get these emails because you signed up on the {{ school_name }} website.
-Stop them here: {{ unsubscribe_url }}
+{% blocktranslate %}You get these emails because you signed up on the {{ school_name }} website.{% endblocktranslate %}
+{% translate "Stop them here:" %} {{ unsubscribe_url }}
 {% endautoescape %}

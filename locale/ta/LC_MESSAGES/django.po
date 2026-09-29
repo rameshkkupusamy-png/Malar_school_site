@@ -1,0 +1,443 @@
+# Tamil translations for school-portal.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the school-portal project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: school-portal VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-29 11:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ta\n"
+"Language-Team: ta <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: portal/auth.py:16
+#, python-format
+msgid "%(email)s isn't on the staff list. Ask the school office to add your email, then sign in again."
+msgstr ""
+"%(email)s பணியாளர் பட்டியலில் இல்லை. உங்கள் மின்னஞ்சலைச் சேர்க்கப் பள்ளி அலுவலகத்திடம் கேட்டு, "
+"மீண்டும் உள்நுழையவும்."
+
+#: portal/auth.py:20
+msgid "Google didn't share a confirmed email address. Try another Google account."
+msgstr "Google உறுதிசெய்யப்பட்ட மின்னஞ்சல் முகவரியைப் பகிரவில்லை. வேறொரு Google கணக்கைப் பயன்படுத்தவும்."
+
+#: portal/forms.py:9
+msgid "Email address"
+msgstr "மின்னஞ்சல் முகவரி"
+
+#: portal/forms.py:10
+msgid "Your name"
+msgstr "உங்கள் பெயர்"
+
+#: portal/locale_extras.py:11
+msgid "a.m."
+msgstr "முற்பகல்"
+
+#: portal/locale_extras.py:12
+msgid "p.m."
+msgstr "பிற்பகல்"
+
+#: portal/locale_extras.py:13
+msgid "AM"
+msgstr "முற்பகல்"
+
+#: portal/locale_extras.py:14
+msgid "PM"
+msgstr "பிற்பகல்"
+
+#: portal/locale_extras.py:15
+msgid "noon"
+msgstr "நண்பகல்"
+
+#: portal/locale_extras.py:16
+msgid "midnight"
+msgstr "நள்ளிரவு"
+
+#: portal/locale_extras.py:19
+msgid "Mon"
+msgstr "திங்"
+
+#: portal/locale_extras.py:20
+msgid "Tue"
+msgstr "செவ்"
+
+#: portal/locale_extras.py:21
+msgid "Wed"
+msgstr "புத"
+
+#: portal/locale_extras.py:22
+msgid "Thu"
+msgstr "வியா"
+
+#: portal/locale_extras.py:23
+msgid "Fri"
+msgstr "வெள்"
+
+#: portal/locale_extras.py:24
+msgid "Sat"
+msgstr "சனி"
+
+#: portal/locale_extras.py:25
+msgid "Sun"
+msgstr "ஞாயி"
+
+#: portal/locale_extras.py:28
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d ஆண்டு"
+msgstr[1] "%(num)d ஆண்டுகள்"
+
+#: portal/locale_extras.py:29
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d மாதம்"
+msgstr[1] "%(num)d மாதங்கள்"
+
+#: portal/locale_extras.py:30
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d வாரம்"
+msgstr[1] "%(num)d வாரங்கள்"
+
+#: portal/locale_extras.py:31
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d நாள்"
+msgstr[1] "%(num)d நாட்கள்"
+
+#: portal/locale_extras.py:32
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d மணி நேரம்"
+msgstr[1] "%(num)d மணி நேரம்"
+
+#: portal/locale_extras.py:33
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d நிமிடம்"
+msgstr[1] "%(num)d நிமிடங்கள்"
+
+#: portal/locale_extras.py:34
+msgid ", "
+msgstr ", "
+
+#: portal/templates/portal/_event_time.html:4
+msgid "l j F"
+msgstr "l j F"
+
+#: portal/templates/portal/_event_time.html:4
+msgctxt "time range"
+msgid "to"
+msgstr "–"
+
+#: portal/templates/portal/_event_time.html:4
+msgid "l j F, P"
+msgstr "l j F, A g:i"
+
+#: portal/templates/portal/_event_time.html:4
+msgid "P"
+msgstr "A g:i"
+
+#: portal/templates/portal/_language_switcher.html:6
+msgid "Language"
+msgstr "மொழி"
+
+#: portal/templates/portal/_notice.html:2 portal/templates/portal/home.html:13
+msgid "Pinned"
+msgstr "முக்கியம்"
+
+#: portal/templates/portal/_pager.html:2
+msgid "Pages"
+msgstr "பக்கங்கள்"
+
+#: portal/templates/portal/_pager.html:3
+msgid "Newer"
+msgstr "புதியவை"
+
+#: portal/templates/portal/_pager.html:4
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "பக்கம் %(number)s / %(total)s"
+
+#: portal/templates/portal/_pager.html:5
+msgid "Older"
+msgstr "பழையவை"
+
+#: portal/templates/portal/album_detail.html:9
+msgid "From"
+msgstr "நிகழ்வு:"
+
+#: portal/templates/portal/album_detail.html:26
+msgid "No photos in this album yet."
+msgstr "இந்தத் தொகுப்பில் இன்னும் படங்கள் இல்லை."
+
+#: portal/templates/portal/album_detail.html:30
+msgid "Back to all photos"
+msgstr "அனைத்துப் படங்களுக்கும் திரும்பு"
+
+#: portal/templates/portal/album_list.html:4 portal/templates/portal/album_list.html:8
+#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:58
+msgid "Photos"
+msgstr "படங்கள்"
+
+#: portal/templates/portal/album_list.html:20
+msgid "No photos yet"
+msgstr "இன்னும் படங்கள் இல்லை"
+
+#: portal/templates/portal/album_list.html:26
+#, python-format
+msgid "%(counter)s photo"
+msgid_plural "%(counter)s photos"
+msgstr[0] "%(counter)s படம்"
+msgstr[1] "%(counter)s படங்கள்"
+
+#: portal/templates/portal/album_list.html:33
+msgid "No photo albums yet."
+msgstr "இன்னும் படத் தொகுப்புகள் இல்லை."
+
+#: portal/templates/portal/announcement_detail.html:11
+msgid "Back to all news"
+msgstr "அனைத்துச் செய்திகளுக்கும் திரும்பு"
+
+#: portal/templates/portal/announcement_list.html:4 portal/templates/portal/announcement_list.html:8
+#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:56
+msgid "News"
+msgstr "செய்திகள்"
+
+#: portal/templates/portal/announcement_list.html:17
+msgid "No news right now."
+msgstr "தற்போது செய்திகள் இல்லை."
+
+#: portal/templates/portal/base.html:16
+msgid "Skip to content"
+msgstr "உள்ளடக்கத்திற்குச் செல்"
+
+#: portal/templates/portal/base.html:26
+msgid "Main"
+msgstr "முதன்மை"
+
+#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:57
+#: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
+msgid "Events"
+msgstr "நிகழ்வுகள்"
+
+#: portal/templates/portal/base.html:55
+msgid "Footer"
+msgstr "அடிக்குறிப்பு"
+
+#: portal/templates/portal/base.html:59
+msgid "Staff sign in"
+msgstr "பணியாளர் உள்நுழைவு"
+
+#: portal/templates/portal/email/new_event.txt:1
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "வணக்கம் %(name)s,"
+
+#: portal/templates/portal/email/new_event.txt:1
+msgid "Hello,"
+msgstr "வணக்கம்,"
+
+#: portal/templates/portal/email/new_event.txt:3
+#, python-format
+msgid "%(school_name)s has a new event:"
+msgstr "%(school_name)s: ஒரு புதிய நிகழ்வு"
+
+#: portal/templates/portal/email/new_event.txt:9
+msgid "Details:"
+msgstr "விவரங்கள்:"
+
+#: portal/templates/portal/email/new_event.txt:12
+#, python-format
+msgid "You get these emails because you signed up on the %(school_name)s website."
+msgstr ""
+"%(school_name)s இணையதளத்தில் நீங்கள் பதிவு செய்ததால் இந்த மின்னஞ்சல்கள் உங்களுக்கு "
+"அனுப்பப்படுகின்றன."
+
+#: portal/templates/portal/email/new_event.txt:13
+msgid "Stop them here:"
+msgstr "இவற்றை நிறுத்த:"
+
+#: portal/templates/portal/event_detail.html:27
+msgid "Photos from this event"
+msgstr "இந்த நிகழ்வின் படங்கள்"
+
+#: portal/templates/portal/event_detail.html:34
+msgid "Back to all events"
+msgstr "அனைத்து நிகழ்வுகளுக்கும் திரும்பு"
+
+#: portal/templates/portal/event_list.html:9
+msgid "Which events"
+msgstr "எந்த நிகழ்வுகள்"
+
+#: portal/templates/portal/event_list.html:10
+msgid "Upcoming"
+msgstr "வரவிருப்பவை"
+
+#: portal/templates/portal/event_list.html:11
+msgid "Past"
+msgstr "முடிந்தவை"
+
+#: portal/templates/portal/event_list.html:21
+msgid "No past events yet."
+msgstr "இன்னும் முடிந்த நிகழ்வுகள் இல்லை."
+
+#: portal/templates/portal/event_list.html:23
+msgid "No upcoming events yet."
+msgstr "இன்னும் வரவிருக்கும் நிகழ்வுகள் இல்லை."
+
+#: portal/templates/portal/event_list.html:23 portal/templates/portal/home.html:102
+msgid "Sign up for emails"
+msgstr "மின்னஞ்சல் அறிவிப்புகளுக்குப் பதிவு செய்க"
+
+#: portal/templates/portal/event_list.html:23
+msgid "to hear when one is added."
+msgstr "(புதிய நிகழ்வு சேர்க்கப்படும்போது தெரிவிக்கப்படும்.)"
+
+#: portal/templates/portal/home.html:13
+msgid "Latest news"
+msgstr "சமீபத்திய செய்தி"
+
+#: portal/templates/portal/home.html:18
+msgid "Read the full update"
+msgstr "முழுச் செய்தியையும் படிக்க"
+
+#: portal/templates/portal/home.html:21
+msgid "Happening now"
+msgstr "இப்போது நடைபெறுகிறது"
+
+#: portal/templates/portal/home.html:21
+#, python-format
+msgid "Next at school, in %(time)s"
+msgstr "பள்ளியில் அடுத்து: இன்னும் %(time)s"
+
+#: portal/templates/portal/home.html:26
+msgid "See event details"
+msgstr "நிகழ்வு விவரங்களைப் பார்க்க"
+
+#: portal/templates/portal/home.html:28
+#, python-format
+msgid "Welcome to %(school_name)s"
+msgstr "%(school_name)s உங்களை வரவேற்கிறது"
+
+#: portal/templates/portal/home.html:29
+msgid "News, events and photos from school, for parents and guardians."
+msgstr "பெற்றோர் மற்றும் பாதுகாவலர்களுக்கான பள்ளிச் செய்திகள், நிகழ்வுகள், படங்கள்."
+
+#: portal/templates/portal/home.html:30
+msgid "Get event emails"
+msgstr "நிகழ்வு மின்னஞ்சல்களைப் பெறுக"
+
+#: portal/templates/portal/home.html:38
+msgid "More news"
+msgstr "மேலும் செய்திகள்"
+
+#: portal/templates/portal/home.html:38
+msgid "News from school"
+msgstr "பள்ளிச் செய்திகள்"
+
+#: portal/templates/portal/home.html:39
+msgid "Updates from teachers and the school office."
+msgstr "ஆசிரியர்கள் மற்றும் பள்ளி அலுவலகத்தின் அறிவிப்புகள்."
+
+#: portal/templates/portal/home.html:40
+msgid "All news"
+msgstr "அனைத்துச் செய்திகளும்"
+
+#: portal/templates/portal/home.html:48
+msgid "No other news right now. New updates from school will appear here."
+msgstr "தற்போது வேறு செய்திகள் இல்லை. பள்ளியின் புதிய அறிவிப்புகள் இங்கே தோன்றும்."
+
+#: portal/templates/portal/home.html:50
+msgid "No news right now. Updates from school will appear here."
+msgstr "தற்போது செய்திகள் இல்லை. பள்ளியின் அறிவிப்புகள் இங்கே தோன்றும்."
+
+#: portal/templates/portal/home.html:57
+msgid "Coming up"
+msgstr "வரவிருக்கும் நிகழ்வுகள்"
+
+#: portal/templates/portal/home.html:58
+msgid "What's happening at school over the next few weeks."
+msgstr "அடுத்த சில வாரங்களில் பள்ளியில் நடைபெறுபவை."
+
+#: portal/templates/portal/home.html:59
+msgid "All upcoming events"
+msgstr "வரவிருக்கும் அனைத்து நிகழ்வுகளும்"
+
+#: portal/templates/portal/home.html:67
+msgid "Nothing else is planned yet. New events appear here as soon as staff add them."
+msgstr "வேறு எதுவும் இன்னும் திட்டமிடப்படவில்லை. ஆசிரியர்கள் சேர்த்தவுடன் புதிய நிகழ்வுகள் இங்கே தோன்றும்."
+
+#: portal/templates/portal/home.html:69
+msgid "Nothing is planned yet. New events appear here as soon as staff add them."
+msgstr "இன்னும் எதுவும் திட்டமிடப்படவில்லை. ஆசிரியர்கள் சேர்த்தவுடன் புதிய நிகழ்வுகள் இங்கே தோன்றும்."
+
+#: portal/templates/portal/home.html:81
+msgid "See the photos"
+msgstr "படங்களைப் பார்க்க"
+
+#: portal/templates/portal/home.html:90
+msgid "Get an email when events are added"
+msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது மின்னஞ்சல் பெறுக"
+
+#: portal/templates/portal/home.html:91
+msgid "For parents and guardians. You can stop the emails at any time from a link in each one."
+msgstr ""
+"பெற்றோர் மற்றும் பாதுகாவலர்களுக்கு. ஒவ்வொரு மின்னஞ்சலிலும் உள்ள இணைப்பின் மூலம் எப்போது "
+"வேண்டுமானாலும் நிறுத்தலாம்."
+
+#: portal/templates/portal/home.html:99
+msgid "(optional)"
+msgstr "(விருப்பத்தேர்வு)"
+
+#: portal/templates/portal/unsubscribe.html:4 portal/templates/portal/unsubscribe.html:8
+msgid "Stop event emails"
+msgstr "நிகழ்வு மின்னஞ்சல்களை நிறுத்து"
+
+#: portal/templates/portal/unsubscribe.html:10
+#, python-format
+msgid "%(email)s will no longer get an email when events are added."
+msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது %(email)s முகவரிக்கு இனி மின்னஞ்சல் வராது."
+
+#: portal/templates/portal/unsubscribe.html:13
+msgid "Stop emails"
+msgstr "மின்னஞ்சல்களை நிறுத்து"
+
+#: portal/templates/portal/unsubscribe.html:16
+#, python-format
+msgid "%(email)s already doesn't get event emails."
+msgstr "%(email)s முகவரிக்கு ஏற்கெனவே நிகழ்வு மின்னஞ்சல்கள் அனுப்பப்படுவதில்லை."
+
+#: portal/templates/portal/unsubscribe.html:17
+msgid "Sign up again on the home page"
+msgstr "முகப்புப் பக்கத்தில் மீண்டும் பதிவு செய்க"
+
+#: portal/views.py:92
+msgid "Enter a valid email address to get event emails."
+msgstr "நிகழ்வு மின்னஞ்சல்களைப் பெறச் சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."
+
+#: portal/views.py:110
+#, python-format
+msgid "You'll get an email at %(email)s when events are added."
+msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது %(email)s முகவரிக்கு மின்னஞ்சல் அனுப்பப்படும்."
+
+#: portal/views.py:121
+#, python-format
+msgid "%(email)s won't get event emails any more."
+msgstr "%(email)s முகவரிக்கு இனி நிகழ்வு மின்னஞ்சல்கள் வராது."
+

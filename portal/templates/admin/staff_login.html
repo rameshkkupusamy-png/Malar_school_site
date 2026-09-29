@@ -1,0 +1,28 @@
+{% extends "admin/login.html" %}
+{% load socialaccount %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+  .staff-google { margin: 0 0 1.5rem; }
+  .staff-google button {
+    width: 100%; padding: 0.7rem 1rem; font: inherit; font-weight: 600; cursor: pointer;
+    background: #fff; color: #1B2421; border: 1px solid #1F4D3A; border-radius: 4px;
+  }
+  .staff-google button:hover { background: #F7F8F6; }
+  .staff-google button:focus-visible { outline: 3px solid #F2C14E; outline-offset: 2px; }
+  .staff-google p { margin: 0.6rem 0 0; color: #5E6B66; font-size: 0.85rem; }
+  .staff-or { margin: 0 0 1rem; color: #5E6B66; font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if google_sign_in %}
+<form class="staff-google" method="post" action="{% provider_login_url 'google' next=next %}">
+  {% csrf_token %}
+  <button type="submit">Sign in with Google</button>
+  <p>For school staff. Use the Google account the school office added to the staff list.</p>
+</form>
+<p class="staff-or">Or sign in with a username and password:</p>
+{% endif %}
+{{ block.super }}
+{% endblock %}

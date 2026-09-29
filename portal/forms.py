@@ -1,18 +1,33 @@
 from django import forms
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .imports import build_times
 
 
 class SubscribeForm(forms.Form):
-    email = forms.EmailField(label="Email address")
-    name = forms.CharField(label="Your name", max_length=100, required=False)
+    email = forms.EmailField(label=_("Email address"))
+    name = forms.CharField(label=_("Your name"), max_length=100, required=False)
 
 
 class EventImportForm(forms.Form):
     file = forms.FileField(
         label="Spreadsheet",
         help_text="Excel (.xlsx) or CSV file, up to 2 MB, using the template's column headings.",
+        widget=forms.ClearableFileInput(attrs={"accept": ".xlsx,.csv"}),
+    )
+    language = forms.ChoiceField(
+        label="Language of this spreadsheet",
+        choices=[("ta", "Tamil"), ("ms", "Malay"), ("en", "English")],
+        help_text="Titles and places are saved in this language. Add other languages later "
+        "by editing each event.",
+    )
+
+
+class StaffImportForm(forms.Form):
+    file = forms.FileField(
+        label="Spreadsheet",
+        help_text="Excel (.xlsx) or CSV file, up to 2 MB, with one teacher per row.",
         widget=forms.ClearableFileInput(attrs={"accept": ".xlsx,.csv"}),
     )
 
