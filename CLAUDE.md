@@ -17,6 +17,9 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests
+- Hosting: the live site runs on a Windows computer with `manage.py serve` (Waitress, localhost
+  only) behind Cloudflare Tunnel; WhiteNoise serves static files, Django serves `media/`
+  (`SERVE_MEDIA`). `manage.py backup` zips the database and photos. Steps are in the README.
 
 ## Commands (PowerShell, from the project root)
 

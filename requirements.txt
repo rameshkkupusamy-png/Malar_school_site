@@ -4,3 +4,5 @@ openpyxl>=3.1
 django-allauth[socialaccount]>=65.19
 python-dotenv>=1.0
 django-modeltranslation>=0.20
+waitress>=3.0
+whitenoise>=6.8

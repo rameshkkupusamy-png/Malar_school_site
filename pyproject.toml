@@ -7,6 +7,8 @@ requires-python = ">=3.12"
 DJANGO_SETTINGS_MODULE = "school_portal.settings"
 testpaths = ["tests"]
 markers = ["browser: opens the site in Chromium (skip with -m 'not browser')"]
+# WhiteNoise warns that collectstatic hasn't run; tests don't need it.
+filterwarnings = ["ignore:No directory at:UserWarning"]
 
 [tool.ruff]
 line-length = 100

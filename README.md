@@ -111,6 +111,101 @@ Set these environment variables in production:
 | `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS` | SMTP server for sending emails. Without `EMAIL_HOST`, emails go to the console. | |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in for staff (see above). Without them, only password login is shown. | |
 | `DEFAULT_FROM_EMAIL` | Sender address | `<SCHOOL_NAME> <noreply@example.com>` |
+| `DJANGO_BEHIND_PROXY` | `1` behind Cloudflare Tunnel, so the site knows visitors use https | `0` |
+| `DJANGO_SERVE_MEDIA` | Serve uploaded photos from Django when `DJANGO_DEBUG` is `0` | `1` |
+| `BACKUP_DIR`, `BACKUP_KEEP` | Where `manage.py backup` saves zips, and how many to keep | `backups\`, `14` |
+
+## Hosting on a Windows computer
+
+The live site can run on a spare Windows computer at home. Visitors reach it through
+**Cloudflare Tunnel**: the computer connects out to Cloudflare, so nothing on the router
+changes and the home network stays closed. Cloudflare also gives the site `https://`.
+
+### 1. Get a web address (once)
+
+1. Create a free account at https://dash.cloudflare.com/.
+2. Buy a domain, for example under **Domain Registration > Register Domains** in Cloudflare
+   (roughly US$10 a year for a `.com` or `.org`). A `.edu.my` address has to be applied for by
+   the school through MYNIC instead; it can be pointed at Cloudflare later.
+
+### 2. Prepare the computer (once)
+
+1. In **Settings > System > Power**, set **Sleep** to **Never** when plugged in. In **Windows
+   Update > Advanced options**, set **Active hours** to school hours so restarts happen at night.
+2. Install Python 3.12 or newer from https://www.python.org/downloads/ (tick **Add python.exe
+   to PATH**) and Git from https://git-scm.com/download/win.
+3. In PowerShell:
+
+   ```powershell
+   cd C:\
+   git clone https://github.com/rameshkkupusamy-png/Malar_school_site.git school-site
+   cd C:\school-site
+   python -m venv .venv
+   .venv\Scripts\pip.exe install -r requirements.txt
+   copy .env.example .env
+   python -c "import secrets; print(secrets.token_urlsafe(50))"   # copy this for DJANGO_SECRET_KEY
+   notepad .env
+   ```
+
+4. In `.env`, fill in the Google values and remove the `#` from the hosting lines, using your
+   domain. Set `BACKUP_DIR` to a different drive or a synced cloud folder (e.g. OneDrive) if you
+   have one.
+5. Set up the database and the site owner login:
+
+   ```powershell
+   .venv\Scripts\python.exe manage.py migrate
+   .venv\Scripts\python.exe manage.py setup_roles
+   .venv\Scripts\python.exe manage.py createsuperuser
+   .venv\Scripts\python.exe manage.py collectstatic --noinput
+   .venv\Scripts\python.exe manage.py serve
+   ```
+
+   Open http://127.0.0.1:8000 on that computer to check it works, then press Ctrl+C.
+
+### 3. Connect it to your web address (once)
+
+1. In Cloudflare, open **Zero Trust > Networks > Tunnels**, click **Create a tunnel**, choose
+   **Cloudflared**, and name it `school-site`.
+2. Pick **Windows**, and run the install command it shows in an **Administrator** PowerShell.
+   This installs `cloudflared` as a Windows service that starts with the computer.
+3. Add a **Public hostname**: your domain (and a second one for `www`), service type **HTTP**,
+   URL `127.0.0.1:8000`.
+4. In your domain's Cloudflare settings, turn on **SSL/TLS > Edge Certificates > Always Use
+   HTTPS**.
+5. In Google Cloud Console, add `https://<your-domain>/accounts/google/login/callback/` to the
+   client's **Authorised redirect URIs**.
+
+### 4. Start the site with Windows
+
+Open **Task Scheduler > Create Task**:
+
+- **General:** name it `School site`, choose **Run whether user is logged on or not**.
+- **Triggers:** **At startup**.
+- **Actions:** start `C:\school-site\.venv\Scripts\python.exe` with arguments
+  `manage.py serve` and **Start in** `C:\school-site`.
+- **Settings:** untick **Stop the task if it runs longer than**, and tick **If the task fails,
+  restart every 1 minute**.
+
+Add a second task, `School site backup`, **Daily** at 2:00 AM, running the same Python with
+`manage.py backup`. Each backup is one zip file (database plus all photos) in `BACKUP_DIR`; the
+newest 14 are kept (`BACKUP_KEEP`). To restore, stop the site, unzip, and put `db.sqlite3` and
+`media\` back in `C:\school-site`.
+
+Restart the computer once and check the site opens from your phone.
+
+### Updating the live site
+
+After new changes are pushed to GitHub, on the hosting computer:
+
+```powershell
+cd C:\school-site
+git pull
+.venv\Scripts\pip.exe install -r requirements.txt
+.venv\Scripts\python.exe manage.py migrate
+.venv\Scripts\python.exe manage.py collectstatic --noinput
+```
+
+Then restart the **School site** task in Task Scheduler (right-click, **End**, then **Run**).
 
 ## Tests
 

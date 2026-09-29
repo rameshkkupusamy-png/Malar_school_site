@@ -26,6 +26,14 @@ SCHOOL_NAME = os.environ.get("SCHOOL_NAME", "SJK (T) Ladang Semenyih")
 SCHOOL_MOTTO = os.environ.get("SCHOOL_MOTTO", "Usaha Tangga Kejayaan")
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000").rstrip("/")
 
+# Behind Cloudflare Tunnel the site is reached over https, but the tunnel talks to the local
+# server over plain http and says so in X-Forwarded-Proto. Only trust that header when the site
+# is actually behind a proxy, otherwise a visitor could fake it.
+if env_bool("DJANGO_BEHIND_PROXY", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = [SITE_URL] if SITE_URL.startswith("https://") else []
+SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = SITE_URL.startswith("https://")
+
 INSTALLED_APPS = [
     "modeltranslation",  # must come before admin
     "django.contrib.admin",
@@ -43,6 +51,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # serves static files when DEBUG is off
     "django.contrib.sessions.middleware.SessionMiddleware",
     "portal.middleware.SiteLanguageMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -141,6 +150,17 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+# Uploaded photos are served by Django itself when DEBUG is off. That is fine for a school
+# site on its own computer; Cloudflare caches them in front of it.
+SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", True)
+
+# Nightly backups (scripts/backup.py): where they go and how many to keep.
+BACKUP_DIR = Path(os.environ.get("BACKUP_DIR", BASE_DIR / "backups"))
+BACKUP_KEEP = int(os.environ.get("BACKUP_KEEP", "14"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
