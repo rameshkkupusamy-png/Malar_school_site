@@ -9,3 +9,5 @@ staticfiles/
 .env
 .claude/settings.local.json
 .playwright-mcp/
+test-results/
+.claude/hooks/.last-pass

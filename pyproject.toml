@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "school_portal.settings"
 testpaths = ["tests"]
+markers = ["browser: opens the site in Chromium (skip with -m 'not browser')"]
 
 [tool.ruff]
 line-length = 100

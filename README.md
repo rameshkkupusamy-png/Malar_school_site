@@ -64,6 +64,12 @@ Set these environment variables in production:
 ## Tests
 
 ```powershell
+python -m playwright install chromium   # once, for the browser tests
 pytest
 ruff check .
 ```
+
+`tests/test_browser.py` opens every public page in Chromium at phone and desktop width and fails
+on page errors, sideways scrolling or a missing heading. Skip it with `pytest -m "not browser"`.
+
+GitHub runs all of these checks on every push and pull request (`.github/workflows/ci.yml`).

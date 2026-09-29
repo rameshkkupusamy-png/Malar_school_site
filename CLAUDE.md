@@ -21,7 +21,8 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - Install: `pip install -r requirements-dev.txt`
 - Run: `python manage.py runserver` then open http://127.0.0.1:8000
 - After model changes: `python manage.py makemigrations portal` then `python manage.py migrate`
-- Tests: `pytest`
+- Tests: `pytest` (browser tests need `python -m playwright install chromium` once;
+  skip them with `pytest -m "not browser"`)
 - Lint/format: `ruff check .` and `ruff format .`
 
 ## Conventions
@@ -34,6 +35,9 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - Emails use Django 6.1 `MAILERS` / `mail.mailers.default`, not the deprecated `EMAIL_*`
   settings or `get_connection()`.
 - Every feature gets tests in `tests/`. Run `pytest` and `ruff check .` before calling a change done.
+  Hooks in `.claude/settings.json` enforce this: edited Python files are formatted with ruff, and
+  the Stop hook runs ruff and pytest when code has changed. CI (`.github/workflows/ci.yml`) runs the
+  same checks plus the migration and deploy checks.
 
 ## Design
 
