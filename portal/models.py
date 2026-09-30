@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_delete
@@ -252,3 +253,55 @@ class Subscriber(models.Model):
 
     def get_unsubscribe_url(self) -> str:
         return reverse("portal:unsubscribe", args=[self.token])
+
+
+class SocialLinkQuerySet(models.QuerySet):
+    def published(self):
+        return self.filter(is_published=True)
+
+
+class SocialLink(models.Model):
+    """A school page on a social network, listed in the footer of every page."""
+
+    PLATFORMS = [
+        ("facebook", "Facebook"),
+        ("instagram", "Instagram"),
+        ("youtube", "YouTube"),
+        ("tiktok", "TikTok"),
+        ("whatsapp", "WhatsApp"),
+        ("telegram", "Telegram"),
+        ("x", "X"),
+        ("other", "Other"),
+    ]
+
+    platform = models.CharField(max_length=20, choices=PLATFORMS)
+    url = models.URLField(
+        "link",
+        validators=[URLValidator(schemes=["http", "https"])],
+        help_text="The full address, e.g. https://www.facebook.com/yourschool",
+    )
+    label = models.CharField(
+        max_length=60,
+        blank=True,
+        help_text="Optional name to show instead of the platform, e.g. “PIBG Facebook group”. "
+        "Required for “Other”.",
+    )
+    order = models.PositiveSmallIntegerField(default=0, help_text="Lower numbers come first.")
+    is_published = models.BooleanField("published", default=True)
+
+    objects = SocialLinkQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["order", "platform", "pk"]
+        verbose_name = "social media link"
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def name(self) -> str:
+        return self.label.strip() or self.get_platform_display()
+
+    def clean(self) -> None:
+        if self.platform == "other" and not self.label.strip():
+            raise ValidationError({"label": "Give a name for links to other sites."})

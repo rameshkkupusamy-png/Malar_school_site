@@ -238,6 +238,18 @@ main.page { padding-block: 2.5rem 4.5rem; }
 
 .footer-links a { color: var(--white); }
 
+.footer-social { flex-basis: 100%; padding-top: 1.25rem; border-top: 1px solid rgb(255 255 255 / 0.2); }
+.footer-social-title { margin: 0 0 0.4rem; color: var(--torch); }
+.footer-social ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.footer-social a { color: var(--white); }
+
 /* Flash messages */
 
 .messages {

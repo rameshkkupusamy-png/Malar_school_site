@@ -58,6 +58,16 @@
         <a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>
         <a href="{% url 'admin:index' %}">{% translate "Staff sign in" %}</a>
       </nav>
+      {% if social_links %}
+        <nav class="footer-social" aria-labelledby="footer-social-title">
+          <p id="footer-social-title" class="footer-social-title">{% translate "Follow the school" %}</p>
+          <ul>
+            {% for link in social_links %}
+              <li><a href="{{ link.url }}" rel="me noopener">{{ link.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
     </div>
   </footer>
 </body>

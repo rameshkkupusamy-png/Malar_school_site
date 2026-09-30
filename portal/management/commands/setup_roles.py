@@ -11,6 +11,7 @@ EDITOR_PERMISSIONS = {
     "photo": ["add", "change", "delete", "view"],
     "eventimport": ["view", "delete"],
     "subscriber": ["view"],
+    "sociallink": ["add", "change", "delete", "view"],
 }
 
 

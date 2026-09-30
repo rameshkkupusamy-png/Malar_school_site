@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-29 11:09+0800\n"
+"POT-Creation-Date: 2026-09-30 07:27+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ta\n"
@@ -243,6 +243,10 @@ msgstr "அடிக்குறிப்பு"
 #: portal/templates/portal/base.html:59
 msgid "Staff sign in"
 msgstr "பணியாளர் உள்நுழைவு"
+
+#: portal/templates/portal/base.html:63
+msgid "Follow the school"
+msgstr "பள்ளியைப் பின்தொடருங்கள்"
 
 #: portal/templates/portal/email/new_event.txt:1
 #, python-format

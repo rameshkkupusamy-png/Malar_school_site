@@ -12,7 +12,16 @@ from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
 
 from .forms import DraftEventForm, DraftEventFormSet, EventImportForm, StaffImportForm
 from .imports import FileRejected, build_template, parse_file
-from .models import Album, Announcement, Event, EventImport, Photo, StaffMember, Subscriber
+from .models import (
+    Album,
+    Announcement,
+    Event,
+    EventImport,
+    Photo,
+    SocialLink,
+    StaffMember,
+    Subscriber,
+)
 from .notifications import notify_subscribers
 from .staff_list import MAX_BYTES, StaffFileRejected, add_staff_from_rows, read_rows
 
@@ -344,3 +353,13 @@ class SubscriberAdmin(admin.ModelAdmin):
     list_display = ["email", "name", "language", "is_active", "created_at"]
     list_filter = ["is_active", "language"]
     search_fields = ["email", "name"]
+
+
+@admin.register(SocialLink)
+class SocialLinkAdmin(admin.ModelAdmin):
+    list_display = ["name", "platform", "url", "order", "is_published"]
+    list_display_links = ["name"]
+    list_editable = ["order", "is_published"]
+    list_filter = ["platform", "is_published"]
+    search_fields = ["label", "url"]
+    fields = ["platform", "label", "url", "order", "is_published"]
