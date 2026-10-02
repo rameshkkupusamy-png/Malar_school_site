@@ -133,7 +133,7 @@ p { margin: 0 0 0.75em; }
   text-decoration: none;
 }
 
-.brand-crest { width: 52px; height: auto; }
+.brand-crest { width: 49px; height: auto; }
 
 .site-nav {
   display: flex;
@@ -211,7 +211,7 @@ main.page { padding-block: 2.5rem 4.5rem; }
 }
 
 .footer-crest {
-  width: 65px;
+  width: 56px;
   height: auto;
   padding: 4px;
   border-radius: var(--radius);
