@@ -52,7 +52,7 @@ def page_paths(site):
     return [
         "/",
         "/events/",
-        "/events/?show=past",
+        "/events/?type=holiday",
         site["event"].get_absolute_url(),
         "/news/",
         site["news"].get_absolute_url(),

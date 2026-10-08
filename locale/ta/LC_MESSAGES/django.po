@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 11:49+0800\n"
+"POT-Creation-Date: 2026-10-08 12:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ta\n"
@@ -136,19 +136,43 @@ msgstr[1] "%(num)d நிமிடங்கள்"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:369
+#: portal/models.py:71
+msgid "Event"
+msgstr "நிகழ்வு"
+
+#: portal/models.py:72
+msgid "Holiday"
+msgstr "விடுமுறை"
+
+#: portal/models.py:73
+msgid "Exam"
+msgstr "தேர்வு"
+
+#: portal/models.py:74 portal/views.py:68
+msgid "PIBG"
+msgstr "PIBG"
+
+#: portal/models.py:75 portal/views.py:69
+msgid "Sports"
+msgstr "விளையாட்டு"
+
+#: portal/models.py:76
+msgid "Celebration"
+msgstr "கொண்டாட்டம்"
+
+#: portal/models.py:409
 msgid "Circulars"
 msgstr "சுற்றறிக்கைகள்"
 
-#: portal/models.py:370
+#: portal/models.py:410
 msgid "Forms"
 msgstr "படிவங்கள்"
 
-#: portal/models.py:371
+#: portal/models.py:411
 msgid "Timetables and lists"
 msgstr "கால அட்டவணைகளும் பட்டியல்களும்"
 
-#: portal/models.py:372
+#: portal/models.py:412
 msgid "School documents"
 msgstr "பள்ளி ஆவணங்கள்"
 
@@ -365,38 +389,35 @@ msgid "Back to all events"
 msgstr "அனைத்து நிகழ்வுகளுக்கும் திரும்பு"
 
 #: portal/templates/portal/event_list.html:9
-msgid "Which events"
-msgstr "எந்த நிகழ்வுகள்"
+msgid "Show only"
+msgstr "இவற்றை மட்டும் காட்டு"
 
-#: portal/templates/portal/event_list.html:10
-msgid "Upcoming"
-msgstr "வரவிருப்பவை"
+#: portal/templates/portal/event_list.html:17
+msgid "Months"
+msgstr "மாதங்கள்"
 
-#: portal/templates/portal/event_list.html:11
-msgid "Past"
-msgstr "முடிந்தவை"
+#: portal/templates/portal/event_list.html:18
+msgid "Previous month"
+msgstr "முந்தைய மாதம்"
 
-#: portal/templates/portal/event_list.html:21
-msgid "No past events yet."
-msgstr "இன்னும் முடிந்த நிகழ்வுகள் இல்லை."
-
-#: portal/templates/portal/event_list.html:23
-msgid "No upcoming events yet."
-msgstr "இன்னும் வரவிருக்கும் நிகழ்வுகள் இல்லை."
-
-#: portal/templates/portal/event_list.html:23 portal/templates/portal/home.html:102
-msgid "Sign up for emails"
-msgstr "மின்னஞ்சல் அறிவிப்புகளுக்குப் பதிவு செய்க"
-
-#: portal/templates/portal/event_list.html:23
-msgid "to hear when one is added."
-msgstr "(புதிய நிகழ்வு சேர்க்கப்படும்போது தெரிவிக்கப்படும்.)"
+#: portal/templates/portal/event_list.html:19
+msgid "Next month"
+msgstr "அடுத்த மாதம்"
 
 #: portal/templates/portal/event_list.html:27
+msgid "No events this month."
+msgstr "இந்த மாதம் நிகழ்வுகள் இல்லை."
+
+#: portal/templates/portal/event_list.html:27
+#, python-format
+msgid "Next: %(month)s"
+msgstr "அடுத்து: %(month)s"
+
+#: portal/templates/portal/event_list.html:32
 msgid "Get every school event on your phone"
 msgstr "பள்ளியின் எல்லா நிகழ்வுகளையும் உங்கள் கைப்பேசியில் பெறுங்கள்"
 
-#: portal/templates/portal/event_list.html:28
+#: portal/templates/portal/event_list.html:33
 msgid ""
 "Add the school calendar once. New and changed events then appear in your phone's calendar by "
 "themselves."
@@ -404,11 +425,11 @@ msgstr ""
 "பள்ளி நாட்காட்டியை ஒருமுறை சேர்த்தால் போதும். புதிய நிகழ்வுகளும் மாற்றங்களும் உங்கள் கைப்பேசி "
 "நாட்காட்டியில் தானாகவே தோன்றும்."
 
-#: portal/templates/portal/event_list.html:30
+#: portal/templates/portal/event_list.html:35
 msgid "Add to Google Calendar"
 msgstr "Google Calendar-இல் சேர்"
 
-#: portal/templates/portal/event_list.html:31
+#: portal/templates/portal/event_list.html:36
 msgid "Add to iPhone or Outlook calendar"
 msgstr "iPhone அல்லது Outlook நாட்காட்டியில் சேர்"
 
@@ -508,6 +529,10 @@ msgstr ""
 msgid "(optional)"
 msgstr "(விருப்பத்தேர்வு)"
 
+#: portal/templates/portal/home.html:102
+msgid "Sign up for emails"
+msgstr "மின்னஞ்சல் அறிவிப்புகளுக்குப் பதிவு செய்க"
+
 #: portal/templates/portal/unsubscribe.html:4 portal/templates/portal/unsubscribe.html:8
 msgid "Stop event emails"
 msgstr "நிகழ்வு மின்னஞ்சல்களை நிறுத்து"
@@ -534,16 +559,32 @@ msgstr "முகப்புப் பக்கத்தில் மீண்�
 msgid "Open the document:"
 msgstr "ஆவணத்தைத் திறக்க:"
 
-#: portal/views.py:161
+#: portal/views.py:65
+msgid "All"
+msgstr "அனைத்தும்"
+
+#: portal/views.py:66
+msgid "Holidays"
+msgstr "விடுமுறைகள்"
+
+#: portal/views.py:67
+msgid "Exams"
+msgstr "தேர்வுகள்"
+
+#: portal/views.py:70
+msgid "Celebrations"
+msgstr "கொண்டாட்டங்கள்"
+
+#: portal/views.py:216
 msgid "Enter a valid email address to get event emails."
 msgstr "நிகழ்வு மின்னஞ்சல்களைப் பெறச் சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."
 
-#: portal/views.py:179
+#: portal/views.py:234
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது %(email)s முகவரிக்கு மின்னஞ்சல் அனுப்பப்படும்."
 
-#: portal/views.py:190
+#: portal/views.py:245
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s முகவரிக்கு இனி நிகழ்வு மின்னஞ்சல்கள் வராது."

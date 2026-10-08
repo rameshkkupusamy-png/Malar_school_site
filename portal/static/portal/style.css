@@ -467,6 +467,24 @@ main.page { padding-block: 2.5rem 4.5rem; }
 .event-row h3 a:hover { text-decoration: underline; }
 .event-row .meta { margin-bottom: 0.1rem; }
 
+/* Event types: only holidays get a band; exams a blue label; the rest a quiet label. */
+.event-row--holiday,
+.event-row--holiday:first-child {
+  padding: 1rem 0.75rem;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--torch) 22%, var(--white));
+}
+
+.kind { margin: 0 0 0.2rem; color: var(--muted); font-size: var(--step--1); font-weight: 600; }
+.kind--holiday { color: var(--navy); }
+.kind--exam {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--blue);
+  color: var(--white);
+}
+
 /* News */
 
 .notices {
@@ -519,6 +537,20 @@ main.page { padding-block: 2.5rem 4.5rem; }
 
 .tabs a:hover { color: var(--ink); }
 .tabs a[aria-current="page"] { border-bottom-color: var(--blue); color: var(--ink); }
+
+.tabs--wrap { flex-wrap: wrap; column-gap: 1.25rem; }
+
+.month-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.month-head h2 { margin: 0; }
+.month-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; font-weight: 600; }
 
 /* Event detail */
 

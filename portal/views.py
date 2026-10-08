@@ -1,5 +1,6 @@
-from datetime import timedelta
-from urllib.parse import quote
+import re
+from datetime import date, timedelta
+from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -9,11 +10,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
 from .forms import SubscribeForm
 from .ical import build_calendar
-from .models import Album, Announcement, Document, Event, SchoolContact, Subscriber
+from .models import Album, Announcement, Document, Event, SchoolContact, Subscriber, month_range
 
 PAGE_SIZE = 10
 
@@ -58,11 +60,57 @@ def home(request):
     )
 
 
+MONTH_PARAM = re.compile(r"^(\d{4})-(\d{2})$")
+FILTERS = [
+    ("", gettext_lazy("All")),
+    (Event.HOLIDAY, gettext_lazy("Holidays")),
+    (Event.EXAM, gettext_lazy("Exams")),
+    (Event.PIBG, gettext_lazy("PIBG")),
+    (Event.SPORTS, gettext_lazy("Sports")),
+    (Event.CELEBRATION, gettext_lazy("Celebrations")),
+]
+
+
+def chosen_month(value: str | None) -> date:
+    """The month in ?month=YYYY-MM, or this month."""
+    match = MONTH_PARAM.match(value or "")
+    if match:
+        year, month = int(match[1]), int(match[2])
+        if 2000 <= year <= 2100 and 1 <= month <= 12:
+            return date(year, month, 1)
+    return timezone.localdate().replace(day=1)
+
+
+def add_months(first_day: date, months: int) -> date:
+    index = first_day.year * 12 + first_day.month - 1 + months
+    return date(index // 12, index % 12 + 1, 1)
+
+
+def month_query(first_day: date, kind: str) -> str:
+    params = {"month": f"{first_day:%Y-%m}"}
+    if kind:
+        params["type"] = kind
+    return "?" + urlencode(params)
+
+
 def event_list(request):
-    show_past = request.GET.get("show") == "past"
+    month = chosen_month(request.GET.get("month"))
+    kind = request.GET.get("type", "")
+    if kind not in {key for key, _label in FILTERS}:
+        kind = ""
+
     events = Event.objects.published()
-    events = events.past().order_by("-starts_at") if show_past else events.upcoming()
-    page = Paginator(events, PAGE_SIZE).get_page(request.GET.get("page"))
+    if kind:
+        events = events.filter(kind=kind)
+    start, end = month_range(month)
+    month_events = list(events.overlapping(start, end).order_by("starts_at"))
+
+    next_month_with_events = None
+    if not month_events:
+        later = events.filter(starts_at__gte=end).order_by("starts_at").first()
+        if later:
+            next_month_with_events = timezone.localtime(later.starts_at).date().replace(day=1)
+
     # Calendar apps subscribe with webcal://, so phones keep checking for new events.
     feed = settings.SITE_URL + reverse("portal:calendar_feed")
     webcal = "webcal://" + feed.split("://", 1)[-1]
@@ -70,8 +118,15 @@ def event_list(request):
         request,
         "portal/event_list.html",
         {
-            "page": page,
-            "show_past": show_past,
+            "month": month,
+            "events": month_events,
+            "filters": [(label, month_query(month, key), key == kind) for key, label in FILTERS],
+            "previous_url": month_query(add_months(month, -1), kind),
+            "next_url": month_query(add_months(month, 1), kind),
+            "next_month_with_events": next_month_with_events,
+            "next_month_with_events_url": (
+                month_query(next_month_with_events, kind) if next_month_with_events else ""
+            ),
             "webcal_url": webcal,
             "google_calendar_url": "https://calendar.google.com/calendar/r?cid="
             + quote(webcal, safe=""),

@@ -35,7 +35,7 @@ def test_switcher_changes_the_language_and_remembers_it(new_visitor):
 
     page = new_visitor.get(reverse("portal:event_list")).content.decode()
     assert '<html lang="ms">' in page
-    assert "Acara" in page and "Akan datang" in page
+    assert "Acara" in page and "Bulan depan" in page
 
     new_visitor.post(reverse("set_language"), {"language": "en", "next": "/"})
     assert '<html lang="en">' in new_visitor.get("/").content.decode()
@@ -164,7 +164,8 @@ def admin_post_data(model, title_field):
     """The smallest valid admin form for each kind of post, with the title in one field."""
     data = {title_field: "Tajuk"} if title_field else {}
     if model == "event":
-        data |= {"starts_at_0": "2026-11-03", "starts_at_1": "08:00", "is_published": "on"}
+        data |= {"starts_at_0": "2026-11-03", "starts_at_1": "08:00", "kind": "event"}
+        data["is_published"] = "on"
     elif model == "announcement":
         body = title_field.replace("title", "body") if title_field else "body_ms"
         data |= {body: "Isi", "published_at_0": "2026-10-08", "published_at_1": "08:00"}

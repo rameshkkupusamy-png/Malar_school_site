@@ -58,17 +58,6 @@ def test_event_in_progress_counts_as_upcoming(client, make_event):
     assert b"Happening now" in response.content
 
 
-def test_event_list_past_tab(client, make_event):
-    make_event("Upcoming trip", days=5)
-    make_event("Old trip", days=-5)
-
-    upcoming = client.get(reverse("portal:event_list"))
-    past = client.get(reverse("portal:event_list") + "?show=past")
-
-    assert [e.title for e in upcoming.context["page"]] == ["Upcoming trip"]
-    assert [e.title for e in past.context["page"]] == ["Old trip"]
-
-
 def test_unpublished_event_detail_is_404(client, make_event):
     event = make_event(is_published=False)
     assert client.get(event.get_absolute_url()).status_code == 404

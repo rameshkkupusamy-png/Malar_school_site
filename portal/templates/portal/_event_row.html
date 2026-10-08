@@ -1,6 +1,7 @@
-<li class="event-row">
+<li class="event-row{% if event.kind == 'holiday' %} event-row--holiday{% endif %}">
   {% include "portal/_datestamp.html" %}
   <div>
+    {% if event.kind != "event" %}<p class="kind kind--{{ event.kind }}">{{ event.get_kind_display }}</p>{% endif %}
     <h3><a href="{{ event.get_absolute_url }}">{{ event.title }}</a></h3>
     <p class="meta">{% include "portal/_event_time.html" %}</p>
     {% if event.location %}<p class="meta">{{ event.location }}</p>{% endif %}

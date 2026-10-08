@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 11:49+0800\n"
+"POT-Creation-Date: 2026-10-08 12:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -136,19 +136,43 @@ msgstr[1] "%(num)d minit"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:369
+#: portal/models.py:71
+msgid "Event"
+msgstr "Acara"
+
+#: portal/models.py:72
+msgid "Holiday"
+msgstr "Cuti"
+
+#: portal/models.py:73
+msgid "Exam"
+msgstr "Peperiksaan"
+
+#: portal/models.py:74 portal/views.py:68
+msgid "PIBG"
+msgstr "PIBG"
+
+#: portal/models.py:75 portal/views.py:69
+msgid "Sports"
+msgstr "Sukan"
+
+#: portal/models.py:76
+msgid "Celebration"
+msgstr "Perayaan"
+
+#: portal/models.py:409
 msgid "Circulars"
 msgstr "Surat edaran"
 
-#: portal/models.py:370
+#: portal/models.py:410
 msgid "Forms"
 msgstr "Borang"
 
-#: portal/models.py:371
+#: portal/models.py:411
 msgid "Timetables and lists"
 msgstr "Jadual dan senarai"
 
-#: portal/models.py:372
+#: portal/models.py:412
 msgid "School documents"
 msgstr "Dokumen sekolah"
 
@@ -363,38 +387,35 @@ msgid "Back to all events"
 msgstr "Kembali ke semua acara"
 
 #: portal/templates/portal/event_list.html:9
-msgid "Which events"
-msgstr "Acara yang mana"
+msgid "Show only"
+msgstr "Tunjukkan sahaja"
 
-#: portal/templates/portal/event_list.html:10
-msgid "Upcoming"
-msgstr "Akan datang"
+#: portal/templates/portal/event_list.html:17
+msgid "Months"
+msgstr "Bulan"
 
-#: portal/templates/portal/event_list.html:11
-msgid "Past"
-msgstr "Lepas"
+#: portal/templates/portal/event_list.html:18
+msgid "Previous month"
+msgstr "Bulan sebelumnya"
 
-#: portal/templates/portal/event_list.html:21
-msgid "No past events yet."
-msgstr "Belum ada acara lepas."
-
-#: portal/templates/portal/event_list.html:23
-msgid "No upcoming events yet."
-msgstr "Belum ada acara akan datang."
-
-#: portal/templates/portal/event_list.html:23 portal/templates/portal/home.html:102
-msgid "Sign up for emails"
-msgstr "Daftar untuk e-mel"
-
-#: portal/templates/portal/event_list.html:23
-msgid "to hear when one is added."
-msgstr "untuk dimaklumkan apabila acara baharu ditambah."
+#: portal/templates/portal/event_list.html:19
+msgid "Next month"
+msgstr "Bulan depan"
 
 #: portal/templates/portal/event_list.html:27
+msgid "No events this month."
+msgstr "Tiada acara bulan ini."
+
+#: portal/templates/portal/event_list.html:27
+#, python-format
+msgid "Next: %(month)s"
+msgstr "Seterusnya: %(month)s"
+
+#: portal/templates/portal/event_list.html:32
 msgid "Get every school event on your phone"
 msgstr "Dapatkan semua acara sekolah di telefon anda"
 
-#: portal/templates/portal/event_list.html:28
+#: portal/templates/portal/event_list.html:33
 msgid ""
 "Add the school calendar once. New and changed events then appear in your phone's calendar by "
 "themselves."
@@ -402,11 +423,11 @@ msgstr ""
 "Tambah kalendar sekolah sekali sahaja. Acara baharu dan perubahan acara akan muncul sendiri dalam"
 " kalendar telefon anda."
 
-#: portal/templates/portal/event_list.html:30
+#: portal/templates/portal/event_list.html:35
 msgid "Add to Google Calendar"
 msgstr "Tambah ke Google Calendar"
 
-#: portal/templates/portal/event_list.html:31
+#: portal/templates/portal/event_list.html:36
 msgid "Add to iPhone or Outlook calendar"
 msgstr "Tambah ke kalendar iPhone atau Outlook"
 
@@ -510,6 +531,10 @@ msgstr ""
 msgid "(optional)"
 msgstr "(pilihan)"
 
+#: portal/templates/portal/home.html:102
+msgid "Sign up for emails"
+msgstr "Daftar untuk e-mel"
+
 #: portal/templates/portal/unsubscribe.html:4 portal/templates/portal/unsubscribe.html:8
 msgid "Stop event emails"
 msgstr "Hentikan e-mel acara"
@@ -536,16 +561,32 @@ msgstr "Daftar semula di halaman utama"
 msgid "Open the document:"
 msgstr "Buka dokumen:"
 
-#: portal/views.py:161
+#: portal/views.py:65
+msgid "All"
+msgstr "Semua"
+
+#: portal/views.py:66
+msgid "Holidays"
+msgstr "Cuti"
+
+#: portal/views.py:67
+msgid "Exams"
+msgstr "Peperiksaan"
+
+#: portal/views.py:70
+msgid "Celebrations"
+msgstr "Perayaan"
+
+#: portal/views.py:216
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:179
+#: portal/views.py:234
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:190
+#: portal/views.py:245
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."
