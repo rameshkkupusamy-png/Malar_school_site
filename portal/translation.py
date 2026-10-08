@@ -8,7 +8,7 @@ clean() methods require at least one title.
 
 from modeltranslation.translator import TranslationOptions, register
 
-from .models import Album, Announcement, Event, Photo
+from .models import Album, Announcement, Document, Event, Photo
 
 
 class AnyLanguage(TranslationOptions):
@@ -34,3 +34,8 @@ class AlbumTranslation(AnyLanguage):
 @register(Photo)
 class PhotoTranslation(AnyLanguage):
     fields = ("caption",)
+
+
+@register(Document)
+class DocumentTranslation(AnyLanguage):
+    fields = ("title", "note")

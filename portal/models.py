@@ -1,14 +1,18 @@
+import math
 import uuid
+from pathlib import PurePath
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
+from django.core.validators import FileExtensionValidator, URLValidator
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
+from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 LANGUAGE_CODES = ("ta", "ms", "en")
 
@@ -305,3 +309,123 @@ class SocialLink(models.Model):
     def clean(self) -> None:
         if self.platform == "other" and not self.label.strip():
             raise ValidationError({"label": "Give a name for links to other sites."})
+
+
+DOCUMENT_EXTENSIONS = ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "jpg", "jpeg", "png"]
+MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
+FILE_TYPE_NAMES = {
+    "pdf": "PDF",
+    "doc": "Word",
+    "docx": "Word",
+    "xls": "Excel",
+    "xlsx": "Excel",
+    "ppt": "PowerPoint",
+    "pptx": "PowerPoint",
+    "jpg": "JPG",
+    "jpeg": "JPG",
+    "png": "PNG",
+}
+
+
+def validate_document_size(file) -> None:
+    if file.size > MAX_DOCUMENT_BYTES:
+        size = math.ceil(file.size / 1024 / 1024)
+        raise ValidationError(
+            f"This file is {size} MB. The limit is 10 MB. Try saving the PDF at a smaller size."
+        )
+
+
+class DocumentQuerySet(models.QuerySet):
+    def published(self):
+        """Published documents whose "remove after" day hasn't passed yet."""
+        return self.filter(is_published=True).filter(
+            Q(remove_after__isnull=True) | Q(remove_after__gte=timezone.localdate())
+        )
+
+
+class Document(models.Model):
+    """A circular, form, timetable or other file for parents, on the Documents page."""
+
+    CIRCULAR, FORM, LIST, SCHOOL = "circular", "form", "list", "school"
+    # The order here is the order of the headings on the page.
+    GROUPS = [
+        (CIRCULAR, _("Circulars")),
+        (FORM, _("Forms")),
+        (LIST, _("Timetables and lists")),
+        (SCHOOL, _("School documents")),
+    ]
+
+    title = models.CharField(max_length=200)
+    note = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional, one line, e.g. “Return by Friday 17 October”.",
+    )
+    group = models.CharField(max_length=20, choices=GROUPS)
+    file = models.FileField(
+        upload_to="documents/%Y/",
+        validators=[
+            FileExtensionValidator(
+                DOCUMENT_EXTENSIONS,
+                message="Upload a PDF, Word, Excel, PowerPoint, JPG or PNG file.",
+            ),
+            validate_document_size,
+        ],
+        help_text="PDF, Word, Excel, PowerPoint, JPG or PNG, up to 10 MB.",
+    )
+    remove_after = models.DateField(
+        "remove after",
+        null=True,
+        blank=True,
+        help_text="It leaves the Documents page after this day. Leave empty to keep it there.",
+    )
+    is_published = models.BooleanField("published", default=True)
+    added_at = models.DateTimeField("added", auto_now_add=True)
+
+    objects = DocumentQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["-added_at", "-pk"]
+
+    def __str__(self) -> str:
+        return self.title
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:document_open", args=[self.pk])
+
+    def clean(self) -> None:
+        require_one_language(self, "title", "Give the document a title in at least one language.")
+
+    @property
+    def file_type(self) -> str:
+        extension = PurePath(self.file.name).suffix.lstrip(".").lower()
+        return FILE_TYPE_NAMES.get(extension, extension.upper())
+
+    @property
+    def file_size(self) -> str:
+        try:
+            return filesizeformat(self.file.size)
+        except OSError:  # the file is missing, e.g. a database restored without media/
+            return ""
+
+
+@receiver(pre_save, sender=Document)
+def _remember_old_document_file(sender, instance, **kwargs):
+    instance._old_file = (
+        sender.objects.filter(pk=instance.pk).values_list("file", flat=True).first()
+        if instance.pk
+        else None
+    )
+
+
+@receiver(post_save, sender=Document)
+def _delete_replaced_document_file(sender, instance, **kwargs):
+    old = getattr(instance, "_old_file", None)
+    if old and old != instance.file.name:
+        instance.file.storage.delete(old)
+
+
+@receiver(post_delete, sender=Document)
+def _delete_document_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
