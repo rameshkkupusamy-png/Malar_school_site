@@ -2,6 +2,7 @@ import math
 import re
 import unicodedata
 import uuid
+from datetime import date, datetime, time
 from pathlib import PurePath
 from urllib.parse import quote
 
@@ -28,6 +29,15 @@ def require_one_language(obj, field: str, message: str) -> None:
         raise ValidationError({f"{field}_ta": message})
 
 
+def month_range(first_day: date) -> tuple[datetime, datetime]:
+    """Local midnight on the 1st of this month and of the next."""
+    next_first = date(first_day.year + first_day.month // 12, first_day.month % 12 + 1, 1)
+    return (
+        timezone.make_aware(datetime.combine(first_day, time.min)),
+        timezone.make_aware(datetime.combine(next_first, time.min)),
+    )
+
+
 class EventQuerySet(models.QuerySet):
     def published(self):
         return self.filter(is_published=True)
@@ -37,12 +47,35 @@ class EventQuerySet(models.QuerySet):
         now = timezone.now()
         return self.filter(Q(ends_at__gte=now) | Q(ends_at__isnull=True, starts_at__gte=now))
 
+    def overlapping(self, start, end):
+        """Events running at some point between start and end (end not included)."""
+        return self.filter(starts_at__lt=end).filter(
+            Q(ends_at__gte=start) | Q(ends_at__isnull=True, starts_at__gte=start)
+        )
+
     def past(self):
         now = timezone.now()
         return self.filter(Q(ends_at__lt=now) | Q(ends_at__isnull=True, starts_at__lt=now))
 
 
 class Event(models.Model):
+    EVENT, HOLIDAY, EXAM, PIBG, SPORTS, CELEBRATION = (
+        "event",
+        "holiday",
+        "exam",
+        "pibg",
+        "sports",
+        "celebration",
+    )
+    KINDS = [
+        (EVENT, _("Event")),
+        (HOLIDAY, _("Holiday")),
+        (EXAM, _("Exam")),
+        (PIBG, _("PIBG")),
+        (SPORTS, _("Sports")),
+        (CELEBRATION, _("Celebration")),
+    ]
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     location = models.CharField(max_length=200, blank=True)
@@ -52,6 +85,13 @@ class Event(models.Model):
         "all day",
         default=False,
         help_text="Times are ignored; set the end date for multi-day events.",
+    )
+    kind = models.CharField(
+        "type",
+        max_length=20,
+        choices=KINDS,
+        default=EVENT,
+        help_text="Holidays and exams stand out on the Events page.",
     )
     image = models.ImageField(upload_to="events/", blank=True)
     is_published = models.BooleanField("published", default=True)

@@ -77,6 +77,7 @@ class WhatsAppShareMixin:
 class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
     list_display = [
         "title",
+        "kind",
         "starts_at",
         "all_day",
         "location",
@@ -84,7 +85,7 @@ class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
         "notified_at",
         "whatsapp_share",
     ]
-    list_filter = ["is_published", "all_day", "starts_at"]
+    list_filter = ["kind", "is_published", "all_day", "starts_at"]
     search_fields = in_all_languages("title", "description", "location")
     date_hierarchy = "starts_at"
     readonly_fields = ["notified_at", "whatsapp_share"]
