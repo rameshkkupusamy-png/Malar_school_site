@@ -1,7 +1,9 @@
 import math
+import re
 import unicodedata
 import uuid
 from pathlib import PurePath
+from urllib.parse import quote
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -449,3 +451,111 @@ def _delete_document_file(sender, instance, **kwargs):
     if instance.file:
         storage, name = instance.file.storage, instance.file.name
         transaction.on_commit(lambda: storage.delete(name))
+
+
+PHONE_HELP = "Enter a Malaysian phone number, for example 03-8723 1234 or 012-345 6789."
+
+
+def malaysian_number(value: str) -> str:
+    """'03-8723 1234' -> '60387231234', the international form links need."""
+    digits = re.sub(r"[\s\-.()]", "", value).removeprefix("+")
+    if not digits.isdigit():
+        raise ValueError(value)
+    if digits.startswith("0"):
+        digits = "60" + digits[1:]
+    if not digits.startswith("60"):
+        raise ValueError(value)
+    national = digits[2:]
+    if not 8 <= len(national) <= 10 or national.startswith("0"):
+        raise ValueError(value)
+    return digits
+
+
+def validate_malaysian_number(value: str) -> None:
+    try:
+        malaysian_number(value)
+    except ValueError:
+        raise ValidationError(PHONE_HELP) from None
+
+
+class SchoolContact(models.Model):
+    """How parents reach the office. There is only ever one of these."""
+
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        validators=[validate_malaysian_number],
+        help_text="e.g. 03-8723 1234",
+    )
+    whatsapp = models.CharField(
+        "WhatsApp number",
+        max_length=30,
+        blank=True,
+        validators=[validate_malaysian_number],
+        help_text="The office's WhatsApp number, e.g. 012-345 6789.",
+    )
+    email = models.EmailField(blank=True)
+    address = models.TextField(blank=True, help_text="The postal address, as on a letter.")
+    hours = models.TextField(
+        "office hours", blank=True, help_text="e.g. Monday to Friday, 7.30 am to 1.00 pm"
+    )
+    map_url = models.URLField(
+        "Google Maps link",
+        blank=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+        help_text="Optional. Paste the school's Google Maps link so the button opens the exact pin.",
+    )
+
+    class Meta:
+        verbose_name = verbose_name_plural = "contact details"
+
+    def __str__(self) -> str:
+        return "Contact details"
+
+    def save(self, *args, **kwargs) -> None:
+        self.pk = 1  # one record, however it is saved
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls) -> "SchoolContact":
+        return cls.objects.first() or cls()
+
+    @property
+    def phone_link(self) -> str:
+        return f"tel:+{malaysian_number(self.phone)}" if self.phone else ""
+
+    @property
+    def whatsapp_link(self) -> str:
+        return f"https://wa.me/{malaysian_number(self.whatsapp)}" if self.whatsapp else ""
+
+    @property
+    def email_link(self) -> str:
+        return f"mailto:{self.email}" if self.email else ""
+
+    @property
+    def google_maps_link(self) -> str:
+        if self.map_url:
+            return self.map_url
+        if self.address:
+            return (
+                f"https://www.google.com/maps/search/?api=1&query={quote(self._one_line_address)}"
+            )
+        return ""
+
+    @property
+    def waze_link(self) -> str:
+        if not self.address:
+            return ""
+        return f"https://waze.com/ul?q={quote(self._one_line_address)}&navigate=yes"
+
+    @property
+    def _one_line_address(self) -> str:
+        return ", ".join(line.strip() for line in self.address.splitlines() if line.strip())
+
+    @property
+    def can_visit(self) -> bool:
+        return bool(self.address or self.hours or self.map_url)
+
+    @property
+    def has_details(self) -> bool:
+        return bool(self.phone or self.whatsapp or self.email or self.can_visit)
