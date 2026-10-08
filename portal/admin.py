@@ -181,6 +181,7 @@ class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
                                 all_day=parsed.all_day,
                                 location=parsed.location,
                                 description=parsed.description,
+                                kind=parsed.kind,
                                 is_published=False,
                                 source_import=batch,
                             )
@@ -238,6 +239,7 @@ class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
                         event.ends_at = row["ends_at"]
                         event.all_day = row["all_day"]
                         event.location = row["location"]
+                        event.kind = row["kind"] or Event.EVENT
                         if action == "publish" and event.pk in selected_ids:
                             event.is_published = True
                             to_publish.append(event)

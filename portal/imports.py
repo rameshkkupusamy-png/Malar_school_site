@@ -15,7 +15,16 @@ from openpyxl.styles import Font
 
 from .models import Event
 
-COLUMNS = ["Title", "Start date", "Start time", "End date", "End time", "Location", "Description"]
+COLUMNS = [
+    "Title",
+    "Start date",
+    "Start time",
+    "End date",
+    "End time",
+    "Location",
+    "Description",
+    "Type",
+]
 REQUIRED = ("Title", "Start date")
 MAX_ROWS = 500
 MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -23,6 +32,22 @@ MAX_FILE_SIZE = 2 * 1024 * 1024
 # Day-first, as used by most schools outside the US. The template says so.
 DATE_FORMATS = ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%d.%m.%Y", "%d %b %Y", "%d %B %Y"]
 TIME_FORMATS = ["%H:%M", "%H.%M", "%I:%M %p", "%I:%M%p", "%I %p", "%I%p"]
+
+KIND_WORDS = {
+    Event.HOLIDAY: ["holiday", "holidays", "cuti", "விடுமுறை"],
+    Event.EXAM: ["exam", "exams", "examination", "test", "peperiksaan", "ujian", "தேர்வு", "பரீட்சை"],
+    Event.PIBG: ["pibg", "pta", "பெற்றோர் ஆசிரியர் சங்கம்"],
+    Event.SPORTS: ["sports", "sport", "sukan", "விளையாட்டு"],
+    Event.CELEBRATION: ["celebration", "perayaan", "sambutan", "கொண்டாட்டம்", "விழா"],
+    Event.EVENT: ["event", "acara", "நிகழ்வு"],
+}
+WORD_TO_KIND = {word: kind for kind, words in KIND_WORDS.items() for word in words}
+
+
+def parse_kind(value) -> str | None:
+    """The event type for a Type cell, Event when empty, or None if it isn't recognised."""
+    text = " ".join(str(value or "").split()).lower()
+    return WORD_TO_KIND.get(text) if text else Event.EVENT
 
 
 class FileRejected(Exception):
@@ -38,6 +63,7 @@ class ParsedEvent:
     all_day: bool
     location: str = ""
     description: str = ""
+    kind: str = Event.EVENT
 
 
 @dataclass
@@ -192,6 +218,14 @@ def parse_file(uploaded_file) -> ParseResult:
             )
             continue
 
+        kind = parse_kind(cell("Type"))
+        if kind is None:
+            result.errors.append(
+                f"Row {row_number} ({title}): the type '{cell('Type')}' wasn't recognised, "
+                "so it was saved as Event."
+            )
+            kind = Event.EVENT
+
         result.events.append(
             ParsedEvent(
                 row=row_number,
@@ -201,6 +235,7 @@ def parse_file(uploaded_file) -> ParseResult:
                 all_day=all_day,
                 location=str(cell("Location") or "")[:200],
                 description=str(cell("Description") or ""),
+                kind=kind,
             )
         )
     return result
@@ -212,7 +247,7 @@ def build_template() -> bytes:
     sheet = workbook.active
     sheet.title = "Events"
     sheet.append(COLUMNS)
-    for column_cells, width in zip(sheet.columns, [34, 14, 12, 14, 12, 22, 50], strict=True):
+    for column_cells, width in zip(sheet.columns, [34, 14, 12, 14, 12, 22, 50, 14], strict=True):
         column_cells[0].font = Font(bold=True)
         sheet.column_dimensions[column_cells[0].column_letter].width = width
     sheet.freeze_panes = "A2"
@@ -226,11 +261,17 @@ def build_template() -> bytes:
         ["Times: 24-hour or AM/PM, e.g. 14:30 or 2:30 PM."],
         ["Leave Start time empty for an all-day event, e.g. a holiday."],
         ["For a multi-day event, fill in End date, e.g. exam week."],
+        [
+            (
+                "Type: Holiday, Exam, PIBG, Sports or Celebration (Cuti, Peperiksaan, Sukan, "
+                "Perayaan also work). Leave empty for an ordinary event."
+            )
+        ],
         [],
         ["Examples:"],
         COLUMNS,
-        ["Science fair", "14/10/2026", "10:00", "", "14:00", "Main hall", "Families welcome."],
-        ["Diwali holidays", "20/10/2026", "", "24/10/2026", "", "", "School closed."],
+        ["Science fair", "14/10/2026", "10:00", "", "14:00", "Main hall", "Families welcome.", ""],
+        ["Diwali holidays", "20/10/2026", "", "24/10/2026", "", "", "School closed.", "Holiday"],
         [],
         ["After uploading, every event is a draft until you tick it and click Publish."],
     ]

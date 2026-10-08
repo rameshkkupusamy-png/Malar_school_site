@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 
-from portal.imports import COLUMNS, FileRejected, parse_file, parse_time
+from portal.imports import COLUMNS, FileRejected, build_template, parse_file, parse_time
 from portal.models import Event, EventImport, Subscriber
 
 IMPORT_URL = reverse("admin:portal_event_import")
@@ -311,3 +311,60 @@ def test_editor_can_import_but_public_user_cannot(client):
 
     client.force_login(editor)
     assert client.get(IMPORT_URL).status_code == 200
+
+
+def test_import_reads_the_type_in_three_languages(db):
+    result = parse_file(
+        csv_file(
+            "Title,Start date,Type\n"
+            "Cuti Deepavali,20/10/2026,  CUTI \n"
+            "UPSA,12/10/2026,தேர்வு\n"
+            "Sports day,15/10/2026,Sports\n"
+            "Assembly,5/10/2026,\n"
+        )
+    )
+    assert [e.kind for e in result.events] == ["holiday", "exam", "sports", "event"]
+    assert result.errors == []
+
+
+def test_unknown_type_becomes_event_with_a_note(db):
+    result = parse_file(csv_file("Title,Start date,Type\nBook fair,20/10/2026,Pameran\n"))
+    assert result.events[0].kind == "event"
+    assert result.errors == [
+        "Row 2 (Book fair): the type 'Pameran' wasn't recognised, so it was saved as Event."
+    ]
+
+
+def test_template_has_a_type_column():
+    sheet = load_workbook(io.BytesIO(build_template())).active
+    assert [cell.value for cell in sheet[1]][-1] == "Type"
+
+
+def test_imported_type_is_saved_and_can_be_changed_on_review(admin_client):
+    admin_client.post(
+        reverse("admin:portal_event_import"),
+        {
+            "file": csv_file("Title,Start date,Type\nCuti Deepavali,20/10/2026,Cuti\n"),
+            "language": "ms",
+        },
+    )
+    event = Event.objects.get()
+    assert event.kind == Event.HOLIDAY
+    assert not event.is_published
+
+    admin_client.post(
+        reverse("admin:portal_event_import_review", args=[event.source_import_id]),
+        {
+            "form-TOTAL_FORMS": "1",
+            "form-INITIAL_FORMS": "1",
+            "form-MIN_NUM_FORMS": "0",
+            "form-MAX_NUM_FORMS": "1000",
+            "form-0-event_id": str(event.pk),
+            "form-0-title": "Cuti Deepavali",
+            "form-0-start_date": "2026-10-20",
+            "form-0-kind": Event.EXAM,
+            "action": "save",
+        },
+    )
+    event.refresh_from_db()
+    assert event.kind == Event.EXAM

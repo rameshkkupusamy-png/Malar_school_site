@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .imports import build_times
+from .models import Event
 
 
 class SubscribeForm(forms.Form):
@@ -48,6 +49,7 @@ class DraftEventForm(forms.Form):
         required=False, widget=forms.TimeInput(attrs={"type": "time"}, format="%H:%M")
     )
     location = forms.CharField(max_length=200, required=False)
+    kind = forms.ChoiceField(label="Type", choices=Event.KINDS, required=False)
 
     @classmethod
     def initial_for(cls, event) -> dict:
@@ -61,6 +63,7 @@ class DraftEventForm(forms.Form):
             "end_date": end.date() if end and end.date() != start.date() else None,
             "end_time": end.time() if end and not event.all_day else None,
             "location": event.location,
+            "kind": event.kind,
         }
 
     def clean(self):
