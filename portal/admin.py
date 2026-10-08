@@ -430,6 +430,16 @@ class SchoolContactAdmin(AnyLanguageAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+    def add_view(self, request, form_url="", extra_context=None):
+        if SchoolContact.objects.exists():
+            return redirect("admin:portal_schoolcontact_change", 1)
+        return super().add_view(request, form_url, extra_context)
+
+    def response_add(self, request, obj, post_url_continue=None):
+        # "Save and add another" would lead to a second record, which can't exist.
+        super().response_add(request, obj, post_url_continue)  # keeps the "added" message
+        return redirect("admin:portal_schoolcontact_change", obj.pk)
+
     def changelist_view(self, request, extra_context=None):
         if SchoolContact.objects.exists():
             return redirect("admin:portal_schoolcontact_change", 1)

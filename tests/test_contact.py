@@ -126,7 +126,6 @@ def test_admin_list_opens_the_form_then_the_record(admin_client):
     assert admin_client.get(url)["Location"] == reverse(
         "admin:portal_schoolcontact_change", args=[1]
     )
-    assert admin_client.get(reverse("admin:portal_schoolcontact_add")).status_code == 403
 
 
 @pytest.mark.django_db
@@ -153,3 +152,38 @@ def test_editors_can_edit_contact_details():
         Group.objects.get(name="Editors").permissions.values_list("codename", flat=True)
     )
     assert {"add_schoolcontact", "change_schoolcontact", "view_schoolcontact"} <= codenames
+
+
+@pytest.mark.parametrize("typed", ["௦௩-௮௭௨௩ ௧௨௩௪", "０３-８７２３ １２３４", "03-8723 123²"])
+def test_digits_must_be_plain_0_to_9(typed):
+    with pytest.raises(ValueError):
+        malaysian_number(typed)
+
+
+@pytest.mark.django_db
+def test_page_survives_a_stored_number_that_no_longer_checks_out(client):
+    SchoolContact(phone="hello", email="office@school.example").save()
+
+    response = client.get(reverse("portal:contact"))
+
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert "hello" in html
+    assert "Call the office" not in html
+    assert "Email the office" in html
+
+
+@pytest.mark.django_db
+def test_save_and_add_another_goes_to_the_record(admin_client):
+    response = admin_client.post(
+        reverse("admin:portal_schoolcontact_add"),
+        {"email": "office@school.example", "_addanother": "Save and add another"},
+    )
+    assert response["Location"] == reverse("admin:portal_schoolcontact_change", args=[1])
+
+
+@pytest.mark.django_db
+def test_add_page_goes_to_the_record_once_it_exists(admin_client):
+    SchoolContact(email="office@school.example").save()
+    response = admin_client.get(reverse("admin:portal_schoolcontact_add"))
+    assert response["Location"] == reverse("admin:portal_schoolcontact_change", args=[1])

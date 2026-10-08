@@ -14,10 +14,10 @@
       <section aria-labelledby="contact-phone">
         <h2 id="contact-phone">{% translate "Phone" %}</h2>
         <p class="contact-value">{{ contact.phone }}</p>
-        <p><a class="button" href="{{ contact.phone_link }}">{% translate "Call the office" %}</a></p>
+        {% if contact.phone_link %}<p><a class="button" href="{{ contact.phone_link }}">{% translate "Call the office" %}</a></p>{% endif %}
       </section>
     {% endif %}
-    {% if contact.whatsapp %}
+    {% if contact.whatsapp_link %}
       <section aria-labelledby="contact-whatsapp">
         <h2 id="contact-whatsapp">WhatsApp</h2>
         <p><a class="button" href="{{ contact.whatsapp_link }}" target="_blank" rel="noopener">{% translate "Message the office on WhatsApp" %}</a></p>

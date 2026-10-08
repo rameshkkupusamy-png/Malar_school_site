@@ -459,7 +459,7 @@ PHONE_HELP = "Enter a Malaysian phone number, for example 03-8723 1234 or 012-34
 def malaysian_number(value: str) -> str:
     """'03-8723 1234' -> '60387231234', the international form links need."""
     digits = re.sub(r"[\s\-.()]", "", value).removeprefix("+")
-    if not digits.isdigit():
+    if not (digits.isascii() and digits.isdigit()):  # plain 0-9 only, not ௩ or ３
         raise ValueError(value)
     if digits.startswith("0"):
         digits = "60" + digits[1:]
@@ -476,6 +476,17 @@ def validate_malaysian_number(value: str) -> None:
         malaysian_number(value)
     except ValueError:
         raise ValidationError(PHONE_HELP) from None
+
+
+def _checked_number(value: str) -> str:
+    """The international form, or "" for an empty or unusable number.
+
+    The admin refuses bad numbers, but one stored some other way must not break the page.
+    """
+    try:
+        return malaysian_number(value) if value else ""
+    except ValueError:
+        return ""
 
 
 class SchoolContact(models.Model):
@@ -522,11 +533,13 @@ class SchoolContact(models.Model):
 
     @property
     def phone_link(self) -> str:
-        return f"tel:+{malaysian_number(self.phone)}" if self.phone else ""
+        number = _checked_number(self.phone)
+        return f"tel:+{number}" if number else ""
 
     @property
     def whatsapp_link(self) -> str:
-        return f"https://wa.me/{malaysian_number(self.whatsapp)}" if self.whatsapp else ""
+        number = _checked_number(self.whatsapp)
+        return f"https://wa.me/{number}" if number else ""
 
     @property
     def email_link(self) -> str:
