@@ -46,6 +46,10 @@ class WhatsAppShareMixin:
         if obj is None or obj.pk is None:
             return "Save and publish first, then share."
         if not is_public(obj):
+            if obj.is_published and getattr(obj, "remove_after", None):
+                return (
+                    "Its “remove after” date has passed, so it's no longer on the Documents page."
+                )
             return "Not shown to parents right now, so it can't be shared."
         return format_html(
             '<a class="button" href="{}" target="_blank" rel="noopener">Share on WhatsApp</a>',

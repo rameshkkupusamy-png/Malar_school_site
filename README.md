@@ -202,6 +202,7 @@ cd C:\school-site
 git pull
 .venv\Scripts\pip.exe install -r requirements.txt
 .venv\Scripts\python.exe manage.py migrate
+.venv\Scripts\python.exe manage.py setup_roles     # gives Editors access to any new sections
 .venv\Scripts\python.exe manage.py collectstatic --noinput
 ```
 

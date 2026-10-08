@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import transaction
 from django.urls import reverse
 from django.utils import timezone
 
@@ -89,12 +90,13 @@ def test_file_type_and_size(make_document):
     assert make_document(name="list.XLSX").file_type == "Excel"
 
 
-def test_replacing_the_file_deletes_the_old_one(make_document):
+def test_replacing_the_file_deletes_the_old_one(make_document, django_capture_on_commit_callbacks):
     document = make_document(name="old.pdf")
     old_path = Path(document.file.path)
 
-    document.file = SimpleUploadedFile("new.pdf", b"%PDF new")
-    document.save()
+    with django_capture_on_commit_callbacks(execute=True):
+        document.file = SimpleUploadedFile("new.pdf", b"%PDF new")
+        document.save()
 
     assert not old_path.exists()
     assert Path(document.file.path).exists()
@@ -111,13 +113,38 @@ def test_saving_without_a_new_file_keeps_it(make_document):
     assert path.exists()
 
 
-def test_deleting_a_document_deletes_its_file(make_document):
+def test_deleting_a_document_deletes_its_file(make_document, django_capture_on_commit_callbacks):
     document = make_document()
     path = Path(document.file.path)
 
-    document.delete()
+    with django_capture_on_commit_callbacks(execute=True):
+        document.delete()
 
     assert not path.exists()
+
+
+class Boom(Exception):
+    pass
+
+
+@pytest.mark.django_db(transaction=True)
+def test_failed_replace_or_delete_keeps_the_file():
+    """If saving fails part-way, the database rolls back, so the file must stay too."""
+    document = Document.objects.create(
+        title="Booklist", group=Document.LIST, file=SimpleUploadedFile("old.pdf", b"%PDF")
+    )
+    path = Path(document.file.path)
+
+    with pytest.raises(Boom), transaction.atomic():
+        document.file = SimpleUploadedFile("new.pdf", b"%PDF new")
+        document.save()
+        raise Boom
+    with pytest.raises(Boom), transaction.atomic():
+        Document.objects.get(pk=document.pk).delete()
+        raise Boom
+
+    assert path.exists()
+    assert Document.objects.get(pk=document.pk).file.name.endswith("old.pdf")
 
 
 def test_page_groups_documents_in_fixed_order_newest_first(make_document, client):
@@ -174,11 +201,10 @@ def test_permanent_link_opens_the_file_even_after_its_date(make_document, client
 def test_permanent_link_works_for_tamil_file_names(make_document, client):
     document = make_document(name="சுற்றறிக்கை 1.pdf")
 
-    response = client.get(document.get_absolute_url())
+    response = client.get(document.get_absolute_url(), follow=True)
 
-    assert response.status_code == 302
-    assert Path(document.file.path).exists()
-    assert response["Location"] == document.file.url
+    assert response.status_code == 200
+    assert Path(document.file.name).name == "சுற்றறிக்கை_1.pdf"
 
 
 def test_permanent_link_is_gone_for_drafts_and_unknown_numbers(make_document, client):
@@ -213,7 +239,7 @@ def test_admin_offers_sharing_only_for_listed_documents(make_document, admin_cli
     url = reverse("admin:portal_document_change", args=[expired.pk])
     html = admin_client.get(url).content.decode()
     assert "Share on WhatsApp" not in html
-    assert "Not shown to parents" in html
+    assert "Its “remove after” date has passed" in html
 
 
 def test_admin_upload_refuses_wrong_file_type(admin_client):
@@ -238,3 +264,40 @@ def test_editors_can_manage_documents():
         Group.objects.get(name="Editors").permissions.values_list("codename", flat=True)
     )
     assert {"add_document", "change_document", "delete_document", "view_document"} <= codenames
+
+
+def test_admin_says_why_an_expired_document_cannot_be_shared(make_document, admin_client):
+    expired = make_document(remove_after=timezone.localdate() - timedelta(days=1))
+
+    url = reverse("admin:portal_document_change", args=[expired.pk])
+    html = admin_client.get(url).content.decode()
+
+    assert "Its “remove after” date has passed" in html
+
+
+def test_admin_accepts_long_file_names(admin_client):
+    name = "Surat makluman lawatan sambil belajar murid tahun enam ke Zoo Negara dan Muzium Negara 2026.pdf"
+    response = admin_client.post(
+        reverse("admin:portal_document_add"),
+        {
+            "title_ta": "சுற்றுலா",
+            "group": Document.CIRCULAR,
+            "file": SimpleUploadedFile(name, b"%PDF"),
+            "is_published": "on",
+        },
+    )
+    assert response.status_code == 302, response.content.decode()[-2000:]
+    assert Path(Document.objects.get().file.name).name == name.replace(" ", "_")
+
+
+def test_admin_title_only_edit_keeps_the_file(make_document, admin_client):
+    document = make_document()
+    path = Path(document.file.path)
+
+    response = admin_client.post(
+        reverse("admin:portal_document_change", args=[document.pk]),
+        {"title_ta": "New title", "group": Document.LIST, "is_published": "on"},
+    )
+
+    assert response.status_code == 302
+    assert path.exists()

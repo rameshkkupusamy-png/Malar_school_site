@@ -1,11 +1,13 @@
 import math
+import unicodedata
 import uuid
 from pathlib import PurePath
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import FileExtensionValidator, URLValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
@@ -335,6 +337,19 @@ def validate_document_size(file) -> None:
         )
 
 
+class DocumentStorage(FileSystemStorage):
+    """Keeps Tamil file names readable.
+
+    Django's default clean-up drops Tamil vowel signs, so "சுற்றறிக்கை.pdf" would be saved as
+    "சறறறகக.pdf". This keeps letters, marks and digits in any script.
+    """
+
+    def get_valid_name(self, name):
+        name = str(name).strip().replace(" ", "_")
+        name = "".join(c for c in name if unicodedata.category(c)[0] in "LMN" or c in "-_.")
+        return name if name.strip(".") else "document"
+
+
 class DocumentQuerySet(models.QuerySet):
     def published(self):
         """Published documents whose "remove after" day hasn't passed yet."""
@@ -364,6 +379,8 @@ class Document(models.Model):
     group = models.CharField(max_length=20, choices=GROUPS)
     file = models.FileField(
         upload_to="documents/%Y/",
+        storage=DocumentStorage(),
+        max_length=255,
         validators=[
             FileExtensionValidator(
                 DOCUMENT_EXTENSIONS,
@@ -422,10 +439,13 @@ def _remember_old_document_file(sender, instance, **kwargs):
 def _delete_replaced_document_file(sender, instance, **kwargs):
     old = getattr(instance, "_old_file", None)
     if old and old != instance.file.name:
-        instance.file.storage.delete(old)
+        # Only once the save is committed: a rolled-back save still points at the old file.
+        storage = instance.file.storage
+        transaction.on_commit(lambda: storage.delete(old))
 
 
 @receiver(post_delete, sender=Document)
 def _delete_document_file(sender, instance, **kwargs):
     if instance.file:
-        instance.file.delete(save=False)
+        storage, name = instance.file.storage, instance.file.name
+        transaction.on_commit(lambda: storage.delete(name))
