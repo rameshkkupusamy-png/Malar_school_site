@@ -19,6 +19,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from .images import shrink_new_upload
+
 LANGUAGE_CODES = ("ta", "ms", "en")
 
 
@@ -129,6 +131,7 @@ class Event(models.Model):
             raise ValidationError({"ends_at": "The end must be after the start."})
 
     def save(self, *args, **kwargs) -> None:
+        self.image = shrink_new_upload(self.image)
         if self.all_day:
             # All-day events run from local midnight on the first day to the end of the last day.
             start = timezone.localtime(self.starts_at)
@@ -231,6 +234,10 @@ class Photo(models.Model):
 
     def __str__(self) -> str:
         return self.caption or f"Photo {self.pk}"
+
+    def save(self, *args, **kwargs) -> None:
+        self.image = shrink_new_upload(self.image)
+        super().save(*args, **kwargs)
 
 
 class StaffMember(models.Model):
