@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:16+0800\n"
+"POT-Creation-Date: 2026-10-08 10:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -136,6 +136,22 @@ msgstr[1] "%(num)d minit"
 msgid ", "
 msgstr ", "
 
+#: portal/models.py:352
+msgid "Circulars"
+msgstr "Surat edaran"
+
+#: portal/models.py:353
+msgid "Forms"
+msgstr "Borang"
+
+#: portal/models.py:354
+msgid "Timetables and lists"
+msgstr "Jadual dan senarai"
+
+#: portal/models.py:355
+msgid "School documents"
+msgstr "Dokumen sekolah"
+
 #: portal/templates/portal/_event_time.html:4
 msgid "l j F"
 msgstr "l j F"
@@ -191,7 +207,7 @@ msgid "Back to all photos"
 msgstr "Kembali ke semua gambar"
 
 #: portal/templates/portal/album_list.html:4 portal/templates/portal/album_list.html:8
-#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:58
+#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:59
 msgid "Photos"
 msgstr "Gambar"
 
@@ -215,7 +231,7 @@ msgid "Back to all news"
 msgstr "Kembali ke semua berita"
 
 #: portal/templates/portal/announcement_list.html:4 portal/templates/portal/announcement_list.html:8
-#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:56
+#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:57
 msgid "News"
 msgstr "Berita"
 
@@ -231,22 +247,35 @@ msgstr "Langkau ke kandungan"
 msgid "Main"
 msgstr "Utama"
 
-#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:57
+#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:58
 #: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
 msgid "Events"
 msgstr "Acara"
 
-#: portal/templates/portal/base.html:55
+#: portal/templates/portal/base.html:30 portal/templates/portal/base.html:60
+#: portal/templates/portal/document_list.html:4 portal/templates/portal/document_list.html:8
+msgid "Documents"
+msgstr "Dokumen"
+
+#: portal/templates/portal/base.html:56
 msgid "Footer"
 msgstr "Kaki halaman"
 
-#: portal/templates/portal/base.html:59
+#: portal/templates/portal/base.html:61
 msgid "Staff sign in"
 msgstr "Log masuk kakitangan"
 
-#: portal/templates/portal/base.html:63
+#: portal/templates/portal/base.html:65
 msgid "Follow the school"
 msgstr "Ikuti sekolah"
+
+#: portal/templates/portal/document_list.html:9
+msgid "Circulars, forms and timetables from the school. Tap a title to open it."
+msgstr "Surat edaran, borang dan jadual daripada sekolah. Sentuh tajuk untuk membukanya."
+
+#: portal/templates/portal/document_list.html:26
+msgid "No documents yet."
+msgstr "Belum ada dokumen."
 
 #: portal/templates/portal/email/new_event.txt:1
 #, python-format
@@ -458,16 +487,16 @@ msgstr "%(email)s sudah tidak menerima e-mel acara."
 msgid "Sign up again on the home page"
 msgstr "Daftar semula di halaman utama"
 
-#: portal/views.py:138
+#: portal/views.py:157
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:156
+#: portal/views.py:175
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:167
+#: portal/views.py:186
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."

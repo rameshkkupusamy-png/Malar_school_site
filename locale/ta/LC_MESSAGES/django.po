@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:16+0800\n"
+"POT-Creation-Date: 2026-10-08 10:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ta\n"
@@ -136,6 +136,22 @@ msgstr[1] "%(num)d நிமிடங்கள்"
 msgid ", "
 msgstr ", "
 
+#: portal/models.py:352
+msgid "Circulars"
+msgstr "சுற்றறிக்கைகள்"
+
+#: portal/models.py:353
+msgid "Forms"
+msgstr "படிவங்கள்"
+
+#: portal/models.py:354
+msgid "Timetables and lists"
+msgstr "கால அட்டவணைகளும் பட்டியல்களும்"
+
+#: portal/models.py:355
+msgid "School documents"
+msgstr "பள்ளி ஆவணங்கள்"
+
 #: portal/templates/portal/_event_time.html:4
 msgid "l j F"
 msgstr "l j F"
@@ -191,7 +207,7 @@ msgid "Back to all photos"
 msgstr "அனைத்துப் படங்களுக்கும் திரும்பு"
 
 #: portal/templates/portal/album_list.html:4 portal/templates/portal/album_list.html:8
-#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:58
+#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:59
 msgid "Photos"
 msgstr "படங்கள்"
 
@@ -215,7 +231,7 @@ msgid "Back to all news"
 msgstr "அனைத்துச் செய்திகளுக்கும் திரும்பு"
 
 #: portal/templates/portal/announcement_list.html:4 portal/templates/portal/announcement_list.html:8
-#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:56
+#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:57
 msgid "News"
 msgstr "செய்திகள்"
 
@@ -231,22 +247,35 @@ msgstr "உள்ளடக்கத்திற்குச் செல்"
 msgid "Main"
 msgstr "முதன்மை"
 
-#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:57
+#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:58
 #: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
 msgid "Events"
 msgstr "நிகழ்வுகள்"
 
-#: portal/templates/portal/base.html:55
+#: portal/templates/portal/base.html:30 portal/templates/portal/base.html:60
+#: portal/templates/portal/document_list.html:4 portal/templates/portal/document_list.html:8
+msgid "Documents"
+msgstr "ஆவணங்கள்"
+
+#: portal/templates/portal/base.html:56
 msgid "Footer"
 msgstr "அடிக்குறிப்பு"
 
-#: portal/templates/portal/base.html:59
+#: portal/templates/portal/base.html:61
 msgid "Staff sign in"
 msgstr "பணியாளர் உள்நுழைவு"
 
-#: portal/templates/portal/base.html:63
+#: portal/templates/portal/base.html:65
 msgid "Follow the school"
 msgstr "பள்ளியைப் பின்தொடருங்கள்"
+
+#: portal/templates/portal/document_list.html:9
+msgid "Circulars, forms and timetables from the school. Tap a title to open it."
+msgstr "பள்ளியின் சுற்றறிக்கைகள், படிவங்கள், கால அட்டவணைகள். திறக்க தலைப்பைத் தொடுங்கள்."
+
+#: portal/templates/portal/document_list.html:26
+msgid "No documents yet."
+msgstr "இன்னும் ஆவணங்கள் இல்லை."
 
 #: portal/templates/portal/email/new_event.txt:1
 #, python-format
@@ -456,16 +485,16 @@ msgstr "%(email)s முகவரிக்கு ஏற்கெனவே நி
 msgid "Sign up again on the home page"
 msgstr "முகப்புப் பக்கத்தில் மீண்டும் பதிவு செய்க"
 
-#: portal/views.py:138
+#: portal/views.py:157
 msgid "Enter a valid email address to get event emails."
 msgstr "நிகழ்வு மின்னஞ்சல்களைப் பெறச் சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."
 
-#: portal/views.py:156
+#: portal/views.py:175
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது %(email)s முகவரிக்கு மின்னஞ்சல் அனுப்பப்படும்."
 
-#: portal/views.py:167
+#: portal/views.py:186
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s முகவரிக்கு இனி நிகழ்வு மின்னஞ்சல்கள் வராது."

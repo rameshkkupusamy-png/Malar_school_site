@@ -27,6 +27,7 @@
           <a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>{% translate "News" %}</a>
           <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>{% translate "Events" %}</a>
           <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>{% translate "Photos" %}</a>
+          <a href="{% url 'portal:document_list' %}"{% if "document" in current %} aria-current="page"{% endif %}>{% translate "Documents" %}</a>
         </nav>
         {% include "portal/_language_switcher.html" %}
       </div>
@@ -56,6 +57,7 @@
         <a href="{% url 'portal:announcement_list' %}">{% translate "News" %}</a>
         <a href="{% url 'portal:event_list' %}">{% translate "Events" %}</a>
         <a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>
+        <a href="{% url 'portal:document_list' %}">{% translate "Documents" %}</a>
         <a href="{% url 'admin:index' %}">{% translate "Staff sign in" %}</a>
       </nav>
       {% if social_links %}

@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import SubscribeForm
 from .ical import build_calendar
-from .models import Album, Announcement, Event, Subscriber
+from .models import Album, Announcement, Document, Event, Subscriber
 
 PAGE_SIZE = 10
 
@@ -129,6 +129,25 @@ def album_list(request):
 def album_detail(request, pk):
     album = get_object_or_404(Album.objects.filter(is_published=True), pk=pk)
     return render(request, "portal/album_detail.html", {"album": album})
+
+
+def document_list(request):
+    documents = list(Document.objects.published())
+    groups = [(label, [d for d in documents if d.group == key]) for key, label in Document.GROUPS]
+    return render(
+        request,
+        "portal/document_list.html",
+        {"groups": [(label, docs) for label, docs in groups if docs]},
+    )
+
+
+def document_open(request, pk):
+    """The permanent link for a document, used on the page and in WhatsApp messages.
+
+    It keeps working after the "remove after" date so links in older messages still open.
+    """
+    document = get_object_or_404(Document.objects.filter(is_published=True), pk=pk)
+    return redirect(document.file.url)
 
 
 @require_POST

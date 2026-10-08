@@ -58,6 +58,7 @@ def page_paths(site):
         site["news"].get_absolute_url(),
         "/gallery/",
         site["album"].get_absolute_url(),
+        "/documents/",
     ]
 
 

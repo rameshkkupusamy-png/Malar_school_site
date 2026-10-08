@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 from django.utils import timezone
 
 from portal.models import MAX_DOCUMENT_BYTES, Document
@@ -114,3 +115,76 @@ def test_deleting_a_document_deletes_its_file(make_document):
     document.delete()
 
     assert not path.exists()
+
+
+def test_page_groups_documents_in_fixed_order_newest_first(make_document, client):
+    make_document("Trip form", Document.FORM)
+    old = make_document("Old circular", Document.CIRCULAR)
+    Document.objects.filter(pk=old.pk).update(added_at=timezone.now() - timedelta(days=5))
+    make_document("New circular", Document.CIRCULAR)
+
+    groups = client.get(reverse("portal:document_list")).context["groups"]
+
+    assert [str(label) for label, _ in groups] == ["Circulars", "Forms"]
+    assert [d.title for d in groups[0][1]] == ["New circular", "Old circular"]
+
+
+def test_page_shows_note_type_and_size_but_not_hidden_documents(make_document, client):
+    make_document("Trip form", Document.FORM, note="Return by Friday", content=b"x" * 2048)
+    make_document("Draft", is_published=False)
+    make_document("Expired", remove_after=timezone.localdate() - timedelta(days=1))
+
+    html = client.get(reverse("portal:document_list")).content.decode()
+
+    assert "Trip form" in html
+    assert "Return by Friday" in html
+    assert "PDF, 2.0\xa0KB" in html
+    assert "Draft" not in html
+    assert "Expired" not in html
+
+
+@pytest.mark.django_db
+def test_page_without_documents_says_so(client):
+    html = client.get(reverse("portal:document_list")).content.decode()
+    assert "No documents yet." in html
+
+
+def test_page_survives_a_missing_file(make_document, client):
+    document = make_document("Lost file")
+    Path(document.file.path).unlink()
+
+    response = client.get(reverse("portal:document_list"))
+
+    assert response.status_code == 200
+    assert "Lost file" in response.content.decode()
+
+
+def test_permanent_link_opens_the_file_even_after_its_date(make_document, client):
+    document = make_document(remove_after=timezone.localdate() - timedelta(days=30))
+
+    response = client.get(document.get_absolute_url())
+
+    assert response.status_code == 302
+    assert response["Location"] == document.file.url
+
+
+def test_permanent_link_works_for_tamil_file_names(make_document, client):
+    document = make_document(name="சுற்றறிக்கை 1.pdf")
+
+    response = client.get(document.get_absolute_url())
+
+    assert response.status_code == 302
+    assert Path(document.file.path).exists()
+    assert response["Location"] == document.file.url
+
+
+def test_permanent_link_is_gone_for_drafts_and_unknown_numbers(make_document, client):
+    draft = make_document(is_published=False)
+    assert client.get(draft.get_absolute_url()).status_code == 404
+    assert client.get(reverse("portal:document_open", args=[99999])).status_code == 404
+
+
+@pytest.mark.django_db
+def test_menu_links_to_documents(client):
+    html = client.get(reverse("portal:home")).content.decode()
+    assert f'href="{reverse("portal:document_list")}"' in html
