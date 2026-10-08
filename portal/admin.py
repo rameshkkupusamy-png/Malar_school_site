@@ -24,6 +24,7 @@ from .models import (
 )
 from .notifications import notify_subscribers
 from .staff_list import MAX_BYTES, StaffFileRejected, add_staff_from_rows, read_rows
+from .whatsapp import is_public, share_url
 
 admin.site.site_header = f"{settings.SCHOOL_NAME} admin"
 admin.site.site_title = f"{settings.SCHOOL_NAME} admin"
@@ -36,13 +37,36 @@ def in_all_languages(*fields):
     return [f"{field}_{code}" for field in fields for code in ("ta", "ms", "en")]
 
 
+class WhatsAppShareMixin:
+    """A "Share on WhatsApp" button on the list and edit pages of published posts."""
+
+    @admin.display(description="WhatsApp")
+    def whatsapp_share(self, obj):
+        if obj is None or obj.pk is None:
+            return "Save and publish first, then share."
+        if not is_public(obj):
+            return "Not shown to parents yet, so it can't be shared."
+        return format_html(
+            '<a class="button" href="{}" target="_blank" rel="noopener">Share on WhatsApp</a>',
+            share_url(obj),
+        )
+
+
 @admin.register(Event)
-class EventAdmin(TranslationAdmin):
-    list_display = ["title", "starts_at", "all_day", "location", "is_published", "notified_at"]
+class EventAdmin(WhatsAppShareMixin, TranslationAdmin):
+    list_display = [
+        "title",
+        "starts_at",
+        "all_day",
+        "location",
+        "is_published",
+        "notified_at",
+        "whatsapp_share",
+    ]
     list_filter = ["is_published", "all_day", "starts_at"]
     search_fields = in_all_languages("title", "description", "location")
     date_hierarchy = "starts_at"
-    readonly_fields = ["notified_at"]
+    readonly_fields = ["notified_at", "whatsapp_share"]
     actions = ["email_subscribers"]
     change_list_template = "admin/portal/event/change_list.html"
 
@@ -253,8 +277,9 @@ class EventImportAdmin(admin.ModelAdmin):
 
 
 @admin.register(Announcement)
-class AnnouncementAdmin(TranslationAdmin):
-    list_display = ["title", "published_at", "is_pinned", "is_published"]
+class AnnouncementAdmin(WhatsAppShareMixin, TranslationAdmin):
+    list_display = ["title", "published_at", "is_pinned", "is_published", "whatsapp_share"]
+    readonly_fields = ["whatsapp_share"]
     list_editable = ["is_pinned", "is_published"]
     list_filter = ["is_pinned", "is_published"]
     search_fields = in_all_languages("title", "body")

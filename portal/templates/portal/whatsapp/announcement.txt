@@ -1,0 +1,5 @@
+{% load i18n %}{% autoescape off %}*{{ post.title }}*
+{{ post.body|truncatewords:40 }}
+
+{% translate "Details:" %} {{ url }}
+{% endautoescape %}
