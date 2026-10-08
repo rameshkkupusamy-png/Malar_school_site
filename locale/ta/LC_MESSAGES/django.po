@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:35+0800\n"
+"POT-Creation-Date: 2026-10-08 10:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ta\n"
@@ -484,6 +484,10 @@ msgstr "%(email)s முகவரிக்கு ஏற்கெனவே நி
 #: portal/templates/portal/unsubscribe.html:17
 msgid "Sign up again on the home page"
 msgstr "முகப்புப் பக்கத்தில் மீண்டும் பதிவு செய்க"
+
+#: portal/templates/portal/whatsapp/document.txt:4
+msgid "Open the document:"
+msgstr "ஆவணத்தைத் திறக்க:"
 
 #: portal/views.py:157
 msgid "Enter a valid email address to get event emails."

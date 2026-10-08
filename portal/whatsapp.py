@@ -10,22 +10,25 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 
-from .models import Announcement, Event
+from .models import Announcement, Document, Event
 
 TEMPLATES = {
     Event: "portal/whatsapp/event.txt",
     Announcement: "portal/whatsapp/announcement.txt",
+    Document: "portal/whatsapp/document.txt",
 }
 
 
-def is_public(obj: Event | Announcement) -> bool:
+def is_public(obj: Event | Announcement | Document) -> bool:
     """Parents can open the post, so the link in the message works."""
+    if isinstance(obj, Document):
+        return Document.objects.published().filter(pk=obj.pk).exists()
     if isinstance(obj, Announcement):
         return obj.is_published and obj.published_at <= timezone.now()
     return obj.is_published
 
 
-def share_message(obj: Event | Announcement) -> str:
+def share_message(obj: Event | Announcement | Document) -> str:
     # The group gets one message, in the site's default language (Tamil). Post text falls
     # back to whichever language staff wrote it in.
     with translation.override(settings.LANGUAGE_CODE):
@@ -37,5 +40,5 @@ def share_message(obj: Event | Announcement) -> str:
     return text.strip()
 
 
-def share_url(obj: Event | Announcement) -> str:
+def share_url(obj: Event | Announcement | Document) -> str:
     return "https://wa.me/?text=" + quote(share_message(obj), safe="")

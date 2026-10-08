@@ -3,12 +3,15 @@ from datetime import timedelta
 from pathlib import Path
 
 import pytest
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
 from portal.models import MAX_DOCUMENT_BYTES, Document
+from portal.whatsapp import share_message
 
 
 @pytest.fixture(autouse=True)
@@ -188,3 +191,50 @@ def test_permanent_link_is_gone_for_drafts_and_unknown_numbers(make_document, cl
 def test_menu_links_to_documents(client):
     html = client.get(reverse("portal:home")).content.decode()
     assert f'href="{reverse("portal:document_list")}"' in html
+
+
+def test_whatsapp_message_has_title_note_and_permanent_link(make_document, settings):
+    settings.SITE_URL = "https://school.example"
+    document = make_document("Zoo trip form", note="Return by Friday")
+
+    text = share_message(document)
+
+    assert text.startswith("*Zoo trip form*\nReturn by Friday\n")
+    assert text.endswith(f"https://school.example/documents/{document.pk}/")
+
+
+def test_admin_offers_sharing_only_for_listed_documents(make_document, admin_client):
+    make_document("Booklist")
+    expired = make_document("Old form", remove_after=timezone.localdate() - timedelta(days=1))
+
+    html = admin_client.get(reverse("admin:portal_document_changelist")).content.decode()
+    assert html.count("Share on WhatsApp") == 1
+
+    url = reverse("admin:portal_document_change", args=[expired.pk])
+    html = admin_client.get(url).content.decode()
+    assert "Share on WhatsApp" not in html
+    assert "Not shown to parents" in html
+
+
+def test_admin_upload_refuses_wrong_file_type(admin_client):
+    response = admin_client.post(
+        reverse("admin:portal_document_add"),
+        {
+            "title_ta": "Form",
+            "group": Document.FORM,
+            "file": SimpleUploadedFile("page.html", b"<html>"),
+            "is_published": "on",
+        },
+    )
+    assert response.status_code == 200
+    assert "Upload a PDF, Word, Excel, PowerPoint, JPG or PNG file." in response.content.decode()
+    assert not Document.objects.exists()
+
+
+@pytest.mark.django_db
+def test_editors_can_manage_documents():
+    call_command("setup_roles", stdout=None)
+    codenames = set(
+        Group.objects.get(name="Editors").permissions.values_list("codename", flat=True)
+    )
+    assert {"add_document", "change_document", "delete_document", "view_document"} <= codenames

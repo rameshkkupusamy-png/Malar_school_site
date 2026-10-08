@@ -12,6 +12,7 @@ EDITOR_PERMISSIONS = {
     "eventimport": ["view", "delete"],
     "subscriber": ["view"],
     "sociallink": ["add", "change", "delete", "view"],
+    "document": ["add", "change", "delete", "view"],
 }
 
 

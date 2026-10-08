@@ -15,6 +15,7 @@ from .imports import FileRejected, build_template, parse_file
 from .models import (
     Album,
     Announcement,
+    Document,
     Event,
     EventImport,
     Photo,
@@ -45,7 +46,7 @@ class WhatsAppShareMixin:
         if obj is None or obj.pk is None:
             return "Save and publish first, then share."
         if not is_public(obj):
-            return "Not shown to parents yet, so it can't be shared."
+            return "Not shown to parents right now, so it can't be shared."
         return format_html(
             '<a class="button" href="{}" target="_blank" rel="noopener">Share on WhatsApp</a>',
             share_url(obj),
@@ -284,6 +285,15 @@ class AnnouncementAdmin(WhatsAppShareMixin, TranslationAdmin):
     list_filter = ["is_pinned", "is_published"]
     search_fields = in_all_languages("title", "body")
     date_hierarchy = "published_at"
+
+
+@admin.register(Document)
+class DocumentAdmin(WhatsAppShareMixin, TranslationAdmin):
+    list_display = ["title", "group", "added_at", "remove_after", "is_published", "whatsapp_share"]
+    list_editable = ["is_published"]
+    list_filter = ["group", "is_published"]
+    search_fields = in_all_languages("title", "note")
+    readonly_fields = ["whatsapp_share"]
 
 
 class PhotoInline(TranslationTabularInline):

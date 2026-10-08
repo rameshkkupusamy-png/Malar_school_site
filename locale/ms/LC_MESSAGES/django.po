@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:35+0800\n"
+"POT-Creation-Date: 2026-10-08 10:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -486,6 +486,10 @@ msgstr "%(email)s sudah tidak menerima e-mel acara."
 #: portal/templates/portal/unsubscribe.html:17
 msgid "Sign up again on the home page"
 msgstr "Daftar semula di halaman utama"
+
+#: portal/templates/portal/whatsapp/document.txt:4
+msgid "Open the document:"
+msgstr "Buka dokumen:"
 
 #: portal/views.py:157
 msgid "Enter a valid email address to get event emails."

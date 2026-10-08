@@ -52,7 +52,7 @@ def test_event_list_shows_share_button_only_for_published(make_event, admin_clie
 
     assert html.count("Share on WhatsApp") == 1
     assert "https://wa.me/?text=" in html
-    assert "Not shown to parents yet" in html
+    assert "Not shown to parents" in html
     assert shown.title in html
 
 
@@ -66,7 +66,7 @@ def test_scheduled_news_cannot_be_shared_yet(admin_client):
     html = admin_client.get(url).content.decode()
 
     assert "Share on WhatsApp" not in html
-    assert "Not shown to parents yet" in html
+    assert "Not shown to parents" in html
 
 
 @pytest.mark.django_db

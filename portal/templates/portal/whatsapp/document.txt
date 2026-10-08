@@ -1,0 +1,5 @@
+{% load i18n %}{% autoescape off %}*{{ post.title }}*{% if post.note %}
+{{ post.note }}{% endif %}
+
+{% translate "Open the document:" %} {{ url }}
+{% endautoescape %}
