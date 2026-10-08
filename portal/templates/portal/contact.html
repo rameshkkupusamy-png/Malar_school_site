@@ -13,7 +13,7 @@
     {% if contact.phone %}
       <section aria-labelledby="contact-phone">
         <h2 id="contact-phone">{% translate "Phone" %}</h2>
-        <p>{{ contact.phone }}</p>
+        <p class="contact-value">{{ contact.phone }}</p>
         <p><a class="button" href="{{ contact.phone_link }}">{% translate "Call the office" %}</a></p>
       </section>
     {% endif %}
@@ -26,7 +26,7 @@
     {% if contact.email %}
       <section aria-labelledby="contact-email">
         <h2 id="contact-email">{% translate "Email" %}</h2>
-        <p>{{ contact.email }}</p>
+        <p class="contact-value">{{ contact.email }}</p>
         <p><a class="button" href="{{ contact.email_link }}">{% translate "Email the office" %}</a></p>
       </section>
     {% endif %}
