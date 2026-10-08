@@ -11,6 +11,7 @@
       <h1>{{ event.title }}</h1>
       <p class="meta">{% include "portal/_event_time.html" %}</p>
       {% if event.location %}<p class="meta">{{ event.location }}</p>{% endif %}
+      <p><a class="button button--quiet" href="{% url 'portal:event_calendar' event.pk %}" download>{% translate "Add to my calendar" %}</a></p>
     </div>
   </header>
 

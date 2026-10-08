@@ -1,10 +1,18 @@
+from datetime import timedelta
+from urllib.parse import quote
+
+from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .forms import SubscribeForm
+from .ical import build_calendar
 from .models import Album, Announcement, Event, Subscriber
 
 PAGE_SIZE = 10
@@ -55,13 +63,51 @@ def event_list(request):
     events = Event.objects.published()
     events = events.past().order_by("-starts_at") if show_past else events.upcoming()
     page = Paginator(events, PAGE_SIZE).get_page(request.GET.get("page"))
-    return render(request, "portal/event_list.html", {"page": page, "show_past": show_past})
+    # Calendar apps subscribe with webcal://, so phones keep checking for new events.
+    feed = settings.SITE_URL + reverse("portal:calendar_feed")
+    webcal = "webcal://" + feed.split("://", 1)[-1]
+    return render(
+        request,
+        "portal/event_list.html",
+        {
+            "page": page,
+            "show_past": show_past,
+            "webcal_url": webcal,
+            "google_calendar_url": "https://calendar.google.com/calendar/r?cid="
+            + quote(webcal, safe=""),
+        },
+    )
 
 
 def event_detail(request, pk):
     event = get_object_or_404(Event.objects.published(), pk=pk)
     albums = event.albums.filter(is_published=True)
     return render(request, "portal/event_detail.html", {"event": event, "albums": albums})
+
+
+def calendar_response(body: str, filename: str) -> HttpResponse:
+    response = HttpResponse(body, content_type="text/calendar; charset=utf-8")
+    response["Content-Disposition"] = f'inline; filename="{filename}"'
+    return response
+
+
+def event_calendar(request, pk):
+    """One event as a calendar file, in the language the parent is reading the site in."""
+    event = get_object_or_404(Event.objects.published(), pk=pk)
+    return calendar_response(build_calendar([event]), f"event-{event.pk}.ics")
+
+
+def calendar_feed(request):
+    """Every published event from the last three months on, for parents' phone calendars.
+
+    Calendar apps fetch this without the visitor's language cookie, so it's always in the
+    site's default language (Tamil), falling back to whatever staff wrote.
+    """
+    since = timezone.now() - timedelta(days=90)
+    events = Event.objects.published().filter(starts_at__gte=since)
+    with translation.override(settings.LANGUAGE_CODE):
+        body = build_calendar(events, name=settings.SCHOOL_NAME)
+    return calendar_response(body, "school-events.ics")
 
 
 def announcement_list(request):

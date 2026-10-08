@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-30 07:27+0800\n"
+"POT-Creation-Date: 2026-10-08 10:16+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -262,7 +262,8 @@ msgstr "Salam sejahtera,"
 msgid "%(school_name)s has a new event:"
 msgstr "%(school_name)s ada acara baharu:"
 
-#: portal/templates/portal/email/new_event.txt:9
+#: portal/templates/portal/email/new_event.txt:9 portal/templates/portal/whatsapp/announcement.txt:4
+#: portal/templates/portal/whatsapp/event.txt:5
 msgid "Details:"
 msgstr "Butiran:"
 
@@ -275,11 +276,15 @@ msgstr "Anda menerima e-mel ini kerana anda telah mendaftar di laman web %(schoo
 msgid "Stop them here:"
 msgstr "Hentikan di sini:"
 
-#: portal/templates/portal/event_detail.html:27
+#: portal/templates/portal/event_detail.html:14
+msgid "Add to my calendar"
+msgstr "Tambah ke kalendar saya"
+
+#: portal/templates/portal/event_detail.html:28
 msgid "Photos from this event"
 msgstr "Gambar daripada acara ini"
 
-#: portal/templates/portal/event_detail.html:34
+#: portal/templates/portal/event_detail.html:35
 msgid "Back to all events"
 msgstr "Kembali ke semua acara"
 
@@ -310,6 +315,26 @@ msgstr "Daftar untuk e-mel"
 #: portal/templates/portal/event_list.html:23
 msgid "to hear when one is added."
 msgstr "untuk dimaklumkan apabila acara baharu ditambah."
+
+#: portal/templates/portal/event_list.html:27
+msgid "Get every school event on your phone"
+msgstr "Dapatkan semua acara sekolah di telefon anda"
+
+#: portal/templates/portal/event_list.html:28
+msgid ""
+"Add the school calendar once. New and changed events then appear in your phone's calendar by "
+"themselves."
+msgstr ""
+"Tambah kalendar sekolah sekali sahaja. Acara baharu dan perubahan acara akan muncul sendiri dalam"
+" kalendar telefon anda."
+
+#: portal/templates/portal/event_list.html:30
+msgid "Add to Google Calendar"
+msgstr "Tambah ke Google Calendar"
+
+#: portal/templates/portal/event_list.html:31
+msgid "Add to iPhone or Outlook calendar"
+msgstr "Tambah ke kalendar iPhone atau Outlook"
 
 #: portal/templates/portal/home.html:13
 msgid "Latest news"
@@ -433,16 +458,16 @@ msgstr "%(email)s sudah tidak menerima e-mel acara."
 msgid "Sign up again on the home page"
 msgstr "Daftar semula di halaman utama"
 
-#: portal/views.py:92
+#: portal/views.py:138
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:110
+#: portal/views.py:156
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:121
+#: portal/views.py:167
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."
