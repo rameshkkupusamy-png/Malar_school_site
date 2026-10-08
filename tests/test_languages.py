@@ -3,11 +3,12 @@
 import pytest
 from django.core import mail
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone, translation
 
-from portal.models import Announcement, Event, EventImport, Subscriber
+from portal.models import Album, Announcement, Document, Event, EventImport, Subscriber
 from portal.notifications import notify_subscribers
 
 
@@ -157,3 +158,52 @@ def test_every_phrase_has_a_translation(language):
         if m.id and (m.fuzzy or not (all(m.string) if m.pluralizable else m.string))
     ]
     assert missing == [], "Run scripts/translations.py update, then translate these"
+
+
+def admin_post_data(model, title_field):
+    """The smallest valid admin form for each kind of post, with the title in one field."""
+    data = {title_field: "Tajuk"} if title_field else {}
+    if model == "event":
+        data |= {"starts_at_0": "2026-11-03", "starts_at_1": "08:00", "is_published": "on"}
+    elif model == "announcement":
+        body = title_field.replace("title", "body") if title_field else "body_ms"
+        data |= {body: "Isi", "published_at_0": "2026-10-08", "published_at_1": "08:00"}
+    elif model == "album":
+        data |= {
+            "photos-TOTAL_FORMS": "0",
+            "photos-INITIAL_FORMS": "0",
+            "photos-MIN_NUM_FORMS": "0",
+            "photos-MAX_NUM_FORMS": "1000",
+        }
+    elif model == "document":
+        data |= {"group": "form", "file": SimpleUploadedFile("borang.pdf", b"%PDF")}
+    return data
+
+
+MODELS = {"event": Event, "announcement": Announcement, "album": Album, "document": Document}
+
+
+@pytest.mark.parametrize("model", MODELS)
+@pytest.mark.parametrize("title_field", ["title_ms", "title_en"])
+def test_staff_can_write_a_post_in_malay_or_english_only(
+    admin_client, settings, tmp_path, model, title_field
+):
+    settings.MEDIA_ROOT = tmp_path
+    url = reverse(f"admin:portal_{model}_add")
+
+    response = admin_client.post(url, admin_post_data(model, title_field))
+
+    assert response.status_code == 302, response.content.decode()[-3000:]
+    assert MODELS[model].objects.get().title == "Tajuk"
+
+
+@pytest.mark.parametrize("model", MODELS)
+def test_staff_still_need_a_title_in_some_language(admin_client, settings, tmp_path, model):
+    settings.MEDIA_ROOT = tmp_path
+    url = reverse(f"admin:portal_{model}_add")
+
+    response = admin_client.post(url, admin_post_data(model, None))
+
+    assert response.status_code == 200
+    assert "title in at least one language" in response.content.decode()
+    assert not MODELS[model].objects.exists()

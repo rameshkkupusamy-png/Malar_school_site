@@ -9,6 +9,7 @@ from django.urls import path, reverse
 from django.utils import translation
 from django.utils.html import format_html
 from modeltranslation.admin import TranslationAdmin, TranslationTabularInline
+from modeltranslation.fields import TranslationField
 
 from .forms import DraftEventForm, DraftEventFormSet, EventImportForm, StaffImportForm
 from .imports import FileRejected, build_template, parse_file
@@ -38,6 +39,20 @@ def in_all_languages(*fields):
     return [f"{field}_{code}" for field in fields for code in ("ta", "ms", "en")]
 
 
+class AnyLanguageAdmin(TranslationAdmin):
+    """Staff may write a post in Tamil, Malay or English.
+
+    modeltranslation marks the Tamil (default language) boxes as required. The models' clean()
+    methods require at least one language instead, so no box is required on its own.
+    """
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if field is not None and isinstance(db_field, TranslationField):
+            field.required = False
+        return field
+
+
 class WhatsAppShareMixin:
     """A "Share on WhatsApp" button on the list and edit pages of published posts."""
 
@@ -58,7 +73,7 @@ class WhatsAppShareMixin:
 
 
 @admin.register(Event)
-class EventAdmin(WhatsAppShareMixin, TranslationAdmin):
+class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
     list_display = [
         "title",
         "starts_at",
@@ -282,7 +297,7 @@ class EventImportAdmin(admin.ModelAdmin):
 
 
 @admin.register(Announcement)
-class AnnouncementAdmin(WhatsAppShareMixin, TranslationAdmin):
+class AnnouncementAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
     list_display = ["title", "published_at", "is_pinned", "is_published", "whatsapp_share"]
     readonly_fields = ["whatsapp_share"]
     list_editable = ["is_pinned", "is_published"]
@@ -292,7 +307,7 @@ class AnnouncementAdmin(WhatsAppShareMixin, TranslationAdmin):
 
 
 @admin.register(Document)
-class DocumentAdmin(WhatsAppShareMixin, TranslationAdmin):
+class DocumentAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
     list_display = ["title", "group", "added_at", "remove_after", "is_published", "whatsapp_share"]
     list_editable = ["is_published"]
     list_filter = ["group", "is_published"]
@@ -307,7 +322,7 @@ class PhotoInline(TranslationTabularInline):
 
 
 @admin.register(Album)
-class AlbumAdmin(TranslationAdmin):
+class AlbumAdmin(AnyLanguageAdmin):
     list_display = ["title", "event", "is_published", "created_at"]
     list_filter = ["is_published"]
     search_fields = in_all_languages("title")
