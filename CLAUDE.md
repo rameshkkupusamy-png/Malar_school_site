@@ -17,9 +17,11 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests
-- Hosting: the live site runs on a Windows computer with `manage.py serve` (Waitress, localhost
-  only) behind Cloudflare Tunnel; WhiteNoise serves static files, Django serves `media/`
-  (`SERVE_MEDIA`). `manage.py backup` zips the database and photos. Steps are in the README.
+- Hosting: the live site runs on PythonAnywhere (`~/Malar_school_site`, virtualenv
+  `~/.virtualenvs/school`); deploy is `git pull`, then the venv Python by full path for pip,
+  `migrate`, `setup_roles`, `collectstatic`, then Reload on the Web tab. `manage.py backup` zips
+  the database and media. `manage.py serve` (Waitress behind Cloudflare Tunnel) is the unused
+  Windows alternative. Steps for both are in the README.
 
 ## Commands (PowerShell, from the project root)
 

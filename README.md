@@ -111,24 +111,141 @@ Set these environment variables in production:
 | `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS` | SMTP server for sending emails. Without `EMAIL_HOST`, emails go to the console. | |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google sign-in for staff (see above). Without them, only password login is shown. | |
 | `DEFAULT_FROM_EMAIL` | Sender address | `<SCHOOL_NAME> <noreply@example.com>` |
-| `DJANGO_BEHIND_PROXY` | `1` behind Cloudflare Tunnel, so the site knows visitors use https | `0` |
+| `DJANGO_BEHIND_PROXY` | `1` behind PythonAnywhere or Cloudflare Tunnel, so the site knows visitors use https | `0` |
 | `DJANGO_SERVE_MEDIA` | Serve uploaded photos from Django when `DJANGO_DEBUG` is `0` | `1` |
 | `BACKUP_DIR`, `BACKUP_KEEP` | Where `manage.py backup` saves zips, and how many to keep | `backups\`, `14` |
 
-## Hosting on a Windows computer
+## Hosting on PythonAnywhere (the live site)
 
-The live site can run on a spare Windows computer at home. Visitors reach it through
+The live site runs on a paid [PythonAnywhere](https://www.pythonanywhere.com/) account, user
+`sjktldgsemenyih`, at https://sjktldgsemenyih.pythonanywhere.com. PythonAnywhere runs the web
+server, gives the site `https://` and keeps it running, so there is no computer at school to
+look after.
+
+### Updating the live site
+
+After new changes are pushed to GitHub, open a **Bash** console on PythonAnywhere (**Consoles**
+tab) and run:
+
+```bash
+cd ~/Malar_school_site
+git pull
+~/.virtualenvs/school/bin/python -m pip install -r requirements.txt
+~/.virtualenvs/school/bin/python manage.py migrate
+~/.virtualenvs/school/bin/python manage.py setup_roles
+~/.virtualenvs/school/bin/python manage.py collectstatic --noinput
+```
+
+Then click **Reload** on the **Web** tab. The site keeps running the old code until you do.
+
+Always call Python by its full path as above. A plain `python` or `pip` in the console is
+PythonAnywhere's general Python, not the site's, so packages installed with it don't reach the
+site. Steps with nothing to do are harmless: `migrate` says "No migrations to apply" and `pip`
+says "Requirement already satisfied".
+
+### Setting it up from scratch
+
+Only needed for a new account, or to rebuild the site.
+
+1. In a **Bash** console:
+
+   ```bash
+   git clone https://github.com/rameshkkupusamy-png/Malar_school_site.git
+   cd ~/Malar_school_site
+   mkvirtualenv school --python=python3.12
+   ~/.virtualenvs/school/bin/python -m pip install -r requirements.txt
+   cp .env.example .env
+   ~/.virtualenvs/school/bin/python -c "import secrets; print(secrets.token_urlsafe(50))"
+   nano .env
+   ```
+
+2. In `.env`, fill in the Google values and the hosting lines (remove their `#`):
+
+   ```
+   DJANGO_DEBUG=0
+   DJANGO_SECRET_KEY=<the long value printed above>
+   DJANGO_ALLOWED_HOSTS=sjktldgsemenyih.pythonanywhere.com
+   SITE_URL=https://sjktldgsemenyih.pythonanywhere.com
+   DJANGO_BEHIND_PROXY=1
+   ```
+
+   Save with **Ctrl+O**, **Enter**, **Ctrl+X**. `SITE_URL` is used for the links in emails,
+   WhatsApp messages and the calendar, so it must be the public address.
+
+3. Set up the database and the site owner login:
+
+   ```bash
+   ~/.virtualenvs/school/bin/python manage.py migrate
+   ~/.virtualenvs/school/bin/python manage.py setup_roles
+   ~/.virtualenvs/school/bin/python manage.py createsuperuser
+   ~/.virtualenvs/school/bin/python manage.py collectstatic --noinput
+   ```
+
+4. On the **Web** tab, choose **Add a new web app** > **Manual configuration** > **Python 3.12**.
+   Then set:
+   - **Virtualenv:** `/home/sjktldgsemenyih/.virtualenvs/school`
+   - **Source code:** `/home/sjktldgsemenyih/Malar_school_site`
+   - **WSGI configuration file:** open it, delete everything, and put in:
+
+     ```python
+     import os
+     import sys
+
+     path = "/home/sjktldgsemenyih/Malar_school_site"
+     if path not in sys.path:
+         sys.path.insert(0, path)
+     os.environ["DJANGO_SETTINGS_MODULE"] = "school_portal.settings"
+
+     from django.core.wsgi import get_wsgi_application
+
+     application = get_wsgi_application()
+     ```
+
+   - **Static files:** URL `/static/` → `/home/sjktldgsemenyih/Malar_school_site/staticfiles`,
+     and URL `/media/` → `/home/sjktldgsemenyih/Malar_school_site/media` (photos and documents).
+   - **Security:** turn on **Force HTTPS**.
+
+   Click **Reload** and open the site.
+
+5. In Google Cloud Console, add
+   `https://sjktldgsemenyih.pythonanywhere.com/accounts/google/login/callback/` to the client's
+   **Authorised redirect URIs**.
+
+### Backups
+
+On the **Tasks** tab, add a daily scheduled task (for example at 02:00) that runs:
+
+```bash
+/home/sjktldgsemenyih/.virtualenvs/school/bin/python /home/sjktldgsemenyih/Malar_school_site/manage.py backup
+```
+
+Each backup is one zip file (the database plus all photos and documents) in `backups/`, and the
+newest 14 are kept (`BACKUP_KEEP`). The backups sit on the same account as the site, so now and
+then download the newest zip from the **Files** tab and keep it somewhere else, such as the
+school's Google Drive. To restore, unzip it, put `db.sqlite3` and `media/` back in
+`~/Malar_school_site`, and click **Reload**.
+
+### If something goes wrong
+
+The **Web** tab links to the **error log** and the **server log**. The last lines of the error
+log usually name the problem. After any change to `.env`, click **Reload**.
+
+## Alternative: hosting on a Windows computer
+
+Not used for the live site. Kept in case the school ever moves the site to its own computer.
+
+The site can also run on a spare Windows computer at home. Visitors reach it through
 **Cloudflare Tunnel**: the computer connects out to Cloudflare, so nothing on the router
 changes and the home network stays closed. Cloudflare also gives the site `https://`.
 
-### 1. Get a web address (once)
+#### 1. Get a web address (once)
 
 1. Create a free account at https://dash.cloudflare.com/.
 2. Buy a domain, for example under **Domain Registration > Register Domains** in Cloudflare
    (roughly US$10 a year for a `.com` or `.org`). A `.edu.my` address has to be applied for by
    the school through MYNIC instead; it can be pointed at Cloudflare later.
 
-### 2. Prepare the computer (once)
+#### 2. Prepare the computer (once)
 
 1. In **Settings > System > Power**, set **Sleep** to **Never** when plugged in. In **Windows
    Update > Advanced options**, set **Active hours** to school hours so restarts happen at night.
@@ -162,7 +279,7 @@ changes and the home network stays closed. Cloudflare also gives the site `https
 
    Open http://127.0.0.1:8000 on that computer to check it works, then press Ctrl+C.
 
-### 3. Connect it to your web address (once)
+#### 3. Connect it to your web address (once)
 
 1. In Cloudflare, open **Zero Trust > Networks > Tunnels**, click **Create a tunnel**, choose
    **Cloudflared**, and name it `school-site`.
@@ -175,7 +292,7 @@ changes and the home network stays closed. Cloudflare also gives the site `https
 5. In Google Cloud Console, add `https://<your-domain>/accounts/google/login/callback/` to the
    client's **Authorised redirect URIs**.
 
-### 4. Start the site with Windows
+#### 4. Start the site with Windows
 
 Open **Task Scheduler > Create Task**:
 
@@ -193,7 +310,7 @@ newest 14 are kept (`BACKUP_KEEP`). To restore, stop the site, unzip, and put `d
 
 Restart the computer once and check the site opens from your phone.
 
-### Updating the live site
+#### Updating it
 
 After new changes are pushed to GitHub, on the hosting computer:
 
