@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:37+0800\n"
+"POT-Creation-Date: 2026-10-08 11:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -136,19 +136,19 @@ msgstr[1] "%(num)d minit"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:352
+#: portal/models.py:369
 msgid "Circulars"
 msgstr "Surat edaran"
 
-#: portal/models.py:353
+#: portal/models.py:370
 msgid "Forms"
 msgstr "Borang"
 
-#: portal/models.py:354
+#: portal/models.py:371
 msgid "Timetables and lists"
 msgstr "Jadual dan senarai"
 
-#: portal/models.py:355
+#: portal/models.py:372
 msgid "School documents"
 msgstr "Dokumen sekolah"
 
@@ -261,13 +261,58 @@ msgstr "Dokumen"
 msgid "Footer"
 msgstr "Kaki halaman"
 
-#: portal/templates/portal/base.html:61
+#: portal/templates/portal/base.html:61 portal/templates/portal/contact.html:4
+#: portal/templates/portal/contact.html:8
+msgid "Contact the school"
+msgstr "Hubungi sekolah"
+
+#: portal/templates/portal/base.html:62
 msgid "Staff sign in"
 msgstr "Log masuk kakitangan"
 
-#: portal/templates/portal/base.html:65
+#: portal/templates/portal/base.html:66
 msgid "Follow the school"
 msgstr "Ikuti sekolah"
+
+#: portal/templates/portal/contact.html:15
+msgid "Phone"
+msgstr "Telefon"
+
+#: portal/templates/portal/contact.html:17
+msgid "Call the office"
+msgstr "Telefon pejabat"
+
+#: portal/templates/portal/contact.html:23
+msgid "Message the office on WhatsApp"
+msgstr "Hantar mesej WhatsApp kepada pejabat"
+
+#: portal/templates/portal/contact.html:28
+msgid "Email"
+msgstr "E-mel"
+
+#: portal/templates/portal/contact.html:30
+msgid "Email the office"
+msgstr "E-mel pejabat"
+
+#: portal/templates/portal/contact.html:35
+msgid "Visit us"
+msgstr "Kunjungi kami"
+
+#: portal/templates/portal/contact.html:37
+msgid "Office hours"
+msgstr "Waktu pejabat"
+
+#: portal/templates/portal/contact.html:40
+msgid "Open in Google Maps"
+msgstr "Buka di Google Maps"
+
+#: portal/templates/portal/contact.html:41
+msgid "Open in Waze"
+msgstr "Buka di Waze"
+
+#: portal/templates/portal/contact.html:48
+msgid "Contact details will be added soon."
+msgstr "Butiran hubungan akan ditambah tidak lama lagi."
 
 #: portal/templates/portal/document_list.html:9
 msgid "Circulars, forms and timetables from the school. Tap a title to open it."
@@ -491,16 +536,16 @@ msgstr "Daftar semula di halaman utama"
 msgid "Open the document:"
 msgstr "Buka dokumen:"
 
-#: portal/views.py:157
+#: portal/views.py:161
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:175
+#: portal/views.py:179
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:186
+#: portal/views.py:190
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."

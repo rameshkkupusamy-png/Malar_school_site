@@ -1,0 +1,50 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Contact the school" %}, {{ school_name }}{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>{% translate "Contact the school" %}</h1>
+</header>
+
+{% if contact.has_details %}
+  <div class="contact">
+    {% if contact.phone %}
+      <section aria-labelledby="contact-phone">
+        <h2 id="contact-phone">{% translate "Phone" %}</h2>
+        <p>{{ contact.phone }}</p>
+        <p><a class="button" href="{{ contact.phone_link }}">{% translate "Call the office" %}</a></p>
+      </section>
+    {% endif %}
+    {% if contact.whatsapp %}
+      <section aria-labelledby="contact-whatsapp">
+        <h2 id="contact-whatsapp">WhatsApp</h2>
+        <p><a class="button" href="{{ contact.whatsapp_link }}" target="_blank" rel="noopener">{% translate "Message the office on WhatsApp" %}</a></p>
+      </section>
+    {% endif %}
+    {% if contact.email %}
+      <section aria-labelledby="contact-email">
+        <h2 id="contact-email">{% translate "Email" %}</h2>
+        <p>{{ contact.email }}</p>
+        <p><a class="button" href="{{ contact.email_link }}">{% translate "Email the office" %}</a></p>
+      </section>
+    {% endif %}
+    {% if contact.can_visit %}
+      <section aria-labelledby="contact-visit">
+        <h2 id="contact-visit">{% translate "Visit us" %}</h2>
+        {% if contact.address %}<address>{{ contact.address|linebreaksbr }}</address>{% endif %}
+        {% if contact.hours %}<h3>{% translate "Office hours" %}</h3><p>{{ contact.hours|linebreaksbr }}</p>{% endif %}
+        {% if contact.google_maps_link or contact.waze_link %}
+          <p class="button-row">
+            {% if contact.google_maps_link %}<a class="button" href="{{ contact.google_maps_link }}" target="_blank" rel="noopener">{% translate "Open in Google Maps" %}</a>{% endif %}
+            {% if contact.waze_link %}<a class="button button--quiet" href="{{ contact.waze_link }}" target="_blank" rel="noopener">{% translate "Open in Waze" %}</a>{% endif %}
+          </p>
+        {% endif %}
+      </section>
+    {% endif %}
+  </div>
+{% else %}
+  <p class="meta">{% translate "Contact details will be added soon." %}</p>
+{% endif %}
+{% endblock %}

@@ -59,6 +59,7 @@ def page_paths(site):
         "/gallery/",
         site["album"].get_absolute_url(),
         "/documents/",
+        "/contact/",
     ]
 
 

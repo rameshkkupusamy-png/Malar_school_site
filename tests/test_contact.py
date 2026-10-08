@@ -1,5 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 
 from portal.models import SchoolContact, malaysian_number
 
@@ -77,3 +78,38 @@ def test_there_is_only_ever_one_record():
     SchoolContact(email="b@school.example").save()
     assert SchoolContact.objects.count() == 1
     assert SchoolContact.load().email == "b@school.example"
+
+
+@pytest.mark.django_db
+def test_page_shows_only_what_is_filled_in(client):
+    SchoolContact(phone="03-8723 1234", email="office@school.example").save()
+
+    html = client.get(reverse("portal:contact")).content.decode()
+
+    assert 'href="tel:+60387231234"' in html and "Call the office" in html
+    assert 'href="mailto:office@school.example"' in html
+    assert "Message the office on WhatsApp" not in html
+    assert "Open in Waze" not in html
+
+
+@pytest.mark.django_db
+def test_page_with_address_offers_directions_and_hours(client):
+    SchoolContact(address="Jalan Semenyih,\n43500 Semenyih", hours_en="Mon–Fri 7.30–1.00").save()
+
+    html = client.get(reverse("portal:contact")).content.decode()
+
+    assert "Open in Google Maps" in html and "Open in Waze" in html
+    assert "43500 Semenyih" in html
+    assert "Mon–Fri 7.30–1.00" in html
+
+
+@pytest.mark.django_db
+def test_page_without_details_says_so(client):
+    html = client.get(reverse("portal:contact")).content.decode()
+    assert "Contact details will be added soon." in html
+
+
+@pytest.mark.django_db
+def test_footer_links_to_contact_page(client):
+    html = client.get(reverse("portal:home")).content.decode()
+    assert f'href="{reverse("portal:contact")}"' in html

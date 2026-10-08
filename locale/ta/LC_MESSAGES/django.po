@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 10:37+0800\n"
+"POT-Creation-Date: 2026-10-08 11:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ta\n"
@@ -136,19 +136,19 @@ msgstr[1] "%(num)d நிமிடங்கள்"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:352
+#: portal/models.py:369
 msgid "Circulars"
 msgstr "சுற்றறிக்கைகள்"
 
-#: portal/models.py:353
+#: portal/models.py:370
 msgid "Forms"
 msgstr "படிவங்கள்"
 
-#: portal/models.py:354
+#: portal/models.py:371
 msgid "Timetables and lists"
 msgstr "கால அட்டவணைகளும் பட்டியல்களும்"
 
-#: portal/models.py:355
+#: portal/models.py:372
 msgid "School documents"
 msgstr "பள்ளி ஆவணங்கள்"
 
@@ -261,13 +261,58 @@ msgstr "ஆவணங்கள்"
 msgid "Footer"
 msgstr "அடிக்குறிப்பு"
 
-#: portal/templates/portal/base.html:61
+#: portal/templates/portal/base.html:61 portal/templates/portal/contact.html:4
+#: portal/templates/portal/contact.html:8
+msgid "Contact the school"
+msgstr "பள்ளியைத் தொடர்பு கொள்ள"
+
+#: portal/templates/portal/base.html:62
 msgid "Staff sign in"
 msgstr "பணியாளர் உள்நுழைவு"
 
-#: portal/templates/portal/base.html:65
+#: portal/templates/portal/base.html:66
 msgid "Follow the school"
 msgstr "பள்ளியைப் பின்தொடருங்கள்"
+
+#: portal/templates/portal/contact.html:15
+msgid "Phone"
+msgstr "தொலைபேசி"
+
+#: portal/templates/portal/contact.html:17
+msgid "Call the office"
+msgstr "அலுவலகத்தை அழைக்கவும்"
+
+#: portal/templates/portal/contact.html:23
+msgid "Message the office on WhatsApp"
+msgstr "அலுவலகத்துக்கு WhatsApp-இல் செய்தி அனுப்பவும்"
+
+#: portal/templates/portal/contact.html:28
+msgid "Email"
+msgstr "மின்னஞ்சல்"
+
+#: portal/templates/portal/contact.html:30
+msgid "Email the office"
+msgstr "அலுவலகத்துக்கு மின்னஞ்சல் அனுப்பவும்"
+
+#: portal/templates/portal/contact.html:35
+msgid "Visit us"
+msgstr "நேரில் வர"
+
+#: portal/templates/portal/contact.html:37
+msgid "Office hours"
+msgstr "அலுவலக நேரம்"
+
+#: portal/templates/portal/contact.html:40
+msgid "Open in Google Maps"
+msgstr "Google Maps-இல் திறக்கவும்"
+
+#: portal/templates/portal/contact.html:41
+msgid "Open in Waze"
+msgstr "Waze-இல் திறக்கவும்"
+
+#: portal/templates/portal/contact.html:48
+msgid "Contact details will be added soon."
+msgstr "தொடர்பு விவரங்கள் விரைவில் சேர்க்கப்படும்."
 
 #: portal/templates/portal/document_list.html:9
 msgid "Circulars, forms and timetables from the school. Tap a title to open it."
@@ -489,16 +534,16 @@ msgstr "முகப்புப் பக்கத்தில் மீண்�
 msgid "Open the document:"
 msgstr "ஆவணத்தைத் திறக்க:"
 
-#: portal/views.py:157
+#: portal/views.py:161
 msgid "Enter a valid email address to get event emails."
 msgstr "நிகழ்வு மின்னஞ்சல்களைப் பெறச் சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."
 
-#: portal/views.py:175
+#: portal/views.py:179
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "புதிய நிகழ்வுகள் சேர்க்கப்படும்போது %(email)s முகவரிக்கு மின்னஞ்சல் அனுப்பப்படும்."
 
-#: portal/views.py:186
+#: portal/views.py:190
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s முகவரிக்கு இனி நிகழ்வு மின்னஞ்சல்கள் வராது."

@@ -13,7 +13,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import SubscribeForm
 from .ical import build_calendar
-from .models import Album, Announcement, Document, Event, Subscriber
+from .models import Album, Announcement, Document, Event, SchoolContact, Subscriber
 
 PAGE_SIZE = 10
 
@@ -148,6 +148,10 @@ def document_open(request, pk):
     """
     document = get_object_or_404(Document.objects.filter(is_published=True), pk=pk)
     return redirect(document.file.url)
+
+
+def contact(request):
+    return render(request, "portal/contact.html", {"contact": SchoolContact.load()})
 
 
 @require_POST

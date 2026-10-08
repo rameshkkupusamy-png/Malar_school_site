@@ -16,6 +16,7 @@ urlpatterns = [
     path("gallery/<int:pk>/", views.album_detail, name="album_detail"),
     path("documents/", views.document_list, name="document_list"),
     path("documents/<int:pk>/", views.document_open, name="document_open"),
+    path("contact/", views.contact, name="contact"),
     path("subscribe/", views.subscribe, name="subscribe"),
     path("unsubscribe/<uuid:token>/", views.unsubscribe, name="unsubscribe"),
 ]
