@@ -12,7 +12,8 @@ filterwarnings = ["ignore:No directory at:UserWarning"]
 
 [tool.ruff]
 line-length = 100
-extend-exclude = ["*/migrations/*"]
+# docs/ holds design notes whose code samples are fragments, not runnable files.
+extend-exclude = ["*/migrations/*", "docs"]
 
 [tool.ruff.lint]
 # Django's class-level list options (list_display, ordering, ...) are the framework idiom.
