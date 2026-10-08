@@ -18,7 +18,7 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 pytestmark = pytest.mark.browser
 
-PHONE = {"width": 390, "height": 844}
+PHONE = {"width": 360, "height": 800}  # small Android phones; Tamil text is widest here
 DESKTOP = {"width": 1280, "height": 800}
 
 
@@ -34,6 +34,9 @@ def site(transactional_db):
     )
     Event.objects.create(title="Sports day", starts_at=now + timedelta(days=10), all_day=True)
     Event.objects.create(title="Summer concert", starts_at=now - timedelta(days=30))
+    # This month's holiday and exam, so the month view renders its band and labels.
+    Event.objects.create(title="Deepavali holiday", starts_at=now, all_day=True, kind=Event.HOLIDAY)
+    Event.objects.create(title="UPSA exam week", starts_at=now, all_day=True, kind=Event.EXAM)
     news = Announcement.objects.create(
         title="School closed on Friday", body="Classes resume on Monday.", is_pinned=True
     )

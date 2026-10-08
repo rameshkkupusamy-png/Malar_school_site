@@ -6,6 +6,7 @@ or correct the drafts on the review page.
 
 import csv
 import io
+import unicodedata
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 
@@ -41,13 +42,36 @@ KIND_WORDS = {
     Event.CELEBRATION: ["celebration", "perayaan", "sambutan", "கொண்டாட்டம்", "விழா"],
     Event.EVENT: ["event", "acara", "நிகழ்வு"],
 }
-WORD_TO_KIND = {word: kind for kind, words in KIND_WORDS.items() for word in words}
+ZERO_WIDTH = dict.fromkeys([0x200B, 0x200C, 0x200D])  # zero-width space and joiners
+
+
+def _type_key(value) -> str:
+    """Lower-case words without punctuation, with Tamil letters in one standard spelling.
+
+    Some Tamil keyboards type a vowel sign such as ொ as two characters, or add invisible
+    joiners; both look the same on screen as the spelling in KIND_WORDS.
+    """
+    text = unicodedata.normalize("NFC", str(value or "")).translate(ZERO_WIDTH)
+    text = "".join(c if unicodedata.category(c)[0] in "LMN" else " " for c in text)
+    return " ".join(text.split()).casefold()
+
+
+WORD_TO_KIND = {_type_key(word): kind for kind, words in KIND_WORDS.items() for word in words}
+# Single words that name a type inside a longer phrase, e.g. "Cuti Umum" or "Hari Sukan".
+# "Event" words are left out so "Acara Sukan" counts as sports.
+TYPE_WORDS = {
+    word: kind for word, kind in WORD_TO_KIND.items() if " " not in word and kind != Event.EVENT
+}
 
 
 def parse_kind(value) -> str | None:
     """The event type for a Type cell, Event when empty, or None if it isn't recognised."""
-    text = " ".join(str(value or "").split()).lower()
-    return WORD_TO_KIND.get(text) if text else Event.EVENT
+    key = _type_key(value)
+    if not key:
+        return Event.EVENT
+    if key in WORD_TO_KIND:
+        return WORD_TO_KIND[key]
+    return next((TYPE_WORDS[word] for word in key.split() if word in TYPE_WORDS), None)
 
 
 class FileRejected(Exception):

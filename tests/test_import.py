@@ -1,4 +1,5 @@
 import io
+import unicodedata
 from datetime import date, datetime, time
 
 import pytest
@@ -9,7 +10,14 @@ from django.urls import reverse
 from django.utils import timezone
 from openpyxl import Workbook, load_workbook
 
-from portal.imports import COLUMNS, FileRejected, build_template, parse_file, parse_time
+from portal.imports import (
+    COLUMNS,
+    FileRejected,
+    build_template,
+    parse_file,
+    parse_kind,
+    parse_time,
+)
 from portal.models import Event, EventImport, Subscriber
 
 IMPORT_URL = reverse("admin:portal_event_import")
@@ -368,3 +376,36 @@ def test_imported_type_is_saved_and_can_be_changed_on_review(admin_client):
     )
     event.refresh_from_db()
     assert event.kind == Event.EXAM
+
+
+@pytest.mark.parametrize(
+    "typed",
+    [
+        unicodedata.normalize("NFD", "கொண்டாட்டம்"),  # vowel sign typed as two characters
+        "தேர்‌வு",  # zero-width non-joiner inside the word
+        unicodedata.normalize("NFD", "பெற்றோர் ஆசிரியர் சங்கம்"),
+    ],
+)
+def test_tamil_type_words_match_however_the_keyboard_spells_them(typed):
+    assert parse_kind(typed) is not None
+
+
+@pytest.mark.parametrize(
+    ("typed", "kind"),
+    [
+        ("Cuti Umum", "holiday"),
+        ("Cuti Sekolah", "holiday"),
+        ("Public holiday", "holiday"),
+        ("Holiday.", "holiday"),
+        ("Peperiksaan Pertengahan Tahun", "exam"),
+        ("Hari Sukan", "sports"),
+        ("Sambutan Hari Guru", "celebration"),
+        ("Mesyuarat Agung PIBG", "pibg"),
+    ],
+)
+def test_common_phrases_are_recognised(typed, kind):
+    assert parse_kind(typed) == kind
+
+
+def test_unrelated_words_are_still_unrecognised():
+    assert parse_kind("Pameran buku") is None
