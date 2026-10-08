@@ -13,6 +13,7 @@ EDITOR_PERMISSIONS = {
     "subscriber": ["view"],
     "sociallink": ["add", "change", "delete", "view"],
     "document": ["add", "change", "delete", "view"],
+    "schoolcontact": ["add", "change", "view"],
 }
 
 

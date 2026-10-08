@@ -1,5 +1,7 @@
 import pytest
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.urls import reverse
 
 from portal.models import SchoolContact, malaysian_number
@@ -113,3 +115,41 @@ def test_page_without_details_says_so(client):
 def test_footer_links_to_contact_page(client):
     html = client.get(reverse("portal:home")).content.decode()
     assert f'href="{reverse("portal:contact")}"' in html
+
+
+@pytest.mark.django_db
+def test_admin_list_opens_the_form_then_the_record(admin_client):
+    url = reverse("admin:portal_schoolcontact_changelist")
+    assert admin_client.get(url)["Location"] == reverse("admin:portal_schoolcontact_add")
+
+    SchoolContact(email="office@school.example").save()
+    assert admin_client.get(url)["Location"] == reverse(
+        "admin:portal_schoolcontact_change", args=[1]
+    )
+    assert admin_client.get(reverse("admin:portal_schoolcontact_add")).status_code == 403
+
+
+@pytest.mark.django_db
+def test_admin_saves_details_and_refuses_bad_numbers(admin_client):
+    url = reverse("admin:portal_schoolcontact_add")
+    response = admin_client.post(url, {"phone": "12345"})
+    assert "Enter a Malaysian phone number" in response.content.decode()
+
+    admin_client.post(url, {"phone": "03-8723 1234", "hours_ms": "Isnin–Jumaat"})
+    assert SchoolContact.load().phone_link == "tel:+60387231234"
+
+
+@pytest.mark.django_db
+def test_contact_details_cannot_be_deleted(admin_client):
+    SchoolContact(email="office@school.example").save()
+    url = reverse("admin:portal_schoolcontact_delete", args=[1])
+    assert admin_client.get(url).status_code == 403
+
+
+@pytest.mark.django_db
+def test_editors_can_edit_contact_details():
+    call_command("setup_roles", stdout=None)
+    codenames = set(
+        Group.objects.get(name="Editors").permissions.values_list("codename", flat=True)
+    )
+    assert {"add_schoolcontact", "change_schoolcontact", "view_schoolcontact"} <= codenames

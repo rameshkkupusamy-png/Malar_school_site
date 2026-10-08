@@ -20,6 +20,7 @@ from .models import (
     Event,
     EventImport,
     Photo,
+    SchoolContact,
     SocialLink,
     StaffMember,
     Subscriber,
@@ -417,3 +418,19 @@ class SocialLinkAdmin(admin.ModelAdmin):
     list_filter = ["platform", "is_published"]
     search_fields = ["label", "url"]
     fields = ["platform", "label", "url", "order", "is_published"]
+
+
+@admin.register(SchoolContact)
+class SchoolContactAdmin(AnyLanguageAdmin):
+    """The one contact record: the list page goes straight to it."""
+
+    def has_add_permission(self, request):
+        return super().has_add_permission(request) and not SchoolContact.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        if SchoolContact.objects.exists():
+            return redirect("admin:portal_schoolcontact_change", 1)
+        return redirect("admin:portal_schoolcontact_add")
