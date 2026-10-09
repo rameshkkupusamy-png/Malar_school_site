@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Serif+Display:ital,wght@1,500;1,600&family=Noto+Serif+Tamil:wght@500&display=swap">
   <link rel="stylesheet" href="{% static 'portal/style.css' %}">
+  {% block head %}{% endblock %}
 </head>
 <body>
   <a class="skip" href="#main">{% translate "Skip to content" %}</a>
@@ -39,6 +40,7 @@
           <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>{% translate "Events" %}</a>
           <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>{% translate "Photos" %}</a>
           <a href="{% url 'portal:document_list' %}"{% if "document" in current %} aria-current="page"{% endif %}>{% translate "Documents" %}</a>
+          <a href="{% url 'portal:achievement_list' %}"{% if "achievement" in current %} aria-current="page"{% endif %}>{% translate "Achievements" %}</a>
         </nav>
         {% include "portal/_language_switcher.html" %}
       </div>
@@ -69,6 +71,7 @@
         <a href="{% url 'portal:event_list' %}">{% translate "Events" %}</a>
         <a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>
         <a href="{% url 'portal:document_list' %}">{% translate "Documents" %}</a>
+        <a href="{% url 'portal:achievement_list' %}">{% translate "Achievements" %}</a>
         <a href="{% url 'portal:contact' %}">{% translate "Contact the school" %}</a>
         <a href="{% url 'admin:index' %}">{% translate "Staff sign in" %}</a>
       </nav>

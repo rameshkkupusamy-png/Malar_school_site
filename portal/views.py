@@ -16,7 +16,16 @@ from django.views.decorators.http import require_POST
 
 from .forms import SubscribeForm
 from .ical import build_calendar
-from .models import Album, Announcement, Document, Event, SchoolContact, Subscriber, month_range
+from .models import (
+    Achievement,
+    Album,
+    Announcement,
+    Document,
+    Event,
+    SchoolContact,
+    Subscriber,
+    month_range,
+)
 
 PAGE_SIZE = 10
 
@@ -185,6 +194,55 @@ def album_list(request):
 def album_detail(request, pk):
     album = get_object_or_404(Album.objects.filter(is_published=True), pk=pk)
     return render(request, "portal/album_detail.html", {"album": album})
+
+
+ACHIEVEMENT_FILTERS = [("", gettext_lazy("All")), *Achievement.CATEGORIES]
+
+
+def achievement_query(year: int | None, category: str) -> str:
+    params = {}
+    if year:
+        params["year"] = year
+    if category:
+        params["type"] = category
+    return "?" + urlencode(params)
+
+
+def achievement_list(request):
+    category = request.GET.get("type", "")
+    if category not in dict(Achievement.CATEGORIES):
+        category = ""
+    achievements = Achievement.objects.published()
+    if category:
+        achievements = achievements.filter(category=category)
+    years = [d.year for d in achievements.dates("date", "year", order="DESC")]
+    chosen = request.GET.get("year", "")
+    year = (
+        int(chosen) if chosen.isdigit() and int(chosen) in years else (years[0] if years else None)
+    )
+    shown = (
+        achievements.filter(date__year=year).prefetch_related("pupils", "photos") if year else []
+    )
+    return render(
+        request,
+        "portal/achievement_list.html",
+        {
+            "year": year,
+            "achievements": list(shown),
+            "years": [(y, achievement_query(y, category), y == year) for y in years],
+            "filters": [
+                (label, achievement_query(year, key), key == category)
+                for key, label in ACHIEVEMENT_FILTERS
+            ],
+        },
+    )
+
+
+def achievement_detail(request, pk):
+    achievement = get_object_or_404(
+        Achievement.objects.published().prefetch_related("pupils", "photos"), pk=pk
+    )
+    return render(request, "portal/achievement_detail.html", {"achievement": achievement})
 
 
 def document_list(request):

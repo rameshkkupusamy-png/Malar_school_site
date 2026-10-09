@@ -640,6 +640,23 @@ main.page { padding-block: 2.5rem 4.5rem; }
 /* The number and address parents copy; this font draws digits small. */
 .contact-value { font-size: var(--step-1); font-variant-numeric: lining-nums; overflow-wrap: anywhere; }
 
+/* Achievements */
+
+.achievements { max-width: var(--measure); margin: 0; padding: 0; list-style: none; }
+.achievement {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 1rem;
+  padding-block: 1.1rem;
+  border-top: 1px solid var(--rule);
+}
+.achievement:not(:has(img)) { grid-template-columns: 1fr; }
+.achievement img { width: 6rem; height: 6rem; border-radius: var(--radius); object-fit: cover; }
+.achievement h3 { margin: 0.2rem 0; }
+.achievement p { margin: 0; }
+.level { font-weight: 600; }
+.level--high { padding: 0.05rem 0.45rem; border-radius: var(--radius); background: var(--blue); color: var(--white); }
+
 /* Gallery */
 
 .albums,

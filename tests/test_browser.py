@@ -10,7 +10,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from portal.models import Album, Announcement, Event, Subscriber, UrgentNotice
+from portal.models import Achievement, Album, Announcement, Event, Subscriber, UrgentNotice
 
 # Playwright's sync API runs an event loop in the test thread, which Django's ORM
 # otherwise refuses to share. The data is created before the browser does anything.
@@ -37,6 +37,14 @@ def site(transactional_db):
     # This month's holiday and exam, so the month view renders its band and labels.
     Event.objects.create(title="Deepavali holiday", starts_at=now, all_day=True, kind=Event.HOLIDAY)
     Event.objects.create(title="UPSA exam week", starts_at=now, all_day=True, kind=Event.EXAM)
+    achievement = Achievement.objects.create(
+        title="மாநில அளவிலான திருக்குறள் ஒப்பித்தல் போட்டியில் தங்கப் பதக்கம்",
+        category=Achievement.TAMIL,
+        level=Achievement.STATE,
+    )
+    achievement.pupils.create(
+        name="Thirunavukkarasu a/l Kandasamy", class_name="6 Mutiara", consent=True
+    )
     UrgentNotice.objects.create(
         message_ta="வெள்ளம் காரணமாக இன்று பள்ளி மூடப்பட்டுள்ளது. திங்கள்கிழமை வகுப்புகள் வழக்கம்போல் நடைபெறும்.",
         link="https://example.com/news/1/",
@@ -47,7 +55,7 @@ def site(transactional_db):
         title="School closed on Friday", body="Classes resume on Monday.", is_pinned=True
     )
     album = Album.objects.create(title="Sports day photos", event=event)
-    return {"event": event, "news": news, "album": album}
+    return {"event": event, "news": news, "album": album, "achievement": achievement}
 
 
 def use_language(page, live_server, language):
@@ -69,6 +77,8 @@ def page_paths(site):
         site["album"].get_absolute_url(),
         "/documents/",
         "/contact/",
+        "/achievements/",
+        site["achievement"].get_absolute_url(),
     ]
 
 

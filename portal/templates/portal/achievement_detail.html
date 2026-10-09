@@ -1,0 +1,26 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ achievement.title }}, {{ school_name }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<article>
+  <header class="page-head">
+    <p class="meta"><span class="level{% if achievement.is_high_level %} level--high{% endif %}">{{ achievement.get_level_display }}</span> · {{ achievement.get_category_display }} · <time datetime="{{ achievement.date|date:'Y-m-d' }}">{{ achievement.date|date:"j F Y" }}</time></p>
+    <h1>{{ achievement.title }}</h1>
+    {% if achievement.pupil_line %}<p>{{ achievement.pupil_line }}</p>{% endif %}
+  </header>
+  {% if achievement.description %}<div class="prose">{{ achievement.description|linebreaks }}</div>{% endif %}
+  {% if achievement.photos_allowed %}
+    {% with photos=achievement.photos.all %}{% if photos %}
+      <ul class="photos">
+        {% for photo in photos %}
+          <li><figure><a href="{{ photo.image.url }}"><img src="{{ photo.image.url }}" alt="{{ photo.caption }}" loading="lazy"></a>{% if photo.caption %}<figcaption>{{ photo.caption }}</figcaption>{% endif %}</figure></li>
+        {% endfor %}
+      </ul>
+    {% endif %}{% endwith %}
+  {% endif %}
+  <p class="more"><a href="{% url 'portal:achievement_list' %}">{% translate "Back to all achievements" %}</a></p>
+</article>
+{% endblock %}
