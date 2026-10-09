@@ -87,7 +87,7 @@
 <section class="band band--signup" aria-labelledby="subscribe-title">
   <div class="band-frame band-frame--up" aria-hidden="true"></div>
   <div class="band-body wrap">
-    <h2 id="subscribe-title">{% translate "Get an email when events are added" %}</h2>
+    <h2 id="subscribe-title">{% translate "Get an email when events are added, and a reminder the day before" %}</h2>
     <p class="band-lead">{% translate "For parents and guardians. You can stop the emails at any time from a link in each one." %}</p>
     <form method="post" action="{% url 'portal:subscribe' %}" class="form-row">
       {% csrf_token %}

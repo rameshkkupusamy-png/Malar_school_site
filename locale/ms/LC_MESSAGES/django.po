@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-08 12:42+0800\n"
+"POT-Creation-Date: 2026-10-09 09:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -30,11 +30,11 @@ msgstr ""
 msgid "Google didn't share a confirmed email address. Try another Google account."
 msgstr "Google tidak berkongsi alamat e-mel yang disahkan. Cuba akaun Google yang lain."
 
-#: portal/forms.py:9
+#: portal/forms.py:10
 msgid "Email address"
 msgstr "Alamat e-mel"
 
-#: portal/forms.py:10
+#: portal/forms.py:11
 msgid "Your name"
 msgstr "Nama anda"
 
@@ -136,45 +136,49 @@ msgstr[1] "%(num)d minit"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:71
+#: portal/models.py:73
 msgid "Event"
 msgstr "Acara"
 
-#: portal/models.py:72
+#: portal/models.py:74
 msgid "Holiday"
 msgstr "Cuti"
 
-#: portal/models.py:73
+#: portal/models.py:75
 msgid "Exam"
 msgstr "Peperiksaan"
 
-#: portal/models.py:74 portal/views.py:68
+#: portal/models.py:76 portal/views.py:68
 msgid "PIBG"
 msgstr "PIBG"
 
-#: portal/models.py:75 portal/views.py:69
+#: portal/models.py:77 portal/views.py:69
 msgid "Sports"
 msgstr "Sukan"
 
-#: portal/models.py:76
+#: portal/models.py:78
 msgid "Celebration"
 msgstr "Perayaan"
 
-#: portal/models.py:409
+#: portal/models.py:417
 msgid "Circulars"
 msgstr "Surat edaran"
 
-#: portal/models.py:410
+#: portal/models.py:418
 msgid "Forms"
 msgstr "Borang"
 
-#: portal/models.py:411
+#: portal/models.py:419
 msgid "Timetables and lists"
 msgstr "Jadual dan senarai"
 
-#: portal/models.py:412
+#: portal/models.py:420
 msgid "School documents"
 msgstr "Dokumen sekolah"
+
+#: portal/notifications.py:73
+msgid "Tomorrow at school"
+msgstr "Esok di sekolah"
 
 #: portal/templates/portal/_event_time.html:4
 msgid "l j F"
@@ -346,12 +350,12 @@ msgstr "Surat edaran, borang dan jadual daripada sekolah. Sentuh tajuk untuk mem
 msgid "No documents yet."
 msgstr "Belum ada dokumen."
 
-#: portal/templates/portal/email/new_event.txt:1
+#: portal/templates/portal/email/new_event.txt:1 portal/templates/portal/email/reminder.txt:1
 #, python-format
 msgid "Hello %(name)s,"
 msgstr "Salam %(name)s,"
 
-#: portal/templates/portal/email/new_event.txt:1
+#: portal/templates/portal/email/new_event.txt:1 portal/templates/portal/email/reminder.txt:1
 msgid "Hello,"
 msgstr "Salam sejahtera,"
 
@@ -360,19 +364,24 @@ msgstr "Salam sejahtera,"
 msgid "%(school_name)s has a new event:"
 msgstr "%(school_name)s ada acara baharu:"
 
-#: portal/templates/portal/email/new_event.txt:9 portal/templates/portal/whatsapp/announcement.txt:4
-#: portal/templates/portal/whatsapp/event.txt:5
+#: portal/templates/portal/email/new_event.txt:9 portal/templates/portal/email/reminder.txt:8
+#: portal/templates/portal/whatsapp/announcement.txt:4 portal/templates/portal/whatsapp/event.txt:5
 msgid "Details:"
 msgstr "Butiran:"
 
-#: portal/templates/portal/email/new_event.txt:12
+#: portal/templates/portal/email/new_event.txt:12 portal/templates/portal/email/reminder.txt:11
 #, python-format
 msgid "You get these emails because you signed up on the %(school_name)s website."
 msgstr "Anda menerima e-mel ini kerana anda telah mendaftar di laman web %(school_name)s."
 
-#: portal/templates/portal/email/new_event.txt:13
+#: portal/templates/portal/email/new_event.txt:13 portal/templates/portal/email/reminder.txt:12
 msgid "Stop them here:"
 msgstr "Hentikan di sini:"
+
+#: portal/templates/portal/email/reminder.txt:3
+#, python-format
+msgid "Tomorrow at %(school_name)s:"
+msgstr "Esok di %(school_name)s:"
 
 #: portal/templates/portal/event_detail.html:14
 msgid "Add to my calendar"
@@ -518,8 +527,8 @@ msgid "See the photos"
 msgstr "Lihat gambar"
 
 #: portal/templates/portal/home.html:90
-msgid "Get an email when events are added"
-msgstr "Terima e-mel apabila acara baharu ditambah"
+msgid "Get an email when events are added, and a reminder the day before"
+msgstr "Terima e-mel apabila acara ditambah, dan peringatan sehari sebelumnya"
 
 #: portal/templates/portal/home.html:91
 msgid "For parents and guardians. You can stop the emails at any time from a link in each one."

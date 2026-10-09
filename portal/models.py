@@ -98,6 +98,7 @@ class Event(models.Model):
     image = models.ImageField(upload_to="events/", blank=True)
     is_published = models.BooleanField("published", default=True)
     notified_at = models.DateTimeField(null=True, blank=True, editable=False)
+    reminded_at = models.DateTimeField(null=True, blank=True, editable=False)
     source_import = models.ForeignKey(
         "EventImport",
         null=True,

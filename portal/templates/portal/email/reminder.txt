@@ -1,0 +1,13 @@
+{% load i18n %}{% autoescape off %}{% if subscriber.name %}{% blocktranslate with name=subscriber.name %}Hello {{ name }},{% endblocktranslate %}{% else %}{% translate "Hello," %}{% endif %}
+
+{% blocktranslate %}Tomorrow at {{ school_name }}:{% endblocktranslate %}
+{% for item in items %}
+{{ item.event.title }}
+{{ item.when }}{% if item.event.location %}
+{{ item.event.location }}{% endif %}
+{% translate "Details:" %} {{ item.url }}
+{% endfor %}
+--
+{% blocktranslate %}You get these emails because you signed up on the {{ school_name }} website.{% endblocktranslate %}
+{% translate "Stop them here:" %} {{ unsubscribe_url }}
+{% endautoescape %}
