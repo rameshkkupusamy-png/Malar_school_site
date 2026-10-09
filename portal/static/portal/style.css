@@ -570,7 +570,7 @@ main.page { padding-block: 2.5rem 4.5rem; }
 .tabs a:hover { color: var(--ink); }
 .tabs a[aria-current="page"] { border-bottom-color: var(--blue); color: var(--ink); }
 
-.tabs--wrap { flex-wrap: wrap; column-gap: 1.25rem; }
+.tabs--wrap { flex-wrap: wrap; gap: 0.1rem 1.25rem; }
 
 .month-head {
   display: flex;

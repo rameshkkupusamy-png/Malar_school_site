@@ -738,7 +738,11 @@ class Achievement(models.Model):
     title = models.CharField(
         max_length=200, help_text="e.g. “1st place, district Tamil essay competition”"
     )
-    description = models.TextField(blank=True)
+    description = models.TextField(
+        blank=True,
+        help_text="Optional. Don't write pupils' full names here: list them below, where the "
+        "consent and short-name rules apply.",
+    )
     date = models.DateField(default=timezone.localdate)
     category = models.CharField(max_length=20, choices=CATEGORIES)
     level = models.CharField(max_length=20, choices=LEVELS)
