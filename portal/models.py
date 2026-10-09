@@ -683,3 +683,148 @@ class UrgentNotice(models.Model):
         require_one_language(self, "message", "Write the notice in at least one language.")
         if self.starts_at and self.ends_at and self.ends_at <= self.starts_at:
             raise ValidationError({"ends_at": "The notice must end after it starts."})
+
+
+PATRONYMIC_MARKERS = {"a/l", "a/p", "s/o", "d/o", "bin", "binti", "bt", "bte"}
+
+
+def short_name(full: str) -> str:
+    """'Kavin a/l Raju' -> 'Kavin R.'; 'Meera Suresh' -> 'Meera S.'; one word stays as is."""
+    words = full.split()
+    if not words:
+        return ""
+    for index, word in enumerate(words):
+        if index and word.lower() in PATRONYMIC_MARKERS:
+            given, rest = words[:index], words[index + 1 :]
+            break
+    else:
+        given, rest = words[:1], words[1:][-1:]
+    initial = f" {rest[0][0].upper()}." if rest else ""
+    return " ".join(given) + initial
+
+
+class AchievementQuerySet(models.QuerySet):
+    def published(self):
+        return self.filter(is_published=True)
+
+
+class Achievement(models.Model):
+    """A pupil's or team's win, shown on the Achievements page."""
+
+    ACADEMIC, SPORTS, ARTS, TAMIL, OTHER = "academic", "sports", "arts", "tamil", "other"
+    CATEGORIES = [
+        (ACADEMIC, _("Academic")),
+        (SPORTS, _("Sports")),
+        (ARTS, _("Arts and culture")),
+        (TAMIL, _("Tamil language")),
+        (OTHER, _("Other")),
+    ]
+    SCHOOL, DISTRICT, STATE, NATIONAL, INTERNATIONAL = (
+        "school",
+        "district",
+        "state",
+        "national",
+        "international",
+    )
+    LEVELS = [
+        (SCHOOL, _("School")),
+        (DISTRICT, _("District")),
+        (STATE, _("State")),
+        (NATIONAL, _("National")),
+        (INTERNATIONAL, _("International")),
+    ]
+    HIGH_LEVELS = {STATE, NATIONAL, INTERNATIONAL}
+
+    title = models.CharField(
+        max_length=200, help_text="e.g. “1st place, district Tamil essay competition”"
+    )
+    description = models.TextField(blank=True)
+    date = models.DateField(default=timezone.localdate)
+    category = models.CharField(max_length=20, choices=CATEGORIES)
+    level = models.CharField(max_length=20, choices=LEVELS)
+    is_published = models.BooleanField("published", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = AchievementQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["-date", "-pk"]
+
+    def __str__(self) -> str:
+        return self.title
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:achievement_detail", args=[self.pk])
+
+    def clean(self) -> None:
+        require_one_language(
+            self, "title", "Give the achievement a title in at least one language."
+        )
+
+    @property
+    def is_high_level(self) -> bool:
+        return self.level in self.HIGH_LEVELS
+
+    @property
+    def photos_allowed(self) -> bool:
+        """Photos only when every pupil listed has their parents' agreement."""
+        return all(pupil.consent for pupil in self.pupils.all())
+
+    @property
+    def pupil_line(self) -> str:
+        return ", ".join(pupil.display for pupil in self.pupils.all())
+
+    @property
+    def consent_summary(self) -> str:
+        pupils = list(self.pupils.all())
+        if not pupils:
+            return "no pupils listed"
+        agreed = sum(pupil.consent for pupil in pupils)
+        return "all agreed" if agreed == len(pupils) else f"{agreed} of {len(pupils)} agreed"
+
+
+class AchievementPupil(models.Model):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="pupils")
+    name = models.CharField(max_length=100, help_text="As on the certificate.")
+    class_name = models.CharField("class", max_length=30, blank=True, help_text="e.g. 5 Mutiara")
+    consent = models.BooleanField(
+        "parents agreed",
+        default=False,
+        help_text="Tick only if the parents agreed to their child's name and photo being shown.",
+    )
+    show_full_name = models.BooleanField(
+        default=False, help_text="Otherwise only the first name and an initial are shown."
+    )
+
+    class Meta:
+        ordering = ["pk"]
+        verbose_name = "pupil"
+
+    def __str__(self) -> str:
+        return self.name
+
+    @property
+    def display(self) -> str:
+        if not self.consent:
+            year = re.search(r"\d", self.class_name)
+            return _("a Year %(year)s pupil") % {"year": year[0]} if year else str(_("a pupil"))
+        name = self.name.strip() if self.show_full_name else short_name(self.name)
+        return f"{name} ({self.class_name.strip()})" if self.class_name.strip() else name
+
+
+class AchievementPhoto(models.Model):
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="photos")
+    image = models.ImageField(upload_to="achievements/")
+    caption = models.CharField(max_length=200, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "photo"
+
+    def __str__(self) -> str:
+        return self.caption or f"Photo {self.pk}"
+
+    def save(self, *args, **kwargs) -> None:
+        self.image = shrink_new_upload(self.image)
+        super().save(*args, **kwargs)
