@@ -14,6 +14,7 @@ EDITOR_PERMISSIONS = {
     "sociallink": ["add", "change", "delete", "view"],
     "document": ["add", "change", "delete", "view"],
     "schoolcontact": ["add", "change", "view"],
+    "urgentnotice": ["add", "change", "delete", "view"],
 }
 
 

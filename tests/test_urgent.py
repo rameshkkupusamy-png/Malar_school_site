@@ -1,11 +1,14 @@
 from datetime import timedelta
 
 import pytest
+from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
 from portal.models import UrgentNotice, end_of_today
+from portal.whatsapp import share_message
 
 
 @pytest.fixture
@@ -96,3 +99,47 @@ def test_message_falls_back_to_the_language_staff_wrote(notice, db):
     notice(message=None, message_ms="Sekolah ditutup hari ini.")
     html = Client().get(reverse("portal:home")).content.decode()  # a Tamil visitor
     assert "Sekolah ditutup hari ini." in html
+
+
+def test_whatsapp_message(notice, settings):
+    settings.SITE_URL = "https://school.example"
+    with_link = notice("Sekolah ditutup.", link="https://school.example/news/4/")
+    without = notice("Kelas dalam talian esok.")
+
+    # Shared messages use the site's default language, Tamil.
+    assert share_message(with_link) == (
+        "*அவசரம்:* Sekolah ditutup.\n\nhttps://school.example/news/4/"
+    )
+    assert share_message(without).endswith("\n\nhttps://school.example/")
+
+
+def test_admin_list_shares_only_showing_notices(notice, admin_client):
+    notice("Now")
+    notice("Over", starts_at=timezone.now() - timedelta(hours=2), ends_at=timezone.now())
+
+    html = admin_client.get(reverse("admin:portal_urgentnotice_changelist")).content.decode()
+
+    assert html.count("Share on WhatsApp") == 1
+
+
+@pytest.mark.django_db
+def test_editor_can_add_a_notice(client):
+    call_command("setup_roles", stdout=None)
+    editor = User.objects.create_user("editor", password="x", is_staff=True)
+    editor.groups.add(Group.objects.get(name="Editors"))
+    client.force_login(editor)
+
+    response = client.post(
+        reverse("admin:portal_urgentnotice_add"),
+        {
+            "message_ms": "Sekolah ditutup hari ini.",
+            "starts_at_0": timezone.localdate().isoformat(),
+            "starts_at_1": "00:00",
+            "ends_at_0": timezone.localdate().isoformat(),
+            "ends_at_1": "23:59",
+            "is_published": "on",
+        },
+    )
+
+    assert response.status_code == 302, response.content.decode()[-2000:]
+    assert UrgentNotice.objects.get().message == "Sekolah ditutup hari ini."

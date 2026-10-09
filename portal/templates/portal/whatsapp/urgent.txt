@@ -1,0 +1,4 @@
+{% load i18n %}{% autoescape off %}*{% translate "Urgent" %}:* {{ post.message }}
+
+{{ post.share_link }}
+{% endautoescape %}

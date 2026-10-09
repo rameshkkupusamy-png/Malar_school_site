@@ -24,6 +24,7 @@ from .models import (
     SocialLink,
     StaffMember,
     Subscriber,
+    UrgentNotice,
 )
 from .notifications import notify_subscribers
 from .staff_list import MAX_BYTES, StaffFileRejected, add_staff_from_rows, read_rows
@@ -447,3 +448,22 @@ class SchoolContactAdmin(AnyLanguageAdmin):
         if SchoolContact.objects.exists():
             return redirect("admin:portal_schoolcontact_change", 1)
         return redirect("admin:portal_schoolcontact_add")
+
+
+@admin.register(UrgentNotice)
+class UrgentNoticeAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
+    list_display = [
+        "message",
+        "starts_at",
+        "ends_at",
+        "is_published",
+        "showing_now",
+        "whatsapp_share",
+    ]
+    list_filter = ["is_published"]
+    search_fields = in_all_languages("message")
+    readonly_fields = ["whatsapp_share"]
+
+    @admin.display(description="showing now", boolean=True)
+    def showing_now(self, obj):
+        return UrgentNotice.objects.showing().filter(pk=obj.pk).exists()
