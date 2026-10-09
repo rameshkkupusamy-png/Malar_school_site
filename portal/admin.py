@@ -14,6 +14,9 @@ from modeltranslation.fields import TranslationField
 from .forms import DraftEventForm, DraftEventFormSet, EventImportForm, StaffImportForm
 from .imports import FileRejected, build_template, parse_file
 from .models import (
+    Achievement,
+    AchievementPhoto,
+    AchievementPupil,
     Album,
     Announcement,
     Document,
@@ -467,3 +470,43 @@ class UrgentNoticeAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
     @admin.display(description="showing now", boolean=True)
     def showing_now(self, obj):
         return UrgentNotice.objects.showing().filter(pk=obj.pk).exists()
+
+
+class AchievementPupilInline(admin.TabularInline):
+    model = AchievementPupil
+    extra = 3
+    fields = ["name", "class_name", "consent", "show_full_name"]
+
+
+class AchievementPhotoInline(TranslationTabularInline):
+    model = AchievementPhoto
+    extra = 2
+    fields = ["image", "caption", "order"]
+
+
+@admin.register(Achievement)
+class AchievementAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
+    list_display = [
+        "title",
+        "date",
+        "category",
+        "level",
+        "is_published",
+        "consent",
+        "whatsapp_share",
+    ]
+    list_filter = ["category", "level", "is_published"]
+    search_fields = in_all_languages("title") + ["pupils__name"]
+    date_hierarchy = "date"
+    readonly_fields = ["photo_note", "whatsapp_share"]
+    inlines = [AchievementPupilInline, AchievementPhotoInline]
+
+    @admin.display(description="parents agreed")
+    def consent(self, obj):
+        return obj.consent_summary
+
+    @admin.display(description="photos")
+    def photo_note(self, obj):
+        if obj is None or obj.pk is None or obj.photos_allowed:
+            return "Photos are shown on the site."
+        return "Photos are hidden until every pupil listed has “parents agreed” ticked."

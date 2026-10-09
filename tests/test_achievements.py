@@ -2,12 +2,15 @@ from datetime import date
 from io import BytesIO
 
 import pytest
+from django.contrib.auth.models import Group, User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
 from django.urls import reverse
 from django.utils import translation
 from PIL import Image
 
 from portal.models import Achievement, AchievementPhoto, AchievementPupil, short_name
+from portal.whatsapp import share_message
 
 
 @pytest.fixture(autouse=True)
@@ -194,3 +197,67 @@ def test_high_level_wins_are_highlighted(achievement, client):
 def test_menu_links_to_achievements(client):
     html = client.get(reverse("portal:home")).content.decode()
     assert html.count(f'href="{reverse("portal:achievement_list")}"') == 2  # menu and footer
+
+
+def test_whatsapp_message_uses_displayed_names_only(achievement, settings):
+    settings.SITE_URL = "https://school.example"
+    item = achievement(
+        pupils=[("Kavin a/l Raju", "5 Mutiara", True), ("Meera a/p Suresh", "5 Mutiara", False)]
+    )
+
+    text = share_message(item)
+
+    assert text.startswith("*1st place, district Tamil essay competition*\nKavin R. (5 Mutiara), ")
+    assert "Raju" not in text and "Meera" not in text
+    assert text.endswith(f"https://school.example/achievements/{item.pk}/")
+
+
+def test_admin_list_shows_consent_summary(achievement, admin_client):
+    achievement(pupils=[("Kavin a/l Raju", "5 Mutiara", True), ("Meera", "5 Mutiara", False)])
+    html = admin_client.get(reverse("admin:portal_achievement_changelist")).content.decode()
+    assert "1 of 2 agreed" in html
+
+
+def test_admin_warns_when_photos_are_held_back(achievement, admin_client):
+    item = achievement(pupils=[("Meera", "5 Mutiara", False)])
+    html = admin_client.get(
+        reverse("admin:portal_achievement_change", args=[item.pk])
+    ).content.decode()
+    assert "Photos are hidden until every pupil" in html
+
+
+@pytest.mark.django_db
+def test_editor_can_add_an_achievement_with_pupils_and_photos(client):
+    call_command("setup_roles", stdout=None)
+    editor = User.objects.create_user("editor", password="x", is_staff=True)
+    editor.groups.add(Group.objects.get(name="Editors"))
+    client.force_login(editor)
+
+    response = client.post(
+        reverse("admin:portal_achievement_add"),
+        {
+            "title_ta": "மாவட்ட கட்டுரைப் போட்டியில் முதல் பரிசு",
+            "date": "2026-09-12",
+            "category": Achievement.TAMIL,
+            "level": Achievement.DISTRICT,
+            "is_published": "on",
+            "pupils-TOTAL_FORMS": "1",
+            "pupils-INITIAL_FORMS": "0",
+            "pupils-MIN_NUM_FORMS": "0",
+            "pupils-MAX_NUM_FORMS": "1000",
+            "pupils-0-name": "Kavin a/l Raju",
+            "pupils-0-class_name": "5 Mutiara",
+            "pupils-0-consent": "on",
+            "photos-TOTAL_FORMS": "1",
+            "photos-INITIAL_FORMS": "0",
+            "photos-MIN_NUM_FORMS": "0",
+            "photos-MAX_NUM_FORMS": "1000",
+            "photos-0-image": jpeg(),
+            "photos-0-order": "0",
+        },
+    )
+
+    assert response.status_code == 302, response.content.decode()[-3000:]
+    item = Achievement.objects.get()
+    assert item.pupils.get().consent
+    assert item.photos.count() == 1

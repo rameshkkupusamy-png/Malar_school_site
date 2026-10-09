@@ -10,17 +10,18 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils import timezone, translation
 
-from .models import Announcement, Document, Event, UrgentNotice
+from .models import Achievement, Announcement, Document, Event, UrgentNotice
 
 TEMPLATES = {
     Event: "portal/whatsapp/event.txt",
     Announcement: "portal/whatsapp/announcement.txt",
     Document: "portal/whatsapp/document.txt",
     UrgentNotice: "portal/whatsapp/urgent.txt",
+    Achievement: "portal/whatsapp/achievement.txt",
 }
 
 
-def is_public(obj: Event | Announcement | Document | UrgentNotice) -> bool:
+def is_public(obj: Event | Announcement | Document | UrgentNotice | Achievement) -> bool:
     """Parents can open the post, so the link in the message works."""
     if isinstance(obj, UrgentNotice):
         return UrgentNotice.objects.showing().filter(pk=obj.pk).exists()
@@ -31,7 +32,7 @@ def is_public(obj: Event | Announcement | Document | UrgentNotice) -> bool:
     return obj.is_published
 
 
-def share_message(obj: Event | Announcement | Document | UrgentNotice) -> str:
+def share_message(obj: Event | Announcement | Document | UrgentNotice | Achievement) -> str:
     # The group gets one message, in the site's default language (Tamil). Post text falls
     # back to whichever language staff wrote it in.
     with translation.override(settings.LANGUAGE_CODE):
@@ -43,5 +44,5 @@ def share_message(obj: Event | Announcement | Document | UrgentNotice) -> str:
     return text.strip()
 
 
-def share_url(obj: Event | Announcement | Document | UrgentNotice) -> str:
+def share_url(obj: Event | Announcement | Document | UrgentNotice | Achievement) -> str:
     return "https://wa.me/?text=" + quote(share_message(obj), safe="")

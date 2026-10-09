@@ -15,6 +15,9 @@ EDITOR_PERMISSIONS = {
     "document": ["add", "change", "delete", "view"],
     "schoolcontact": ["add", "change", "view"],
     "urgentnotice": ["add", "change", "delete", "view"],
+    "achievement": ["add", "change", "delete", "view"],
+    "achievementpupil": ["add", "change", "delete", "view"],
+    "achievementphoto": ["add", "change", "delete", "view"],
 }
 
 
