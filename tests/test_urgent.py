@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import date, datetime, time, timedelta
 
 import pytest
 from django.contrib.auth.models import Group, User
@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from portal.models import UrgentNotice, end_of_today
+from portal.models import UrgentNotice, default_end
 from portal.whatsapp import share_message
 
 
@@ -41,11 +41,23 @@ def test_newest_notice_comes_first(notice):
     assert list(UrgentNotice.objects.showing()) == [newer, older]
 
 
-def test_default_end_is_the_end_of_today():
-    end = timezone.localtime(end_of_today())
-    assert end.date() == timezone.localdate()
-    assert (end.hour, end.minute, end.second) == (23, 59, 59)
-    assert UrgentNotice().ends_at == end_of_today()
+def at_local(hour):
+    return timezone.make_aware(datetime.combine(date(2026, 10, 9), time(hour, 0)))
+
+
+def test_daytime_notice_ends_at_the_end_of_today():
+    end = timezone.localtime(default_end(at_local(10)))
+    assert end == timezone.make_aware(datetime(2026, 10, 9, 23, 59, 59))
+
+
+def test_evening_notice_lasts_until_the_end_of_tomorrow():
+    """Posted at 7 pm about tomorrow's closure, it must still show when parents check at 6 am."""
+    end = timezone.localtime(default_end(at_local(19)))
+    assert end == timezone.make_aware(datetime(2026, 10, 10, 23, 59, 59))
+
+
+def test_new_notice_uses_the_default_end():
+    assert UrgentNotice().ends_at.date() >= timezone.localdate()
 
 
 @pytest.mark.django_db

@@ -2,7 +2,7 @@ import math
 import re
 import unicodedata
 import uuid
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 from pathlib import PurePath
 from urllib.parse import quote
 
@@ -622,9 +622,17 @@ class SchoolContact(models.Model):
         return bool(self.phone or self.whatsapp or self.email or self.can_visit)
 
 
-def end_of_today():
-    """23:59:59 today, school time: the default end of an urgent notice."""
-    return timezone.make_aware(datetime.combine(timezone.localdate(), time(23, 59, 59)))
+EVENING_HOUR = 18  # notices posted from 6 pm are usually about tomorrow
+
+
+def default_end(now=None):
+    """23:59:59 school time today, or tomorrow for a notice posted in the evening.
+
+    "School is closed tomorrow", posted at 7 pm, must still show when parents check at 6 am.
+    """
+    now = timezone.localtime(now)
+    day = now.date() + timedelta(days=1 if now.hour >= EVENING_HOUR else 0)
+    return timezone.make_aware(datetime.combine(day, time(23, 59, 59)))
 
 
 class UrgentNoticeQuerySet(models.QuerySet):
@@ -648,7 +656,10 @@ class UrgentNotice(models.Model):
     )
     starts_at = models.DateTimeField("show from", default=timezone.now)
     ends_at = models.DateTimeField(
-        "show until", default=end_of_today, help_text="It disappears by itself after this."
+        "show until",
+        default=default_end,
+        help_text="It disappears by itself after this. Set from 6 pm, it defaults to the end of "
+        "tomorrow; check it fits your notice.",
     )
     is_published = models.BooleanField("published", default=True)
 
