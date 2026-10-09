@@ -620,3 +620,55 @@ class SchoolContact(models.Model):
     @property
     def has_details(self) -> bool:
         return bool(self.phone or self.whatsapp or self.email or self.can_visit)
+
+
+def end_of_today():
+    """23:59:59 today, school time: the default end of an urgent notice."""
+    return timezone.make_aware(datetime.combine(timezone.localdate(), time(23, 59, 59)))
+
+
+class UrgentNoticeQuerySet(models.QuerySet):
+    def showing(self, now=None):
+        now = now or timezone.now()
+        return self.filter(is_published=True, starts_at__lte=now, ends_at__gt=now).order_by(
+            "-starts_at"
+        )
+
+
+class UrgentNotice(models.Model):
+    """One line at the top of every page for a set time, e.g. "School closed today"."""
+
+    message = models.CharField(
+        max_length=200, help_text="One line, e.g. “School is closed today because of flooding.”"
+    )
+    link = models.URLField(
+        blank=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+        help_text="Optional. A page with more details, e.g. a news post or a document.",
+    )
+    starts_at = models.DateTimeField("show from", default=timezone.now)
+    ends_at = models.DateTimeField(
+        "show until", default=end_of_today, help_text="It disappears by itself after this."
+    )
+    is_published = models.BooleanField("published", default=True)
+
+    objects = UrgentNoticeQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["-starts_at"]
+        verbose_name = "urgent notice"
+
+    def __str__(self) -> str:
+        return self.message
+
+    def get_absolute_url(self) -> str:
+        return reverse("portal:home")
+
+    @property
+    def share_link(self) -> str:
+        return self.link or settings.SITE_URL + reverse("portal:home")
+
+    def clean(self) -> None:
+        require_one_language(self, "message", "Write the notice in at least one language.")
+        if self.starts_at and self.ends_at and self.ends_at <= self.starts_at:
+            raise ValidationError({"ends_at": "The notice must end after it starts."})
