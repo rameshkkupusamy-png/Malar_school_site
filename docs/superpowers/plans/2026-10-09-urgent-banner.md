@@ -53,9 +53,12 @@ from portal.models import UrgentNotice, end_of_today
 @pytest.fixture
 def notice(db):
     def _make(message="School closed today because of flooding.", **fields):
+        """Pass message=None to set only the language fields (message_ta, message_ms, …)."""
+        if message is not None:
+            fields["message"] = message
         fields.setdefault("starts_at", timezone.now() - timedelta(hours=1))
         fields.setdefault("ends_at", timezone.now() + timedelta(hours=1))
-        return UrgentNotice.objects.create(message=message, **fields)
+        return UrgentNotice.objects.create(**fields)
 
     return _make
 
@@ -205,7 +208,7 @@ def test_no_bar_without_a_current_notice(notice, client):
 def test_message_falls_back_to_the_language_staff_wrote(notice, db):
     from django.test import Client
 
-    notice(message_ta="", message_ms="Sekolah ditutup hari ini.")
+    notice(message=None, message_ms="Sekolah ditutup hari ini.")
     html = Client().get(reverse("portal:home")).content.decode()  # a Tamil visitor
     assert "Sekolah ditutup hari ini." in html
 ```
@@ -285,8 +288,9 @@ def test_whatsapp_message(notice, settings):
     with_link = notice("Sekolah ditutup.", link="https://school.example/news/4/")
     without = notice("Kelas dalam talian esok.")
 
-    assert share_message(with_link) == "*Urgent:* Sekolah ditutup.\n\nhttps://school.example/news/4/".replace(
-        "Urgent", "அவசரம்"
+    # Shared messages use the site's default language, Tamil.
+    assert share_message(with_link) == (
+        "*அவசரம்:* Sekolah ditutup.\n\nhttps://school.example/news/4/"
     )
     assert share_message(without).endswith("\n\nhttps://school.example/")
 
