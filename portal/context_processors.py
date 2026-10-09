@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .models import SocialLink
+from .models import SocialLink, UrgentNotice
 
 
 def school(request):
@@ -11,4 +11,5 @@ def school(request):
         "google_sign_in": bool(settings.GOOGLE_CLIENT_ID),
         # Lazy: only queried on pages that show the footer.
         "social_links": SocialLink.objects.published(),
+        "urgent_notices": UrgentNotice.objects.showing(),
     }

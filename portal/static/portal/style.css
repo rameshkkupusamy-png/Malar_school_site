@@ -124,6 +124,21 @@ p { margin: 0 0 0.75em; }
   padding-block: 0.75rem;
 }
 
+/* Urgent notices: one line above the header on every page */
+
+.urgent { background: var(--navy); color: var(--white); }
+.urgent-notice { margin: 0; padding-block: 0.7rem; overflow-wrap: anywhere; }
+.urgent-notice + .urgent-notice { border-top: 1px solid rgb(255 255 255 / 0.2); }
+.urgent-label {
+  display: inline-block;
+  margin-right: 0.5rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--torch);
+  color: var(--navy);
+}
+.urgent a { color: var(--white); font-weight: 600; }
+
 .brand {
   display: flex;
   align-items: center;

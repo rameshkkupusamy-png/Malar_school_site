@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-09 09:48+0800\n"
+"POT-Creation-Date: 2026-10-09 10:08+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -148,11 +148,11 @@ msgstr "Cuti"
 msgid "Exam"
 msgstr "Peperiksaan"
 
-#: portal/models.py:76 portal/views.py:68
+#: portal/models.py:76 portal/views.py:69
 msgid "PIBG"
 msgstr "PIBG"
 
-#: portal/models.py:77 portal/views.py:69
+#: portal/models.py:77 portal/views.py:70
 msgid "Sports"
 msgstr "Sukan"
 
@@ -176,7 +176,7 @@ msgstr "Jadual dan senarai"
 msgid "School documents"
 msgstr "Dokumen sekolah"
 
-#: portal/notifications.py:73
+#: portal/notifications.py:81
 msgid "Tomorrow at school"
 msgstr "Esok di sekolah"
 
@@ -235,7 +235,7 @@ msgid "Back to all photos"
 msgstr "Kembali ke semua gambar"
 
 #: portal/templates/portal/album_list.html:4 portal/templates/portal/album_list.html:8
-#: portal/templates/portal/base.html:29 portal/templates/portal/base.html:59
+#: portal/templates/portal/base.html:40 portal/templates/portal/base.html:70
 msgid "Photos"
 msgstr "Gambar"
 
@@ -259,7 +259,7 @@ msgid "Back to all news"
 msgstr "Kembali ke semua berita"
 
 #: portal/templates/portal/announcement_list.html:4 portal/templates/portal/announcement_list.html:8
-#: portal/templates/portal/base.html:27 portal/templates/portal/base.html:57
+#: portal/templates/portal/base.html:38 portal/templates/portal/base.html:68
 msgid "News"
 msgstr "Berita"
 
@@ -267,38 +267,50 @@ msgstr "Berita"
 msgid "No news right now."
 msgstr "Tiada berita buat masa ini."
 
-#: portal/templates/portal/base.html:16
+#: portal/templates/portal/base.html:19
 msgid "Skip to content"
 msgstr "Langkau ke kandungan"
 
-#: portal/templates/portal/base.html:26
+#: portal/templates/portal/base.html:22
+msgid "Urgent notices"
+msgstr "Makluman penting"
+
+#: portal/templates/portal/base.html:24
+msgid "Urgent"
+msgstr "Penting"
+
+#: portal/templates/portal/base.html:24
+msgid "Details"
+msgstr "Butiran"
+
+#: portal/templates/portal/base.html:37
 msgid "Main"
 msgstr "Utama"
 
-#: portal/templates/portal/base.html:28 portal/templates/portal/base.html:58
+#: portal/templates/portal/base.html:39 portal/templates/portal/base.html:69
 #: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
 msgid "Events"
 msgstr "Acara"
 
-#: portal/templates/portal/base.html:30 portal/templates/portal/base.html:60
+#: portal/templates/portal/base.html:41 portal/templates/portal/base.html:71
 #: portal/templates/portal/document_list.html:4 portal/templates/portal/document_list.html:8
 msgid "Documents"
 msgstr "Dokumen"
 
-#: portal/templates/portal/base.html:56
+#: portal/templates/portal/base.html:67
 msgid "Footer"
 msgstr "Kaki halaman"
 
-#: portal/templates/portal/base.html:61 portal/templates/portal/contact.html:4
+#: portal/templates/portal/base.html:72 portal/templates/portal/contact.html:4
 #: portal/templates/portal/contact.html:8
 msgid "Contact the school"
 msgstr "Hubungi sekolah"
 
-#: portal/templates/portal/base.html:62
+#: portal/templates/portal/base.html:73
 msgid "Staff sign in"
 msgstr "Log masuk kakitangan"
 
-#: portal/templates/portal/base.html:66
+#: portal/templates/portal/base.html:77
 msgid "Follow the school"
 msgstr "Ikuti sekolah"
 
@@ -570,32 +582,32 @@ msgstr "Daftar semula di halaman utama"
 msgid "Open the document:"
 msgstr "Buka dokumen:"
 
-#: portal/views.py:65
+#: portal/views.py:66
 msgid "All"
 msgstr "Semua"
 
-#: portal/views.py:66
+#: portal/views.py:67
 msgid "Holidays"
 msgstr "Cuti"
 
-#: portal/views.py:67
+#: portal/views.py:68
 msgid "Exams"
 msgstr "Peperiksaan"
 
-#: portal/views.py:70
+#: portal/views.py:71
 msgid "Celebrations"
 msgstr "Perayaan"
 
-#: portal/views.py:216
+#: portal/views.py:246
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:234
+#: portal/views.py:264
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:245
+#: portal/views.py:275
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."

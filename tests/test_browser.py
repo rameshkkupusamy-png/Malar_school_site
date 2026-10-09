@@ -10,7 +10,7 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from portal.models import Album, Announcement, Event, Subscriber
+from portal.models import Album, Announcement, Event, Subscriber, UrgentNotice
 
 # Playwright's sync API runs an event loop in the test thread, which Django's ORM
 # otherwise refuses to share. The data is created before the browser does anything.
@@ -37,6 +37,12 @@ def site(transactional_db):
     # This month's holiday and exam, so the month view renders its band and labels.
     Event.objects.create(title="Deepavali holiday", starts_at=now, all_day=True, kind=Event.HOLIDAY)
     Event.objects.create(title="UPSA exam week", starts_at=now, all_day=True, kind=Event.EXAM)
+    UrgentNotice.objects.create(
+        message_ta="வெள்ளம் காரணமாக இன்று பள்ளி மூடப்பட்டுள்ளது. திங்கள்கிழமை வகுப்புகள் வழக்கம்போல் நடைபெறும்.",
+        link="https://example.com/news/1/",
+        starts_at=now - timedelta(hours=1),
+        ends_at=now + timedelta(days=1),
+    )
     news = Announcement.objects.create(
         title="School closed on Friday", body="Classes resume on Monday.", is_pinned=True
     )

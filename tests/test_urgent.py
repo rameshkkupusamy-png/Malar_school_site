@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils import timezone
 
 from portal.models import UrgentNotice, end_of_today
@@ -72,3 +73,26 @@ def test_share_link_is_the_link_or_the_home_page(settings):
         "https://school.example/news/4/"
     )
     assert UrgentNotice().share_link == "https://school.example/"
+
+
+def test_bar_shows_on_every_page_with_details_link(notice, client):
+    notice("Classes are online tomorrow because of haze.", link="https://school.example/news/4/")
+
+    for url in (reverse("portal:home"), reverse("portal:event_list"), reverse("portal:contact")):
+        html = client.get(url).content.decode()
+        assert '<strong class="urgent-label">Urgent</strong>' in html
+        assert "Classes are online tomorrow because of haze." in html
+        assert '<a href="https://school.example/news/4/">Details</a>' in html
+
+
+def test_no_bar_without_a_current_notice(notice, client):
+    notice("Over", starts_at=timezone.now() - timedelta(hours=2), ends_at=timezone.now())
+    assert 'class="urgent"' not in client.get(reverse("portal:home")).content.decode()
+
+
+def test_message_falls_back_to_the_language_staff_wrote(notice, db):
+    from django.test import Client
+
+    notice(message=None, message_ms="Sekolah ditutup hari ini.")
+    html = Client().get(reverse("portal:home")).content.decode()  # a Tamil visitor
+    assert "Sekolah ditutup hari ini." in html

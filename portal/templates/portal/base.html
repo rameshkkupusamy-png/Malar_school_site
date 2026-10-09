@@ -18,6 +18,14 @@
 <body>
   <a class="skip" href="#main">{% translate "Skip to content" %}</a>
 
+  {% if urgent_notices %}
+    <div class="urgent" role="region" aria-label="{% translate 'Urgent notices' %}">
+      {% for notice in urgent_notices %}
+        <p class="urgent-notice wrap"><strong class="urgent-label">{% translate "Urgent" %}</strong> {{ notice.message }}{% if notice.link %} <a href="{{ notice.link }}">{% translate "Details" %}</a>{% endif %}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   {% with current=request.resolver_match.url_name|default:"" %}
   <header class="site-header">
     <div class="wrap">
