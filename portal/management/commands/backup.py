@@ -12,7 +12,8 @@ PREFIX = "school-backup-"
 
 class Command(BaseCommand):
     help = (
-        "Save the database and all uploaded photos into one zip file in BACKUP_DIR, "
+        "Save the database and all uploads (media/ and private_media/) into one zip file in "
+        "BACKUP_DIR, "
         "and delete the oldest backups beyond BACKUP_KEEP. Safe to run while the site is up."
     )
 
@@ -35,17 +36,22 @@ class Command(BaseCommand):
                 connection.connection.backup(copy)
             copy.close()
 
-            media = Path(settings.MEDIA_ROOT)
+            folders = [
+                (Path(settings.MEDIA_ROOT), "media"),
+                (Path(settings.PRIVATE_MEDIA_ROOT), "private_media"),
+            ]
             photos = 0
             with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as archive:
                 archive.write(snapshot, "db.sqlite3")
-                if media.is_dir():
+                for media, prefix in folders:
+                    if not media.is_dir():
+                        continue
                     for file in sorted(media.rglob("*")):
                         if file.is_file():
                             # Photos are already compressed; storing them is faster.
                             archive.write(
                                 file,
-                                Path("media") / file.relative_to(media),
+                                Path(prefix) / file.relative_to(media),
                                 compress_type=zipfile.ZIP_STORED,
                             )
                             photos += 1

@@ -5,7 +5,7 @@ from urllib.parse import quote, urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
@@ -18,6 +18,7 @@ from .forms import SubscribeForm
 from .ical import build_calendar
 from .models import (
     Achievement,
+    AchievementPhoto,
     Album,
     Announcement,
     Document,
@@ -217,9 +218,8 @@ def achievement_list(request):
         achievements = achievements.filter(category=category)
     years = [d.year for d in achievements.dates("date", "year", order="DESC")]
     chosen = request.GET.get("year", "")
-    year = (
-        int(chosen) if chosen.isdigit() and int(chosen) in years else (years[0] if years else None)
-    )
+    valid = chosen.isascii() and chosen.isdigit() and len(chosen) <= 4
+    year = int(chosen) if valid and int(chosen) in years else (years[0] if years else None)
     shown = (
         achievements.filter(date__year=year).prefetch_related("pupils", "photos") if year else []
     )
@@ -243,6 +243,25 @@ def achievement_detail(request, pk):
         Achievement.objects.published().prefetch_related("pupils", "photos"), pk=pk
     )
     return render(request, "portal/achievement_detail.html", {"achievement": achievement})
+
+
+def private_media(request, name):
+    """Achievement photos: sent only while the achievement is published and every pupil listed
+    has their parents' agreement, or to staff who manage achievements."""
+    photo = AchievementPhoto.objects.select_related("achievement").filter(image=name).first()
+    if photo is None:
+        raise Http404
+    item = photo.achievement
+    public = item.is_published and item.photos_allowed
+    if not public and not request.user.has_perm("portal.view_achievementphoto"):
+        raise Http404
+    try:
+        response = FileResponse(photo.image.open("rb"))
+    except FileNotFoundError:
+        raise Http404 from None
+    response["Cache-Control"] = "private, no-store"  # withdrawn consent takes effect at once
+    response["X-Robots-Tag"] = "noindex"
+    return response
 
 
 def document_list(request):

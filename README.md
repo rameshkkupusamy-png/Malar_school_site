@@ -219,10 +219,10 @@ On the **Tasks** tab, add a daily scheduled task (for example at 02:00) that run
 /home/sjktldgsemenyih/.virtualenvs/school/bin/python /home/sjktldgsemenyih/Malar_school_site/manage.py backup
 ```
 
-Each backup is one zip file (the database plus all photos and documents) in `backups/`, and the
+Each backup is one zip file (the database, all photos and documents, and the private achievement photos in `private_media/`) in `backups/`, and the
 newest 14 are kept (`BACKUP_KEEP`). The backups sit on the same account as the site, so now and
 then download the newest zip from the **Files** tab and keep it somewhere else, such as the
-school's Google Drive. To restore, unzip it, put `db.sqlite3` and `media/` back in
+school's Google Drive. To restore, unzip it, put `db.sqlite3`, `media/` and `private_media/` back in
 `~/Malar_school_site`, and click **Reload**.
 
 ### If something goes wrong

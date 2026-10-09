@@ -19,6 +19,7 @@ urlpatterns = [
     path("contact/", views.contact, name="contact"),
     path("achievements/", views.achievement_list, name="achievement_list"),
     path("achievements/<int:pk>/", views.achievement_detail, name="achievement_detail"),
+    path("private/<path:name>", views.private_media, name="private_media"),
     path("manifest.webmanifest", views.manifest, name="manifest"),
     path("subscribe/", views.subscribe, name="subscribe"),
     path("unsubscribe/<uuid:token>/", views.unsubscribe, name="unsubscribe"),

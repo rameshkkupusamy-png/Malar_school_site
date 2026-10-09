@@ -507,6 +507,15 @@ class AchievementAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
 
     @admin.display(description="photos")
     def photo_note(self, obj):
-        if obj is None or obj.pk is None or obj.photos_allowed:
-            return "Photos are shown on the site."
-        return "Photos are hidden until every pupil listed has “parents agreed” ticked."
+        if obj is None or obj.pk is None:
+            return "Photos only show when every pupil listed has “parents agreed” ticked."
+        if not obj.is_published:
+            return "This achievement is not published, so nothing is shown yet."
+        if not obj.pupils.exists():
+            return (
+                "No pupils are listed, so these photos are shown. Only add photos where the "
+                "parents of every child pictured agreed."
+            )
+        if not obj.photos_allowed:
+            return "Photos are hidden until every pupil listed has “parents agreed” ticked."
+        return "Photos are shown on the site."

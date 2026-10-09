@@ -1,4 +1,5 @@
 import math
+import os
 import re
 import unicodedata
 import uuid
@@ -17,6 +18,7 @@ from django.dispatch import receiver
 from django.template.defaultfilters import filesizeformat
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
 from .images import shrink_new_upload
@@ -694,7 +696,7 @@ def short_name(full: str) -> str:
     if not words:
         return ""
     for index, word in enumerate(words):
-        if index and word.lower() in PATRONYMIC_MARKERS:
+        if index and word.lower().rstrip(".") in PATRONYMIC_MARKERS:
             given, rest = words[:index], words[index + 1 :]
             break
     else:
@@ -736,7 +738,9 @@ class Achievement(models.Model):
     HIGH_LEVELS = {STATE, NATIONAL, INTERNATIONAL}
 
     title = models.CharField(
-        max_length=200, help_text="e.g. “1st place, district Tamil essay competition”"
+        max_length=200,
+        help_text="e.g. “1st place, district Tamil essay competition”. No pupils' full names: "
+        "list them below, where the consent and short-name rules apply.",
     )
     description = models.TextField(
         blank=True,
@@ -816,10 +820,39 @@ class AchievementPupil(models.Model):
         return f"{name} ({self.class_name.strip()})" if self.class_name.strip() else name
 
 
+@deconstructible
+class PrivateMediaStorage(FileSystemStorage):
+    """Uploads that must not be public. They live outside MEDIA_ROOT, so the web server never
+    sends them directly; portal.views.private_media checks who may see each one."""
+
+    @property
+    def base_location(self):
+        return settings.PRIVATE_MEDIA_ROOT
+
+    @property
+    def location(self):
+        return os.path.abspath(self.base_location)
+
+    @property
+    def base_url(self):
+        return settings.PRIVATE_MEDIA_URL
+
+
+def achievement_photo_name(instance, filename) -> str:
+    """A random name: teachers often name files after the child ("Kavin Raju 1st place.jpg")."""
+    return f"achievements/{uuid.uuid4().hex}{PurePath(filename).suffix.lower()}"
+
+
 class AchievementPhoto(models.Model):
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="photos")
-    image = models.ImageField(upload_to="achievements/")
-    caption = models.CharField(max_length=200, blank=True)
+    image = models.ImageField(
+        upload_to=achievement_photo_name,
+        storage=PrivateMediaStorage(),
+        help_text="Only photos where the parents of every child pictured agreed.",
+    )
+    caption = models.CharField(
+        max_length=200, blank=True, help_text="Optional. No pupils' full names."
+    )
     order = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -832,3 +865,31 @@ class AchievementPhoto(models.Model):
     def save(self, *args, **kwargs) -> None:
         self.image = shrink_new_upload(self.image)
         super().save(*args, **kwargs)
+
+
+# Achievement photos: delete the file with its record or when it's replaced, once the database
+# change is committed (a rolled-back save still points at the old file).
+
+
+@receiver(pre_save, sender=AchievementPhoto)
+def _remember_old_achievement_photo(sender, instance, **kwargs):
+    instance._old_image = (
+        sender.objects.filter(pk=instance.pk).values_list("image", flat=True).first()
+        if instance.pk
+        else None
+    )
+
+
+@receiver(post_save, sender=AchievementPhoto)
+def _delete_replaced_achievement_photo(sender, instance, **kwargs):
+    old = getattr(instance, "_old_image", None)
+    if old and old != instance.image.name:
+        storage = instance.image.storage
+        transaction.on_commit(lambda: storage.delete(old))
+
+
+@receiver(post_delete, sender=AchievementPhoto)
+def _delete_achievement_photo_file(sender, instance, **kwargs):
+    if instance.image:
+        storage, name = instance.image.storage, instance.image.name
+        transaction.on_commit(lambda: storage.delete(name))

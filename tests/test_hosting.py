@@ -56,12 +56,16 @@ def test_backup_saves_database_and_photos(settings, tmp_path, make_event):
     settings.MEDIA_ROOT = tmp_path / "media"
     (tmp_path / "media" / "albums").mkdir(parents=True)
     (tmp_path / "media" / "albums" / "sports.jpg").write_bytes(b"jpeg bytes")
+    settings.PRIVATE_MEDIA_ROOT = tmp_path / "private"
+    (tmp_path / "private" / "achievements").mkdir(parents=True)
+    (tmp_path / "private" / "achievements" / "win.jpg").write_bytes(b"private bytes")
 
     call_command("backup", to=tmp_path / "backups")
 
     [backup] = (tmp_path / "backups").glob("school-backup-*.zip")
     with zipfile.ZipFile(backup) as archive:
         assert archive.read("media/albums/sports.jpg") == b"jpeg bytes"
+        assert archive.read("private_media/achievements/win.jpg") == b"private bytes"
         archive.extract("db.sqlite3", tmp_path)
     with sqlite3.connect(tmp_path / "db.sqlite3") as restored:
         titles = [row[0] for row in restored.execute("select title from portal_event")]

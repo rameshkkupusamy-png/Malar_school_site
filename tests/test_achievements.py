@@ -1,5 +1,7 @@
+import re
 from datetime import date
 from io import BytesIO
+from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import Group, User
@@ -15,7 +17,8 @@ from portal.whatsapp import share_message
 
 @pytest.fixture(autouse=True)
 def media(settings, tmp_path):
-    settings.MEDIA_ROOT = tmp_path
+    settings.MEDIA_ROOT = tmp_path / "media"
+    settings.PRIVATE_MEDIA_ROOT = tmp_path / "private"
 
 
 def jpeg(size=(3000, 2000)):
@@ -51,6 +54,8 @@ def achievement(db):
         ("Meera Suresh", "Meera S."),
         ("Tharshini", "Tharshini"),
         ("  ", ""),
+        ("Nur Aisyah bt. Ahmad", "Nur Aisyah A."),
+        ("Ali Bin. Abu", "Ali A."),
     ],
 )
 def test_short_name(full, short):
@@ -164,15 +169,16 @@ def test_photos_hidden_until_every_pupil_agreed(achievement, client):
     )
     AchievementPhoto.objects.create(achievement=item, image=jpeg())
 
+    photo = item.photos.get()
     for url in (reverse("portal:achievement_list"), item.get_absolute_url()):
         html = client.get(url).content.decode()
-        assert "achievements/win" not in html
+        assert photo.image.url not in html
         assert "Kavin R. (5 Mutiara)" in html
         assert "Meera" not in html
         assert "a Year 5 pupil" in html
 
     item.pupils.update(consent=True)
-    assert "achievements/win" in client.get(item.get_absolute_url()).content.decode()
+    assert photo.image.url in client.get(item.get_absolute_url()).content.decode()
 
 
 def test_detail_page_and_drafts(achievement, client):
@@ -261,3 +267,112 @@ def test_editor_can_add_an_achievement_with_pupils_and_photos(client):
     item = Achievement.objects.get()
     assert item.pupils.get().consent
     assert item.photos.count() == 1
+
+
+# Photo files: private, random names, served only through the consent gate ------------------
+
+
+def test_photo_files_get_random_names_outside_the_public_media_folder(achievement, settings):
+    photo = AchievementPhoto.objects.create(
+        achievement=achievement(),
+        image=SimpleUploadedFile("Kavin Raju 1st place.jpg", jpeg().read()),
+    )
+
+    assert re.fullmatch(r"achievements/[0-9a-f]{32}\.jpg", photo.image.name)
+    assert Path(photo.image.path).is_relative_to(settings.PRIVATE_MEDIA_ROOT)
+    assert not (Path(settings.MEDIA_ROOT) / photo.image.name).exists()
+
+
+def test_photo_is_served_only_while_published_with_everyone_agreed(achievement, client):
+    item = achievement(pupils=[("Kavin a/l Raju", "5 Mutiara", True)])
+    photo = AchievementPhoto.objects.create(achievement=item, image=jpeg())
+    url = photo.image.url
+
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/jpeg"
+    assert "no-store" in response["Cache-Control"]
+    assert response["X-Robots-Tag"] == "noindex"
+    assert b"".join(response.streaming_content)[:2] == bytes([0xFF, 0xD8])  # a JPEG
+
+    item.pupils.update(consent=False)  # a parent withdrew consent
+    assert client.get(url).status_code == 404
+
+    item.pupils.update(consent=True)
+    Achievement.objects.filter(pk=item.pk).update(is_published=False)
+    assert client.get(url).status_code == 404
+
+
+def test_staff_can_see_held_back_photos(achievement, admin_client):
+    item = achievement(pupils=[("Meera", "5 Mutiara", False)])
+    photo = AchievementPhoto.objects.create(achievement=item, image=jpeg())
+    assert admin_client.get(photo.image.url).status_code == 200
+
+
+@pytest.mark.django_db
+def test_unknown_private_file_is_not_found(client):
+    assert (
+        client.get("/private/achievements/0123456789abcdef0123456789abcdef.jpg").status_code == 404
+    )
+    assert client.get("/private/../db.sqlite3").status_code == 404
+
+
+def test_deleting_photos_or_achievements_deletes_the_files(
+    achievement, django_capture_on_commit_callbacks
+):
+    item = achievement()
+    first = AchievementPhoto.objects.create(achievement=item, image=jpeg())
+    second = AchievementPhoto.objects.create(achievement=item, image=jpeg())
+    first_path, second_path = Path(first.image.path), Path(second.image.path)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        first.delete()
+    assert not first_path.exists()
+
+    with django_capture_on_commit_callbacks(execute=True):
+        item.delete()
+    assert not second_path.exists()
+
+
+def test_replacing_a_photo_deletes_the_old_file(achievement, django_capture_on_commit_callbacks):
+    photo = AchievementPhoto.objects.create(achievement=achievement(), image=jpeg())
+    old_path = Path(photo.image.path)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        photo.image = jpeg((800, 600))
+        photo.save()
+
+    assert not old_path.exists()
+    assert Path(photo.image.path).exists()
+
+
+# Admin warnings and other review fixes --------------------------------------------------------
+
+
+def test_admin_warns_when_photos_show_without_pupils_listed(achievement, admin_client):
+    item = achievement("Gold, state choir competition")
+    html = admin_client.get(
+        reverse("admin:portal_achievement_change", args=[item.pk])
+    ).content.decode()
+    assert "No pupils are listed, so these photos are shown" in html
+
+
+def test_admin_note_mentions_unpublished(achievement, admin_client):
+    item = achievement(pupils=[("Kavin a/l Raju", "5 Mutiara", True)], is_published=False)
+    html = admin_client.get(
+        reverse("admin:portal_achievement_change", args=[item.pk])
+    ).content.decode()
+    assert "not published, so nothing is shown yet" in html
+
+
+@pytest.mark.parametrize("query", ["?year=²", "?year=" + "9" * 5000, "?year=-1"])
+def test_odd_year_values_do_not_break_the_page(achievement, client, query):
+    achievement("Choir", date=date(2026, 3, 1))
+    response = page(client, query)
+    assert response.status_code == 200
+    assert response.context["year"] == 2026
+
+
+def test_titles_and_captions_warn_against_full_names():
+    for model, field in [(Achievement, "title"), (AchievementPhoto, "caption")]:
+        assert "full names" in str(model._meta.get_field(field).help_text)
