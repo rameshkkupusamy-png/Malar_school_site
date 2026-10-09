@@ -134,3 +134,29 @@ def test_keyboard_focus_is_visible(page, live_server, site):
         }"""
     )
     assert outline, "The first focused link has no visible focus outline"
+
+
+def test_urgent_bar_is_yellow_and_its_label_pulses(page, live_server, site):
+    page.goto(live_server.url + "/")
+
+    bar = page.evaluate("getComputedStyle(document.querySelector('.urgent')).backgroundColor")
+    assert bar == "rgb(242, 213, 60)"  # torch yellow
+    label = page.locator(".urgent-label")
+    assert label.evaluate("el => getComputedStyle(el).animationName") == "urgent-pulse"
+    assert label.evaluate("el => getComputedStyle(el).animationIterationCount") == "3"
+
+
+def test_urgent_pulse_is_skipped_when_the_phone_asks_for_less_motion(page, live_server, site):
+    page.emulate_media(reduced_motion="reduce")
+    page.goto(live_server.url + "/")
+
+    label = page.locator(".urgent-label")
+    assert label.evaluate("el => getComputedStyle(el).animationName") == "none"
+
+
+def test_links_in_the_urgent_bar_show_keyboard_focus(page, live_server, site):
+    page.goto(live_server.url + "/")
+    link = page.locator(".urgent a")
+    link.focus()
+    colour = link.evaluate("el => getComputedStyle(el).outlineColor")
+    assert colour != "rgb(242, 213, 60)", "a yellow outline is invisible on the yellow bar"

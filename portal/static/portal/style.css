@@ -124,20 +124,37 @@ p { margin: 0 0 0.75em; }
   padding-block: 0.75rem;
 }
 
-/* Urgent notices: one line above the header on every page */
+/* Urgent notices: one line above the header on every page. Bright yellow so it can't be
+   missed; the label pulses three times on arrival, never for people who ask for less motion. */
 
-.urgent { background: var(--navy); color: var(--white); }
-.urgent-notice { margin: 0; padding-block: 0.7rem; overflow-wrap: anywhere; }
-.urgent-notice + .urgent-notice { border-top: 1px solid rgb(255 255 255 / 0.2); }
+.urgent { background: var(--torch); color: var(--navy); }
+.urgent-notice {
+  margin: 0;
+  padding-block: 0.8rem;
+  font-size: var(--step-1);
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.urgent-notice + .urgent-notice { border-top: 1px solid rgb(20 41 95 / 0.25); }
 .urgent-label {
   display: inline-block;
   margin-right: 0.5rem;
-  padding: 0.05rem 0.5rem;
+  padding: 0.05rem 0.55rem;
   border-radius: var(--radius);
-  background: var(--torch);
-  color: var(--navy);
+  background: var(--navy);
+  color: var(--white);
 }
-.urgent a { color: var(--white); font-weight: 600; }
+.urgent a { color: var(--navy); }
+.urgent a:focus-visible { outline-color: var(--navy); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .urgent-label { animation: urgent-pulse 0.9s ease-in-out 0.3s 3; }
+}
+
+@keyframes urgent-pulse {
+  50% { transform: scale(1.12); box-shadow: 0 0 0 0.3rem rgb(20 41 95 / 0.25); }
+}
 
 .brand {
   display: flex;
