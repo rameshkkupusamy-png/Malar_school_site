@@ -17,6 +17,7 @@ urlpatterns = [
     path("documents/", views.document_list, name="document_list"),
     path("documents/<int:pk>/", views.document_open, name="document_open"),
     path("contact/", views.contact, name="contact"),
+    path("manifest.webmanifest", views.manifest, name="manifest"),
     path("subscribe/", views.subscribe, name="subscribe"),
     path("unsubscribe/<uuid:token>/", views.unsubscribe, name="unsubscribe"),
 ]

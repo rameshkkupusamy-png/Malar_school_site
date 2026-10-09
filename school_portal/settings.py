@@ -24,6 +24,8 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").sp
 # School-specific settings
 SCHOOL_NAME = os.environ.get("SCHOOL_NAME", "SJK (T) Ladang Semenyih")
 SCHOOL_MOTTO = os.environ.get("SCHOOL_MOTTO", "Usaha Tangga Kejayaan")
+# The name under the icon on a phone's home screen; only about 12 letters fit.
+SCHOOL_SHORT_NAME = os.environ.get("SCHOOL_SHORT_NAME", "SJKT Semenyih")
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000").rstrip("/")
 
 # Behind Cloudflare Tunnel the site is reached over https, but the tunnel talks to the local

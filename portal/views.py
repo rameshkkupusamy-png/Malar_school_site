@@ -5,8 +5,9 @@ from urllib.parse import quote, urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
@@ -203,6 +204,35 @@ def document_open(request, pk):
     """
     document = get_object_or_404(Document.objects.filter(is_published=True), pk=pk)
     return redirect(document.file.url)
+
+
+def manifest(request):
+    """Lets parents add the site to their phone's home screen, with the crest as its icon."""
+    icons = [
+        {"src": static("portal/icon-192.png"), "sizes": "192x192", "type": "image/png"},
+        {"src": static("portal/icon-512.png"), "sizes": "512x512", "type": "image/png"},
+        {
+            "src": static("portal/icon-maskable-512.png"),
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable",
+        },
+    ]
+    return JsonResponse(
+        {
+            "name": settings.SCHOOL_NAME,
+            "short_name": settings.SCHOOL_SHORT_NAME,
+            "start_url": "/",
+            "scope": "/",
+            "display": "standalone",
+            "theme_color": "#14295F",
+            "background_color": "#FFFFFF",
+            "lang": settings.LANGUAGE_CODE,
+            "icons": icons,
+        },
+        content_type="application/manifest+json",
+        json_dumps_params={"ensure_ascii": False},
+    )
 
 
 def contact(request):

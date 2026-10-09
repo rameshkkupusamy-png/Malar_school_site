@@ -7,6 +7,9 @@
   <title>{% block title %}{{ school_name }}{% endblock %}</title>
   <link rel="icon" type="image/png" href="{% static 'portal/favicon.png' %}">
   <link rel="apple-touch-icon" href="{% static 'portal/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% url 'portal:manifest' %}">
+  <meta name="theme-color" content="#14295F">
+  <meta name="apple-mobile-web-app-title" content="{{ school_short_name }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta+Malar:wght@400;600;700&family=Noto+Serif+Display:ital,wght@1,500;1,600&family=Noto+Serif+Tamil:wght@500&display=swap">
