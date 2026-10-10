@@ -20,8 +20,8 @@ whichever language column that word is stored in.
   `aria-current="page"` on the search page.
 - `/search/?q=…` shows the heading "Search the school site", one labelled `type="search"` box
   (filled with the current query) and a "Search" button.
-- No query, or a query under 2 characters after trimming: only the box and the hint "Type a word
-  from the title, for example sports day or booklist."
+- No query, or a query under 2 characters after trimming: only the box and the hint "Type a word,
+  for example sports day or booklist."
 - Results are grouped in this fixed order: Events, News, Documents, Achievements, Photos. Each
   section heading shows its count, e.g. "Events (3)". Sections with no matches are hidden.
 - Each section lists at most 10 items as a plain list (not cards): a title link in the visitor's
