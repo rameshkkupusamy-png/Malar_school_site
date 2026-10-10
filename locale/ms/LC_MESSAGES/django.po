@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-09 13:46+0800\n"
+"POT-Creation-Date: 2026-10-10 20:23+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -136,94 +136,122 @@ msgstr[1] "%(num)d minit"
 msgid ", "
 msgstr ", "
 
-#: portal/models.py:73
+#: portal/models.py:75
 msgid "Event"
 msgstr "Acara"
 
-#: portal/models.py:74
+#: portal/models.py:76
 msgid "Holiday"
 msgstr "Cuti"
 
-#: portal/models.py:75
+#: portal/models.py:77
 msgid "Exam"
 msgstr "Peperiksaan"
 
-#: portal/models.py:76 portal/views.py:78
+#: portal/models.py:78 portal/views.py:80
 msgid "PIBG"
 msgstr "PIBG"
 
-#: portal/models.py:77 portal/models.py:717 portal/views.py:79
+#: portal/models.py:79 portal/models.py:719 portal/views.py:81
 msgid "Sports"
 msgstr "Sukan"
 
-#: portal/models.py:78
+#: portal/models.py:80
 msgid "Celebration"
 msgstr "Perayaan"
 
-#: portal/models.py:417
+#: portal/models.py:419
 msgid "Circulars"
 msgstr "Surat edaran"
 
-#: portal/models.py:418
+#: portal/models.py:420
 msgid "Forms"
 msgstr "Borang"
 
-#: portal/models.py:419
+#: portal/models.py:421
 msgid "Timetables and lists"
 msgstr "Jadual dan senarai"
 
-#: portal/models.py:420
+#: portal/models.py:422
 msgid "School documents"
 msgstr "Dokumen sekolah"
 
-#: portal/models.py:716
+#: portal/models.py:718
 msgid "Academic"
 msgstr "Akademik"
 
-#: portal/models.py:718
+#: portal/models.py:720
 msgid "Arts and culture"
 msgstr "Seni dan budaya"
 
-#: portal/models.py:719
+#: portal/models.py:721
 msgid "Tamil language"
 msgstr "Bahasa Tamil"
 
-#: portal/models.py:720
+#: portal/models.py:722
 msgid "Other"
 msgstr "Lain-lain"
 
-#: portal/models.py:730
+#: portal/models.py:732
 msgid "School"
 msgstr "Sekolah"
 
-#: portal/models.py:731
+#: portal/models.py:733
 msgid "District"
 msgstr "Daerah"
 
-#: portal/models.py:732
+#: portal/models.py:734
 msgid "State"
 msgstr "Negeri"
 
-#: portal/models.py:733
+#: portal/models.py:735
 msgid "National"
 msgstr "Kebangsaan"
 
-#: portal/models.py:734
+#: portal/models.py:736
 msgid "International"
 msgstr "Antarabangsa"
 
-#: portal/models.py:810
+#: portal/models.py:818
 #, python-format
 msgid "a Year %(year)s pupil"
 msgstr "seorang murid Tahun %(year)s"
 
-#: portal/models.py:810
+#: portal/models.py:818
 msgid "a pupil"
 msgstr "seorang murid"
 
 #: portal/notifications.py:81
 msgid "Tomorrow at school"
 msgstr "Esok di sekolah"
+
+#: portal/search.py:66 portal/templates/portal/base.html:40 portal/templates/portal/base.html:72
+#: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
+msgid "Events"
+msgstr "Acara"
+
+#: portal/search.py:69 portal/templates/portal/announcement_list.html:4
+#: portal/templates/portal/announcement_list.html:8 portal/templates/portal/base.html:39
+#: portal/templates/portal/base.html:71
+msgid "News"
+msgstr "Berita"
+
+#: portal/search.py:73 portal/templates/portal/base.html:42 portal/templates/portal/base.html:74
+#: portal/templates/portal/document_list.html:4 portal/templates/portal/document_list.html:8
+msgid "Documents"
+msgstr "Dokumen"
+
+#: portal/search.py:76 portal/templates/portal/achievement_list.html:4
+#: portal/templates/portal/achievement_list.html:9 portal/templates/portal/base.html:43
+#: portal/templates/portal/base.html:75
+msgid "Achievements"
+msgstr "Pencapaian"
+
+#: portal/search.py:80 portal/templates/portal/album_list.html:4
+#: portal/templates/portal/album_list.html:8 portal/templates/portal/base.html:41
+#: portal/templates/portal/base.html:73
+msgid "Photos"
+msgstr "Gambar"
 
 #: portal/templates/portal/_event_time.html:4
 msgid "l j F"
@@ -271,11 +299,6 @@ msgstr "Lebih lama"
 msgid "Back to all achievements"
 msgstr "Kembali ke semua pencapaian"
 
-#: portal/templates/portal/achievement_list.html:4 portal/templates/portal/achievement_list.html:9
-#: portal/templates/portal/base.html:43 portal/templates/portal/base.html:74
-msgid "Achievements"
-msgstr "Pencapaian"
-
 #: portal/templates/portal/achievement_list.html:10 portal/templates/portal/event_list.html:9
 msgid "Show only"
 msgstr "Tunjukkan sahaja"
@@ -300,11 +323,6 @@ msgstr "Belum ada gambar dalam album ini."
 msgid "Back to all photos"
 msgstr "Kembali ke semua gambar"
 
-#: portal/templates/portal/album_list.html:4 portal/templates/portal/album_list.html:8
-#: portal/templates/portal/base.html:41 portal/templates/portal/base.html:72
-msgid "Photos"
-msgstr "Gambar"
-
 #: portal/templates/portal/album_list.html:20
 msgid "No photos yet"
 msgstr "Belum ada gambar"
@@ -323,11 +341,6 @@ msgstr "Belum ada album gambar."
 #: portal/templates/portal/announcement_detail.html:11
 msgid "Back to all news"
 msgstr "Kembali ke semua berita"
-
-#: portal/templates/portal/announcement_list.html:4 portal/templates/portal/announcement_list.html:8
-#: portal/templates/portal/base.html:39 portal/templates/portal/base.html:70
-msgid "News"
-msgstr "Berita"
 
 #: portal/templates/portal/announcement_list.html:17
 msgid "No news right now."
@@ -353,30 +366,25 @@ msgstr "Butiran"
 msgid "Main"
 msgstr "Utama"
 
-#: portal/templates/portal/base.html:40 portal/templates/portal/base.html:71
-#: portal/templates/portal/event_list.html:4 portal/templates/portal/event_list.html:8
-msgid "Events"
-msgstr "Acara"
+#: portal/templates/portal/base.html:44 portal/templates/portal/base.html:76
+#: portal/templates/portal/search.html:4 portal/templates/portal/search.html:15
+msgid "Search"
+msgstr "Cari"
 
-#: portal/templates/portal/base.html:42 portal/templates/portal/base.html:73
-#: portal/templates/portal/document_list.html:4 portal/templates/portal/document_list.html:8
-msgid "Documents"
-msgstr "Dokumen"
-
-#: portal/templates/portal/base.html:69
+#: portal/templates/portal/base.html:70
 msgid "Footer"
 msgstr "Kaki halaman"
 
-#: portal/templates/portal/base.html:75 portal/templates/portal/contact.html:4
-#: portal/templates/portal/contact.html:8
+#: portal/templates/portal/base.html:77 portal/templates/portal/contact.html:4
+#: portal/templates/portal/contact.html:8 portal/templates/portal/search.html:49
 msgid "Contact the school"
 msgstr "Hubungi sekolah"
 
-#: portal/templates/portal/base.html:76
+#: portal/templates/portal/base.html:78
 msgid "Staff sign in"
 msgstr "Log masuk kakitangan"
 
-#: portal/templates/portal/base.html:80
+#: portal/templates/portal/base.html:82
 msgid "Follow the school"
 msgstr "Ikuti sekolah"
 
@@ -443,6 +451,7 @@ msgid "%(school_name)s has a new event:"
 msgstr "%(school_name)s ada acara baharu:"
 
 #: portal/templates/portal/email/new_event.txt:9 portal/templates/portal/email/reminder.txt:8
+#: portal/templates/portal/whatsapp/achievement.txt:4
 #: portal/templates/portal/whatsapp/announcement.txt:4 portal/templates/portal/whatsapp/event.txt:5
 msgid "Details:"
 msgstr "Butiran:"
@@ -618,6 +627,27 @@ msgstr "(pilihan)"
 msgid "Sign up for emails"
 msgstr "Daftar untuk e-mel"
 
+#: portal/templates/portal/search.html:9
+msgid "Search the school site"
+msgstr "Cari dalam laman sekolah"
+
+#: portal/templates/portal/search.html:12
+msgid "What are you looking for?"
+msgstr "Apa yang anda cari?"
+
+#: portal/templates/portal/search.html:20
+msgid "Type a word, for example sports day or booklist."
+msgstr "Taip satu perkataan, contohnya hari sukan atau senarai buku."
+
+#: portal/templates/portal/search.html:45
+#, python-format
+msgid "Showing the first %(shown)s of %(total)s. Try a more specific word."
+msgstr "Menunjukkan %(shown)s yang pertama daripada %(total)s. Cuba perkataan yang lebih khusus."
+
+#: portal/templates/portal/search.html:49
+msgid "Nothing matched. Try another word."
+msgstr "Tiada yang sepadan. Cuba perkataan lain."
+
 #: portal/templates/portal/unsubscribe.html:4 portal/templates/portal/unsubscribe.html:8
 msgid "Stop event emails"
 msgstr "Hentikan e-mel acara"
@@ -644,32 +674,32 @@ msgstr "Daftar semula di halaman utama"
 msgid "Open the document:"
 msgstr "Buka dokumen:"
 
-#: portal/views.py:75 portal/views.py:199
+#: portal/views.py:77 portal/views.py:201
 msgid "All"
 msgstr "Semua"
 
-#: portal/views.py:76
+#: portal/views.py:78
 msgid "Holidays"
 msgstr "Cuti"
 
-#: portal/views.py:77
+#: portal/views.py:79
 msgid "Exams"
 msgstr "Peperiksaan"
 
-#: portal/views.py:80
+#: portal/views.py:82
 msgid "Celebrations"
 msgstr "Perayaan"
 
-#: portal/views.py:304
+#: portal/views.py:338
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:322
+#: portal/views.py:356
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:333
+#: portal/views.py:367
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."

@@ -14,6 +14,8 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - `portal/auth.py` staff sign-in rules (django-allauth): Google sign-in only for active
   `StaffMember` emails; password sign-up is closed. `import_staff` loads the list from a
   spreadsheet. The admin login page is `portal/templates/admin/staff_login.html`
+- `portal/search.py` site search (`/search/`): published events, news, documents, achievements and
+  albums, matched in all three language columns; pupil names are never searched
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests

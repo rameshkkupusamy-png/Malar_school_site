@@ -27,6 +27,7 @@ from .models import (
     Subscriber,
     month_range,
 )
+from .search import LIMIT, MAX_LENGTH, find, words
 
 PAGE_SIZE = 10
 
@@ -281,6 +282,20 @@ def document_open(request, pk):
     """
     document = get_object_or_404(Document.objects.filter(is_published=True), pk=pk)
     return redirect(document.file.url)
+
+
+def search(request):
+    query = request.GET.get("q", "")
+    return render(
+        request,
+        "portal/search.html",
+        {
+            "query": query.strip()[:MAX_LENGTH],
+            "searched": bool(words(query)),
+            "sections": find(query),
+            "limit": LIMIT,
+        },
+    )
 
 
 def manifest(request):

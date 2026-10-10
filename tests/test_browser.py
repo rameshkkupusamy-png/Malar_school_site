@@ -79,6 +79,7 @@ def page_paths(site):
         "/contact/",
         "/achievements/",
         site["achievement"].get_absolute_url(),
+        "/search/?q=sports",
     ]
 
 
@@ -170,3 +171,16 @@ def test_links_in_the_urgent_bar_show_keyboard_focus(page, live_server, site):
     link.focus()
     colour = link.evaluate("el => getComputedStyle(el).outlineColor")
     assert colour != "rgb(242, 213, 60)", "a yellow outline is invisible on the yellow bar"
+
+
+def test_parent_can_search_and_open_a_result(page, live_server, site):
+    use_language(page, live_server, "en")
+    page.set_viewport_size(PHONE)
+    page.goto(live_server.url + "/")
+
+    page.get_by_role("navigation", name="Main").get_by_role("link", name="Search").click()
+    page.get_by_label("What are you looking for?").fill("science fair")
+    page.get_by_role("button", name="Search").click()
+    page.get_by_role("link", name=site["event"].title).click()
+
+    assert page.url == live_server.url + site["event"].get_absolute_url()

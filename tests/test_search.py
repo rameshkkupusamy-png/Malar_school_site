@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
 from django.utils import timezone, translation
 
 from portal.models import Achievement, Album, Announcement, Document, Event
@@ -163,3 +164,72 @@ def test_short_queries_search_nothing():
     event(title="Sports day")
     assert find("") == []
     assert find("s") == []
+
+
+def search_page(client, query=None):
+    url = reverse("portal:search")
+    return client.get(url, {"q": query} if query is not None else {})
+
+
+@pytest.mark.django_db
+def test_page_without_a_query_shows_the_box_and_hint(client):
+    for query in (None, "", "   ", "s"):
+        html = search_page(client, query).content.decode()
+        assert 'type="search"' in html
+        assert "Type a word, for example sports day or booklist." in html
+        assert "Nothing matched" not in html
+
+
+@pytest.mark.django_db
+def test_results_are_grouped_with_counts_and_links(client):
+    sports = event(title_en="Sports day")
+    Announcement.objects.create(title_en="Sports day photos are up", body_en="See the gallery.")
+
+    html = search_page(client, "sports").content.decode()
+
+    assert "Events (1)" in html
+    assert "News (1)" in html
+    assert sports.get_absolute_url() in html
+    assert html.index("Events (1)") < html.index("News (1)")
+    assert "Documents (" not in html
+
+
+@pytest.mark.django_db
+def test_nothing_found_suggests_another_word_and_the_contact_page(client):
+    html = search_page(client, "zebra").content.decode()
+    assert "Nothing matched. Try another word." in html
+    assert reverse("portal:contact") in html
+
+
+@pytest.mark.django_db
+def test_more_than_ten_matches_says_so(client):
+    for day in range(LIMIT + 2):
+        event(days=day + 1, title_en=f"Club meeting {day}")
+    html = search_page(client, "club").content.decode()
+    assert "Showing the first 10 of 12. Try a more specific word." in html
+
+
+@pytest.mark.django_db
+def test_page_is_not_indexed_and_the_menu_marks_it(client):
+    html = search_page(client).content.decode()
+    assert '<meta name="robots" content="noindex">' in html
+    assert f'<a href="{reverse("portal:search")}" aria-current="page">Search</a>' in html
+
+
+@pytest.mark.django_db
+def test_query_is_shown_back_escaped(client):
+    html = search_page(client, '<script>alert("x")</script>').content.decode()
+    assert "<script>alert" not in html
+    assert "&lt;script&gt;alert" in html
+
+
+@pytest.mark.django_db
+def test_long_query_still_renders(client):
+    assert search_page(client, "word " * 100).status_code == 200
+
+
+@pytest.mark.django_db
+def test_tamil_only_post_shows_its_tamil_title_to_english_visitors(client):
+    event(title_ta="விளையாட்டு நாள்")
+    html = search_page(client, "விளையாட்டு").content.decode()
+    assert ">விளையாட்டு நாள்</a>" in html

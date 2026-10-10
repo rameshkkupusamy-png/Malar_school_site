@@ -1,0 +1,52 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Search" %}, {{ school_name }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>{% translate "Search the school site" %}</h1>
+  <form class="form-row search-form" method="get" action="{% url 'portal:search' %}" role="search">
+    <div class="field">
+      <label for="search-q">{% translate "What are you looking for?" %}</label>
+      <input id="search-q" type="search" name="q" value="{{ query }}" maxlength="100">
+    </div>
+    <button class="button" type="submit">{% translate "Search" %}</button>
+  </form>
+</header>
+
+{% if not searched %}
+  <p class="meta">{% translate "Type a word, for example sports day or booklist." %}</p>
+{% else %}
+  {% for section in sections %}
+    <section class="search-section" aria-labelledby="results-{{ section.key }}">
+      <h2 id="results-{{ section.key }}">{{ section.heading }} ({{ section.total }})</h2>
+      {% if section.key == "events" %}
+        <ul class="event-list">
+          {% for event in section.items %}{% include "portal/_event_row.html" %}{% endfor %}
+        </ul>
+      {% else %}
+        <ul class="document-list">
+          {% for item in section.items %}
+            <li>
+              <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+              <p class="meta">
+                {% if section.key == "news" %}<time datetime="{{ item.published_at|date:'c' }}">{{ item.published_at|date:"j F Y" }}</time>
+                {% elif section.key == "documents" %}<time datetime="{{ item.added_at|date:'c' }}">{{ item.added_at|date:"j F Y" }}</time> · {{ item.file_type }}
+                {% elif section.key == "achievements" %}{{ item.get_level_display }} · <time datetime="{{ item.date|date:'Y-m-d' }}">{{ item.date|date:"j F Y" }}</time>
+                {% else %}<time datetime="{{ item.created_at|date:'c' }}">{{ item.created_at|date:"j F Y" }}</time>{% endif %}
+              </p>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if section.total > limit %}
+        <p class="meta">{% blocktranslate with shown=limit total=section.total %}Showing the first {{ shown }} of {{ total }}. Try a more specific word.{% endblocktranslate %}</p>
+      {% endif %}
+    </section>
+  {% empty %}
+    <p>{% translate "Nothing matched. Try another word." %} <a href="{% url 'portal:contact' %}">{% translate "Contact the school" %}</a></p>
+  {% endfor %}
+{% endif %}
+{% endblock %}

@@ -630,6 +630,10 @@ main.page { padding-block: 2.5rem 4.5rem; }
 .document-list li > a { font-weight: 600; }
 .document-list p { margin: 0.2rem 0 0; }
 
+.search-form { max-width: 40rem; }
+.search-section { margin-top: 2.5rem; }
+.search-section h2 { margin-bottom: 0.5rem; }
+
 /* Contact */
 
 .contact { max-width: var(--measure); }
@@ -728,6 +732,7 @@ main.page { padding-block: 2.5rem 4.5rem; }
 label { font-size: var(--step--1); font-weight: 700; }
 
 input[type="email"],
+input[type="search"],
 input[type="text"] {
   padding: 0.65rem 0.75rem;
   border: 2px solid var(--ink);
