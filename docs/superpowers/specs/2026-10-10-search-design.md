@@ -27,10 +27,10 @@ whichever language column that word is stored in.
 - Each section lists at most 10 items as a plain list (not cards): a title link in the visitor's
   language (usual modeltranslation fallback) plus a date or type line. Events reuse
   `_event_row.html` so dates match the Events page.
-- If a section has more than 10 matches it ends with "Showing the newest 10 of N. Try a more
+- If a section has more than 10 matches it ends with "Showing the first 10 of N. Try a more
   specific word." No paging.
-- Nothing found anywhere: "Nothing matched. Try another word, or contact the school." with a link
-  to the contact page.
+- Nothing found anywhere: "Nothing matched. Try another word." followed by the existing "Contact the
+  school" link to the contact page.
 - The page carries `<meta name="robots" content="noindex">`.
 
 ## Matching rules
@@ -56,11 +56,11 @@ whichever language column that word is stored in.
 
 ## Code
 
-- `portal/search.py`: `search(query: str) -> list[Section]`, where a section holds its key,
+- `portal/search.py`: `find(query: str) -> list[Section]`, where a section holds its key,
   heading, total count and first 10 items. A helper builds, per word, an OR of `icontains` across
   `field_ta / field_ms / field_en` for the section's fields, and ANDs the words together. Returns
   an empty list for queries under 2 characters.
-- `portal/views.py`: `search` view reads `q`, calls `search()`, renders `portal/search.html`.
+- `portal/views.py`: `search` view reads `q`, calls `find()`, renders `portal/search.html`.
 - `portal/urls.py`: `path("search/", views.search, name="search")`.
 - `portal/templates/portal/search.html` extends `base.html`; header and footer links added in
   `base.html`. Styles in `style.css` using the existing tokens (blue links, rule lines between
@@ -78,7 +78,7 @@ whichever language column that word is stored in.
   "remove after".
 - A pupil's name that appears only in an `AchievementPupil` record returns no result.
 - Empty and 1-character queries show the hint and no sections; a 500-character query renders.
-- More than 10 matches shows 10 items and the "newest 10 of N" line.
+- More than 10 matches shows 10 items and the "first 10 of N" line.
 - Page has `noindex`; header link present with `aria-current` on the search page.
 - Browser test (`tests/test_browser.py`): at phone width the menu wraps cleanly, searching and
   clicking a result opens it.
