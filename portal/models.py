@@ -413,12 +413,13 @@ class DocumentQuerySet(models.QuerySet):
 class Document(models.Model):
     """A circular, form, timetable or other file for parents, on the Documents page."""
 
-    CIRCULAR, FORM, LIST, SCHOOL = "circular", "form", "list", "school"
+    CIRCULAR, FORM, LIST, PIBG, SCHOOL = "circular", "form", "list", "pibg", "school"
     # The order here is the order of the headings on the page.
     GROUPS = [
         (CIRCULAR, _("Circulars")),
         (FORM, _("Forms")),
         (LIST, _("Timetables and lists")),
+        (PIBG, _("PIBG")),
         (SCHOOL, _("School documents")),
     ]
 
@@ -622,6 +623,110 @@ class SchoolContact(models.Model):
     @property
     def has_details(self) -> bool:
         return bool(self.phone or self.whatsapp or self.email or self.can_visit)
+
+
+class Pibg(models.Model):
+    """The PIBG (Parent-Teacher Association) page. There is only ever one of these."""
+
+    term = models.CharField(
+        max_length=20, blank=True, help_text="The committee's term, e.g. 2026/2027."
+    )
+    about = models.TextField(
+        "about and how to take part",
+        blank=True,
+        help_text="What PIBG does, the yearly fee and how to pay, and how to volunteer.",
+    )
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        validators=[validate_malaysian_number],
+        help_text="The shared PIBG number, e.g. 012-345 6789. Shown publicly.",
+    )
+    email = models.EmailField(blank=True, help_text="The shared PIBG email. Shown publicly.")
+    whatsapp_group = models.URLField(
+        "WhatsApp group link",
+        blank=True,
+        validators=[URLValidator(schemes=["https"])],
+        help_text="The PIBG WhatsApp group invite link, e.g. https://chat.whatsapp.com/…",
+    )
+
+    class Meta:
+        verbose_name = verbose_name_plural = "PIBG"
+
+    def __str__(self) -> str:
+        return "PIBG"
+
+    def save(self, *args, **kwargs) -> None:
+        self.pk = 1  # one record, however it is saved
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls) -> "Pibg":
+        return cls.objects.first() or cls()
+
+    @property
+    def phone_link(self) -> str:
+        number = _checked_number(self.phone)
+        return f"tel:+{number}" if number else ""
+
+    @property
+    def email_link(self) -> str:
+        return f"mailto:{self.email}" if self.email else ""
+
+    @property
+    def has_contact(self) -> bool:
+        return bool(self.phone_link or self.email or self.whatsapp_group)
+
+    def members(self) -> list["CommitteeMember"]:
+        """The committee in role order, then by `order`, then by name."""
+        if self.pk is None:
+            return []
+        rank = {key: index for index, (key, _label) in enumerate(CommitteeMember.ROLES)}
+        return sorted(
+            self.committee.all(), key=lambda m: (rank.get(m.role, len(rank)), m.order, m.name)
+        )
+
+
+class CommitteeMember(models.Model):
+    CHAIR, VICE_CHAIR, SECRETARY, ASSISTANT_SECRETARY = (
+        "chair",
+        "vice_chair",
+        "secretary",
+        "assistant_secretary",
+    )
+    TREASURER, ASSISTANT_TREASURER, AUDITOR, ADVISOR, MEMBER = (
+        "treasurer",
+        "assistant_treasurer",
+        "auditor",
+        "advisor",
+        "member",
+    )
+    # The order here is the order on the page.
+    ROLES = [
+        (CHAIR, _("Chairperson")),
+        (VICE_CHAIR, _("Vice-chairperson")),
+        (SECRETARY, _("Secretary")),
+        (ASSISTANT_SECRETARY, _("Assistant secretary")),
+        (TREASURER, _("Treasurer")),
+        (ASSISTANT_TREASURER, _("Assistant treasurer")),
+        (AUDITOR, _("Auditor")),
+        (ADVISOR, _("Advisor")),
+        (MEMBER, _("Committee member")),
+    ]
+
+    pibg = models.ForeignKey(Pibg, on_delete=models.CASCADE, related_name="committee")
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=30, choices=ROLES, default=MEMBER)
+    order = models.PositiveSmallIntegerField(
+        default=0, help_text="Orders people with the same role; lower numbers come first."
+    )
+
+    class Meta:
+        ordering = ["pk"]
+        verbose_name = "committee member"
+
+    def __str__(self) -> str:
+        return self.name
 
 
 EVENING_HOUR = 18  # notices posted from 6 pm are usually about tomorrow

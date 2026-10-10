@@ -16,6 +16,7 @@ from .models import (
     Document,
     Event,
     Photo,
+    Pibg,
     SchoolContact,
     UrgentNotice,
 )
@@ -69,3 +70,8 @@ class AchievementTranslation(AnyLanguage):
 @register(AchievementPhoto)
 class AchievementPhotoTranslation(AnyLanguage):
     fields = ("caption",)
+
+
+@register(Pibg)
+class PibgTranslation(AnyLanguage):
+    fields = ("about",)
