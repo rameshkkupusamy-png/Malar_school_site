@@ -18,6 +18,8 @@ EDITOR_PERMISSIONS = {
     "achievement": ["add", "change", "delete", "view"],
     "achievementpupil": ["add", "change", "delete", "view"],
     "achievementphoto": ["add", "change", "delete", "view"],
+    "pibg": ["add", "change", "view"],
+    "committeemember": ["add", "change", "delete", "view"],
 }
 
 

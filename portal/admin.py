@@ -19,10 +19,12 @@ from .models import (
     AchievementPupil,
     Album,
     Announcement,
+    CommitteeMember,
     Document,
     Event,
     EventImport,
     Photo,
+    Pibg,
     SchoolContact,
     SocialLink,
     StaffMember,
@@ -427,30 +429,58 @@ class SocialLinkAdmin(admin.ModelAdmin):
     fields = ["platform", "label", "url", "order", "is_published"]
 
 
-@admin.register(SchoolContact)
-class SchoolContactAdmin(AnyLanguageAdmin):
-    """The one contact record: the list page goes straight to it."""
+class SingleRecordAdmin(AnyLanguageAdmin):
+    """For models with exactly one record (their save() pins pk=1).
+
+    The list page goes straight to the record, or to the add form before it exists.
+    """
+
+    def _url(self, view, *args):
+        opts = self.model._meta
+        return reverse(f"admin:{opts.app_label}_{opts.model_name}_{view}", args=args)
 
     def has_add_permission(self, request):
-        return super().has_add_permission(request) and not SchoolContact.objects.exists()
+        return super().has_add_permission(request) and not self.model.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
 
     def add_view(self, request, form_url="", extra_context=None):
-        if SchoolContact.objects.exists():
-            return redirect("admin:portal_schoolcontact_change", 1)
+        if self.model.objects.exists():
+            return redirect(self._url("change", 1))
         return super().add_view(request, form_url, extra_context)
 
     def response_add(self, request, obj, post_url_continue=None):
         # "Save and add another" would lead to a second record, which can't exist.
         super().response_add(request, obj, post_url_continue)  # keeps the "added" message
-        return redirect("admin:portal_schoolcontact_change", obj.pk)
+        return redirect(self._url("change", obj.pk))
 
     def changelist_view(self, request, extra_context=None):
-        if SchoolContact.objects.exists():
-            return redirect("admin:portal_schoolcontact_change", 1)
-        return redirect("admin:portal_schoolcontact_add")
+        if self.model.objects.exists():
+            return redirect(self._url("change", 1))
+        return redirect(self._url("add"))
+
+
+@admin.register(SchoolContact)
+class SchoolContactAdmin(SingleRecordAdmin):
+    """The one contact record: the list page goes straight to it."""
+
+
+class CommitteeMemberInline(admin.TabularInline):
+    model = CommitteeMember
+    extra = 3
+    fields = ["name", "role", "order"]
+    verbose_name_plural = "Committee. Shown publicly. Add only people who agreed to be listed."
+
+
+@admin.register(Pibg)
+class PibgAdmin(SingleRecordAdmin):
+    """The PIBG page: term, about text, shared contact and the current committee.
+
+    After the AGM, delete the old committee rows, add the new ones and change the term.
+    """
+
+    inlines = [CommitteeMemberInline]
 
 
 @admin.register(UrgentNotice)
