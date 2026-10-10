@@ -1,0 +1,70 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+
+{% block title %}PIBG, {{ school_name }}{% endblock %}
+{% block head %}<meta name="robots" content="noindex">{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1>PIBG</h1>
+  <p class="meta">{% translate "Parent-Teacher Association" %}</p>
+</header>
+
+{% if is_empty %}
+  <p class="meta">{% translate "Details coming soon." %}</p>
+{% endif %}
+
+{% if pibg.about or pibg.has_contact %}
+  <section class="pibg-section" aria-labelledby="pibg-about">
+    <h2 id="pibg-about">{% translate "How to take part" %}</h2>
+    {% if pibg.about %}{{ pibg.about|linebreaks }}{% endif %}
+    {% if pibg.phone_link or pibg.email %}
+      <p class="contact-value">{% if pibg.phone_link %}{{ pibg.phone }}{% endif %}{% if pibg.phone_link and pibg.email %} · {% endif %}{{ pibg.email }}</p>
+    {% endif %}
+    {% if pibg.has_contact %}
+      <p class="button-row">
+        {% if pibg.phone_link %}<a class="button" href="{{ pibg.phone_link }}">{% translate "Call PIBG" %}</a>{% endif %}
+        {% if pibg.email %}<a class="button" href="{{ pibg.email_link }}">{% translate "Email PIBG" %}</a>{% endif %}
+        {% if pibg.whatsapp_group %}<a class="button" href="{{ pibg.whatsapp_group }}" target="_blank" rel="noopener">{% translate "Join the PIBG WhatsApp group" %}</a>{% endif %}
+      </p>
+    {% endif %}
+  </section>
+{% endif %}
+
+{% if upcoming %}
+  <section class="pibg-section" aria-labelledby="pibg-upcoming">
+    <h2 id="pibg-upcoming">{% translate "Upcoming meetings" %}</h2>
+    <ul class="event-list">
+      {% for event in upcoming %}{% include "portal/_event_row.html" %}{% endfor %}
+    </ul>
+    <p><a href="{% url 'portal:event_list' %}?type=pibg">{% translate "All PIBG events" %}</a></p>
+  </section>
+{% endif %}
+
+{% if committee %}
+  <section class="pibg-section" aria-labelledby="pibg-committee">
+    <h2 id="pibg-committee">{% if pibg.term %}{% blocktranslate with term=pibg.term %}Committee for {{ term }}{% endblocktranslate %}{% else %}{% translate "Committee" %}{% endif %}</h2>
+    <dl class="committee">
+      {% for member in committee %}<div><dt>{{ member.get_role_display }}</dt><dd>{{ member.name }}</dd></div>{% endfor %}
+    </dl>
+  </section>
+{% endif %}
+
+{% if documents %}
+  <section class="pibg-section" aria-labelledby="pibg-documents">
+    <h2 id="pibg-documents">{% translate "Minutes and circulars" %}</h2>
+    <ul class="document-list">
+      {% for document in documents %}{% include "portal/_document_row.html" %}{% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+{% if past %}
+  <section class="pibg-section" aria-labelledby="pibg-past">
+    <h2 id="pibg-past">{% translate "Past meetings" %}</h2>
+    <ul class="event-list">
+      {% for event in past %}{% include "portal/_event_row.html" %}{% endfor %}
+    </ul>
+  </section>
+{% endif %}
+{% endblock %}

@@ -10,7 +10,16 @@ from datetime import timedelta
 import pytest
 from django.utils import timezone
 
-from portal.models import Achievement, Album, Announcement, Event, Subscriber, UrgentNotice
+from portal.models import (
+    Achievement,
+    Album,
+    Announcement,
+    CommitteeMember,
+    Event,
+    Pibg,
+    Subscriber,
+    UrgentNotice,
+)
 
 # Playwright's sync API runs an event loop in the test thread, which Django's ORM
 # otherwise refuses to share. The data is created before the browser does anything.
@@ -55,6 +64,18 @@ def site(transactional_db):
         title="School closed on Friday", body="Classes resume on Monday.", is_pinned=True
     )
     album = Album.objects.create(title="Sports day photos", event=event)
+    Event.objects.create(
+        title="PIBG annual general meeting", starts_at=now + timedelta(days=12), kind=Event.PIBG
+    )
+    pibg = Pibg.objects.create(
+        term="2026/2027",
+        about_ta="ஆண்டுக் கட்டணம் RM20. பள்ளி அலுவலகத்தில் செலுத்தலாம். தன்னார்வலர்களை வரவேற்கிறோம்.",
+        phone="012-345 6789",
+        email="pibg.ladangsemenyih@example.com",
+        whatsapp_group="https://chat.whatsapp.com/abc",
+    )
+    pibg.committee.create(name="Encik Arunachalam a/l Subramaniam", role=CommitteeMember.CHAIR)
+    pibg.committee.create(name="Puan Kavitha", role=CommitteeMember.ASSISTANT_TREASURER)
     return {"event": event, "news": news, "album": album, "achievement": achievement}
 
 
@@ -76,6 +97,7 @@ def page_paths(site):
         "/gallery/",
         site["album"].get_absolute_url(),
         "/documents/",
+        "/pibg/",
         "/contact/",
         "/achievements/",
         site["achievement"].get_absolute_url(),

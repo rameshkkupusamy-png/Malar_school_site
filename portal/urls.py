@@ -17,6 +17,7 @@ urlpatterns = [
     path("documents/", views.document_list, name="document_list"),
     path("documents/<int:pk>/", views.document_open, name="document_open"),
     path("contact/", views.contact, name="contact"),
+    path("pibg/", views.pibg, name="pibg"),
     path("achievements/", views.achievement_list, name="achievement_list"),
     path("achievements/<int:pk>/", views.achievement_detail, name="achievement_detail"),
     path("search/", views.search, name="search"),

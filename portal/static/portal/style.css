@@ -644,6 +644,20 @@ main.page { padding-block: 2.5rem 4.5rem; }
 /* The number and address parents copy; this font draws digits small. */
 .contact-value { font-size: var(--step-1); font-variant-numeric: lining-nums; overflow-wrap: anywhere; }
 
+/* PIBG */
+
+.pibg-section { margin-top: 2.5rem; }
+.committee { margin: 0; }
+.committee div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--rule);
+}
+.committee dt { flex: 0 0 13rem; color: var(--muted); }
+.committee dd { margin: 0; font-weight: 600; }
+
 /* Achievements */
 
 .achievements { max-width: var(--measure); margin: 0; padding: 0; list-style: none; }

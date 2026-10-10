@@ -16,6 +16,9 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
   spreadsheet. The admin login page is `portal/templates/admin/staff_login.html`
 - `portal/search.py` site search (`/search/`): published events, news, documents, achievements and
   albums, matched in all three language columns; pupil names are never searched
+- PIBG page (`/pibg/`): one `Pibg` record (term, about text, shared contact) with `CommitteeMember`
+  rows edited inline; meetings are events with type PIBG, documents use the PIBG group. Committee
+  names are public on that page only: never add them to search
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests

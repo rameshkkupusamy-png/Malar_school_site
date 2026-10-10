@@ -1,11 +1,15 @@
+from datetime import timedelta
+
 import pytest
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 
-from portal.models import CommitteeMember, Document, Pibg
+from portal.models import CommitteeMember, Document, Event, Pibg
+from portal.search import find
 
 
 @pytest.fixture(autouse=True)
@@ -187,3 +191,95 @@ def test_editor_can_set_up_pibg_and_its_committee(client):
     assert [m.name for m in Pibg.load().members()] == ["Puan Kavitha"]
     page = client.get(reverse("admin:portal_pibg_change", args=[1]))
     assert page.status_code == 200
+
+
+def pibg_page(client):
+    return client.get(reverse("portal:pibg"))
+
+
+@pytest.mark.django_db
+def test_page_before_set_up_says_details_coming_soon(client):
+    html = pibg_page(client).content.decode()
+    assert "Details coming soon." in html
+    assert "Committee" not in html
+
+
+@pytest.mark.django_db
+def test_page_shows_about_contact_and_committee_in_order(client):
+    pibg = Pibg.objects.create(
+        term="2026/2027",
+        about_en="Yearly fee RM20.\n\nPay at the office.",
+        phone="012-345 6789",
+        whatsapp_group="https://chat.whatsapp.com/abc",
+    )
+    pibg.committee.create(name="Puan Kavitha", role=CommitteeMember.TREASURER)
+    pibg.committee.create(name="Encik Arun", role=CommitteeMember.CHAIR)
+
+    html = pibg_page(client).content.decode()
+
+    assert "Details coming soon." not in html
+    assert "Yearly fee RM20." in html
+    assert 'href="tel:+60123456789"' in html and "Call PIBG" in html
+    assert 'href="https://chat.whatsapp.com/abc"' in html
+    assert "Join the PIBG WhatsApp group" in html
+    assert "Email PIBG" not in html
+    assert "Committee for 2026/2027" in html
+    assert html.index("Encik Arun") < html.index("Puan Kavitha")
+    assert "Chairperson" in html and "Treasurer" in html
+
+
+@pytest.mark.django_db
+def test_committee_heading_without_a_term(client):
+    Pibg.objects.create().committee.create(name="Encik Arun", role=CommitteeMember.CHAIR)
+    assert ">Committee</h2>" in pibg_page(client).content.decode()
+
+
+@pytest.mark.django_db
+def test_upcoming_meetings_are_published_pibg_events_only(client, make_event):
+    make_event("PIBG AGM", days=5, kind=Event.PIBG)
+    make_event("Hidden PIBG meeting", days=6, kind=Event.PIBG, is_published=False)
+    make_event("Sports day", days=7)
+
+    response = pibg_page(client)
+    html = response.content.decode()
+
+    assert [e.title for e in response.context["upcoming"]] == ["PIBG AGM"]
+    assert "Hidden PIBG meeting" not in html
+    assert "Sports day" not in html
+    assert f'href="{reverse("portal:event_list")}?type=pibg"' in html
+
+
+@pytest.mark.django_db
+def test_past_meetings_are_the_newest_five(client, make_event):
+    for day in range(1, 8):
+        make_event(f"Meeting {day}", days=-day, kind=Event.PIBG)
+    titles = [e.title for e in pibg_page(client).context["past"]]
+    assert titles == ["Meeting 1", "Meeting 2", "Meeting 3", "Meeting 4", "Meeting 5"]
+
+
+@pytest.mark.django_db
+def test_documents_are_published_unexpired_pibg_ones(client):
+    document("AGM minutes 2026")
+    document("Draft minutes", is_published=False)
+    document("Old fee notice", remove_after=timezone.localdate() - timedelta(days=1))
+    document("Booklist", group=Document.LIST)
+
+    response = pibg_page(client)
+
+    assert [d.title for d in response.context["documents"]] == ["AGM minutes 2026"]
+    assert "Minutes and circulars" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_page_is_not_indexed_and_linked_from_menu_and_footer(client):
+    html = pibg_page(client).content.decode()
+    assert '<meta name="robots" content="noindex">' in html
+    assert f'<a href="{reverse("portal:pibg")}" aria-current="page">PIBG</a>' in html
+    home = client.get(reverse("portal:home")).content.decode()
+    assert home.count(f'href="{reverse("portal:pibg")}"') == 2
+
+
+@pytest.mark.django_db
+def test_committee_names_are_not_searchable():
+    Pibg.objects.create().committee.create(name="Puan Kavitha Raman", role=CommitteeMember.CHAIR)
+    assert find("Kavitha") == []

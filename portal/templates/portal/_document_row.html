@@ -1,0 +1,5 @@
+<li>
+  <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+  {% if document.note %}<p>{{ document.note }}</p>{% endif %}
+  <p class="meta"><time datetime="{{ document.added_at|date:'c' }}">{{ document.added_at|date:"j F Y" }}</time> · {{ document.file_type }}{% if document.file_size %}, {{ document.file_size }}{% endif %}</p>
+</li>

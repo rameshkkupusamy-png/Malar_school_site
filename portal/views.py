@@ -23,6 +23,7 @@ from .models import (
     Announcement,
     Document,
     Event,
+    Pibg,
     SchoolContact,
     Subscriber,
     month_range,
@@ -30,6 +31,7 @@ from .models import (
 from .search import LIMIT, MAX_LENGTH, find, words
 
 PAGE_SIZE = 10
+PAST_MEETINGS = 5
 
 
 def home(request):
@@ -329,6 +331,21 @@ def manifest(request):
 
 def contact(request):
     return render(request, "portal/contact.html", {"contact": SchoolContact.load()})
+
+
+def pibg(request):
+    info = Pibg.load()
+    meetings = Event.objects.published().filter(kind=Event.PIBG)
+    context = {
+        "pibg": info,
+        "committee": info.members(),
+        "upcoming": list(meetings.upcoming().order_by("starts_at")),
+        "past": list(meetings.past().order_by("-starts_at")[:PAST_MEETINGS]),
+        "documents": list(Document.objects.published().filter(group=Document.PIBG)),
+    }
+    parts = ("committee", "upcoming", "past", "documents")
+    context["is_empty"] = not (info.about or info.has_contact or any(context[p] for p in parts))
+    return render(request, "portal/pibg.html", context)
 
 
 @require_POST
