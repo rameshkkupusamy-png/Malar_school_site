@@ -232,4 +232,5 @@ def test_long_query_still_renders(client):
 def test_tamil_only_post_shows_its_tamil_title_to_english_visitors(client):
     event(title_ta="விளையாட்டு நாள்")
     html = search_page(client, "விளையாட்டு").content.decode()
+    assert '<html lang="en">' in html
     assert ">விளையாட்டு நாள்</a>" in html
