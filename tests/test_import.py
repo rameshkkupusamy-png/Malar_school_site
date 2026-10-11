@@ -18,7 +18,7 @@ from portal.imports import (
     parse_kind,
     parse_time,
 )
-from portal.models import Event, EventImport, Subscriber
+from portal.models import Event, EventImport, SiteSections, Subscriber
 
 IMPORT_URL = reverse("admin:portal_event_import")
 
@@ -409,3 +409,21 @@ def test_common_phrases_are_recognised(typed, kind):
 
 def test_unrelated_words_are_still_unrecognised():
     assert parse_kind("Pameran buku") is None
+
+
+def test_publish_with_email_while_events_are_paused_warns(admin_client, mailoutbox):
+    Subscriber.objects.create(email="parent@example.com")
+    SiteSections(events=False).save()
+    upload_sample(admin_client)
+    batch = EventImport.objects.get()
+    fair = batch.events.get(title="Science fair")
+
+    data = review_post(batch, "publish", selected=[fair])
+    data["email_parents"] = "1"
+    url = reverse("admin:portal_event_import_review", args=[batch.pk])
+    response = admin_client.post(url, data, follow=True)
+
+    fair.refresh_from_db()
+    assert fair.is_published
+    assert mailoutbox == []
+    assert "Events is paused, so no emails were sent." in response.content.decode()

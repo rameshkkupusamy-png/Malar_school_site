@@ -19,7 +19,9 @@ from portal.models import (
     SiteSections,
     Subscriber,
 )
+from portal.notifications import notify_subscribers, send_reminders
 from portal.search import find
+from portal.whatsapp import is_public
 
 KEYS = ["news", "events", "photos", "documents", "pibg", "achievements", "search"]
 
@@ -293,3 +295,45 @@ def test_search_leaves_out_paused_sections(content, key):
     keys = [s.key for s in find("sports day")]
     assert key not in keys
     assert len(keys) == 4
+
+
+@pytest.mark.django_db
+def test_no_event_emails_while_events_are_paused(make_event, mailoutbox):
+    Subscriber.objects.create(email="parent@example.com")
+    event = make_event(days=1)
+    pause("events")
+    assert notify_subscribers(event) == 0
+    assert send_reminders([event]) == 0
+    assert mailoutbox == []
+    event.refresh_from_db()
+    assert event.notified_at is None
+    assert event.reminded_at is None
+
+
+@pytest.mark.django_db
+def test_email_action_works_again_once_events_are_back_on(admin_client, make_event, mailoutbox):
+    Subscriber.objects.create(email="parent@example.com")
+    event = make_event()
+    pause("events")
+    url = reverse("admin:portal_event_changelist")
+    data = {"action": "email_subscribers", "_selected_action": [event.pk]}
+    response = admin_client.post(url, data, follow=True)
+    assert "Events is paused, so no emails were sent." in response.content.decode()
+    assert mailoutbox == []
+
+    record = SiteSections.load()
+    record.events = True
+    record.save()
+    admin_client.post(url, data)
+    assert len(mailoutbox) == 1
+
+
+@pytest.mark.django_db
+def test_posts_in_paused_sections_cannot_be_shared(admin_client, make_event):
+    event = make_event()
+    assert is_public(event)
+    pause("events")
+    assert not is_public(event)
+    html = admin_client.get(reverse("admin:portal_event_change", args=[event.pk])).content.decode()
+    assert "Share on WhatsApp" not in html
+    assert "Not shown to parents right now, so it can&#x27;t be shared." in html

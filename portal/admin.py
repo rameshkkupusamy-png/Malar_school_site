@@ -33,13 +33,16 @@ from .models import (
     UrgentNotice,
 )
 from .notifications import notify_subscribers
+from .sections import is_on
 from .staff_list import MAX_BYTES, StaffFileRejected, add_staff_from_rows, read_rows
-from .whatsapp import is_public, share_url
+from .whatsapp import is_public, section_paused, share_url
 
 admin.site.site_header = f"{settings.SCHOOL_NAME} admin"
 admin.site.site_title = f"{settings.SCHOOL_NAME} admin"
 admin.site.index_title = "Manage the school portal"
 admin.site.login_template = "admin/staff_login.html"
+
+EVENTS_PAUSED = "Events is paused, so no emails were sent."
 
 
 def in_all_languages(*fields):
@@ -69,6 +72,8 @@ class WhatsAppShareMixin:
         if obj is None or obj.pk is None:
             return "Save and publish first, then share."
         if not is_public(obj):
+            if section_paused(obj):
+                return "Not shown to parents right now, so it can't be shared."
             if obj.is_published and getattr(obj, "remove_after", None):
                 return (
                     "Its “remove after” date has passed, so it's no longer on the Documents page."
@@ -101,6 +106,9 @@ class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
 
     @admin.action(description="Email subscribers about selected events")
     def email_subscribers(self, request, queryset):
+        if not is_on("events"):
+            self.message_user(request, EVENTS_PAUSED, messages.WARNING)
+            return
         unpublished = queryset.filter(is_published=False).count()
         sent = 0
         for event in queryset.filter(is_published=True):
@@ -260,8 +268,11 @@ class EventAdmin(WhatsAppShareMixin, AnyLanguageAdmin):
                     else:
                         note = f"Published {len(to_publish)} event(s)."
                         if request.POST.get("email_parents"):
-                            sent = sum(notify_subscribers(event) for event in to_publish)
-                            note += f" Sent {sent} email(s) to parents."
+                            if is_on("events"):
+                                sent = sum(notify_subscribers(event) for event in to_publish)
+                                note += f" Sent {sent} email(s) to parents."
+                            else:
+                                note += f" {EVENTS_PAUSED}"
                         self.message_user(request, note, messages.SUCCESS)
                 else:
                     self.message_user(request, "Saved your changes.", messages.SUCCESS)

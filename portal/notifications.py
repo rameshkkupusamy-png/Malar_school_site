@@ -7,10 +7,13 @@ from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
 from .models import Event, Subscriber
+from .sections import is_on
 
 
 def notify_subscribers(event: Event) -> int:
     """Email every active subscriber about an event. Returns the number of emails sent."""
+    if not is_on("events"):
+        return 0  # parents can't open event pages while Events is paused
     messages = []
     for subscriber in Subscriber.objects.filter(is_active=True):
         # Each parent gets the email, and the event text, in the language they signed up in.
@@ -54,6 +57,8 @@ def send_reminders(events: list[Event] | None = None) -> int:
 
     Each event is reminded once: it's marked as soon as the emails have gone.
     """
+    if not is_on("events"):
+        return 0
     events = reminder_events() if events is None else events
     if not events:
         return 0

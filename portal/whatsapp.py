@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone, translation
 
 from .models import Achievement, Announcement, Document, Event, UrgentNotice
+from .sections import is_on
 
 TEMPLATES = {
     Event: "portal/whatsapp/event.txt",
@@ -21,8 +22,24 @@ TEMPLATES = {
 }
 
 
+SECTIONS = {
+    Event: "events",
+    Announcement: "news",
+    Document: "documents",
+    Achievement: "achievements",
+}
+
+
+def section_paused(obj) -> bool:
+    """The post's section is switched off in Site sections, so its link opens the paused page."""
+    key = SECTIONS.get(type(obj))
+    return key is not None and not is_on(key)
+
+
 def is_public(obj: Event | Announcement | Document | UrgentNotice | Achievement) -> bool:
     """Parents can open the post, so the link in the message works."""
+    if section_paused(obj):
+        return False
     if isinstance(obj, UrgentNotice):
         return UrgentNotice.objects.showing().filter(pk=obj.pk).exists()
     if isinstance(obj, Document):
