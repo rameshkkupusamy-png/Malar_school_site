@@ -729,6 +729,40 @@ class CommitteeMember(models.Model):
         return self.name
 
 
+class SiteSections(models.Model):
+    """Which parts of the public site are switched on. There is only ever one of these."""
+
+    news = models.BooleanField(default=True, help_text="The News pages.")
+    events = models.BooleanField(
+        default=True,
+        help_text="The Events pages and calendar files. "
+        "Also stops email sign-ups, event emails and reminders.",
+    )
+    photos = models.BooleanField(
+        default=True, help_text="The photo albums, and album photos on the home page."
+    )
+    documents = models.BooleanField(default=True, help_text="The Documents page and its links.")
+    pibg = models.BooleanField("PIBG", default=True, help_text="The PIBG page.")
+    achievements = models.BooleanField(
+        default=True, help_text="The Achievements pages and their photos."
+    )
+    search = models.BooleanField(default=True, help_text="The Search page.")
+
+    class Meta:
+        verbose_name = verbose_name_plural = "site sections"
+
+    def __str__(self) -> str:
+        return "Site sections"
+
+    def save(self, *args, **kwargs) -> None:
+        self.pk = 1  # one record, however it is saved
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls) -> "SiteSections":
+        return cls.objects.first() or cls()
+
+
 EVENING_HOUR = 18  # notices posted from 6 pm are usually about tomorrow
 
 

@@ -26,6 +26,7 @@ from .models import (
     Photo,
     Pibg,
     SchoolContact,
+    SiteSections,
     SocialLink,
     StaffMember,
     Subscriber,
@@ -429,7 +430,7 @@ class SocialLinkAdmin(admin.ModelAdmin):
     fields = ["platform", "label", "url", "order", "is_published"]
 
 
-class SingleRecordAdmin(AnyLanguageAdmin):
+class SingleRecord:
     """For models with exactly one record (their save() pins pk=1).
 
     The list page goes straight to the record, or to the add form before it exists.
@@ -461,6 +462,10 @@ class SingleRecordAdmin(AnyLanguageAdmin):
         return redirect(self._url("add"))
 
 
+class SingleRecordAdmin(SingleRecord, AnyLanguageAdmin):
+    """A single record with text in three languages."""
+
+
 @admin.register(SchoolContact)
 class SchoolContactAdmin(SingleRecordAdmin):
     """The one contact record: the list page goes straight to it."""
@@ -481,6 +486,42 @@ class PibgAdmin(SingleRecordAdmin):
     """
 
     inlines = [CommitteeMemberInline]
+
+
+@admin.register(SiteSections)
+class SiteSectionsAdmin(SingleRecord, admin.ModelAdmin):
+    """Untick a section to pause it on the public site. Superusers only."""
+
+    fieldsets = [
+        (
+            None,
+            {
+                "description": "Untick a section to hide it from parents for a while. "
+                "Nothing is deleted, and staff can keep preparing posts.",
+                "fields": [
+                    "news",
+                    "events",
+                    "photos",
+                    "documents",
+                    "pibg",
+                    "achievements",
+                    "search",
+                ],
+            },
+        )
+    ]
+
+    def has_module_permission(self, request):
+        return request.user.is_superuser
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser and super().has_add_permission(request)
 
 
 @admin.register(UrgentNotice)
