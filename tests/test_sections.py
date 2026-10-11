@@ -5,6 +5,8 @@ import pytest
 from django.contrib.auth.models import Group, Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 from PIL import Image
@@ -230,10 +232,7 @@ def test_home_without_events_has_no_events_or_sign_up(client, content):
 
 @pytest.mark.django_db
 def test_home_without_photos_uses_no_album(client, content):
-    album = Album.objects.get()
-    buffer = io.BytesIO()
-    Image.new("RGB", (40, 30), (200, 30, 30)).save(buffer, "JPEG")  # Photo.save() shrinks it
-    Photo.objects.create(album=album, image=SimpleUploadedFile("a.jpg", buffer.getvalue()))
+    add_photo()
     assert "See the photos" in client.get("/").content.decode()
     pause("photos")
     html = client.get("/").content.decode()
@@ -241,15 +240,106 @@ def test_home_without_photos_uses_no_album(client, content):
     assert "/gallery/" not in html
 
 
+def add_photo():
+    buffer = io.BytesIO()
+    Image.new("RGB", (40, 30), (200, 30, 30)).save(buffer, "JPEG")  # Photo.save() shrinks it
+    image = SimpleUploadedFile("a.jpg", buffer.getvalue())
+    Photo.objects.create(album=Album.objects.get(), image=image)
+
+
 @pytest.mark.django_db
 def test_home_with_everything_paused_is_just_the_welcome(client, content):
+    add_photo()
     pause(*KEYS)
     response = client.get("/")
     html = response.content.decode()
     assert response.status_code == 200
     assert "Welcome to" in html
+    assert "band--album" not in html
+    assert 'class="band-img"' not in html
     for path in MENU.values():
         assert f'href="{path}' not in html
+
+
+@pytest.mark.django_db
+def test_welcome_line_does_not_name_sections(client, content):
+    pause(*KEYS)
+    html = client.get("/").content.decode()
+    assert "Updates from school, for parents and guardians." in html
+    assert "News, events and photos" not in html
+
+
+# The rounded line runs from band to band; it must end inside the page, not at the footer.
+HERO_DOWN = '<div class="band-frame band-frame--down"'
+HERO_END = '<div class="band-frame" aria-hidden'
+ALBUM_DOWN = '<div class="band-frame band-frame--up band-frame--down"'
+ALBUM_END = '<div class="band-frame band-frame--up" aria-hidden'
+
+
+@pytest.mark.django_db
+def test_line_runs_through_every_part_when_all_is_on(client, content):
+    add_photo()
+    html = client.get("/").content.decode()
+    assert HERO_DOWN in html
+    assert ALBUM_DOWN in html
+    assert "split--end" not in html
+
+
+@pytest.mark.django_db
+def test_line_ends_at_the_album_while_events_are_paused(client, content):
+    add_photo()
+    pause("events")
+    html = client.get("/").content.decode()
+    assert HERO_DOWN in html
+    assert ALBUM_END in html
+    assert "split--end" not in html
+
+
+@pytest.mark.django_db
+def test_line_ends_in_the_news_part_when_it_is_last(client, content):
+    pause("events")
+    html = client.get("/").content.decode()
+    assert HERO_DOWN in html
+    assert 'class="split split--end wrap"' in html
+
+
+@pytest.mark.django_db
+def test_line_ends_at_the_top_band_when_nothing_follows(client, content):
+    pause(*KEYS)
+    html = client.get("/").content.decode()
+    assert HERO_END in html
+    assert HERO_DOWN not in html
+
+
+def site_sections_reads(client, url):
+    with CaptureQueriesContext(connection) as queries:
+        client.get(url)
+    # Reads of the record itself; the admin sidebar's "does it exist yet?" check doesn't count.
+    reads = [q["sql"] for q in queries.captured_queries if '"portal_sitesections"' in q["sql"]]
+    return sum(not sql.startswith("SELECT 1 AS") for sql in reads)
+
+
+@pytest.mark.parametrize("url", ["/", "/pibg/", "/search/?q=sports", "/events/"])
+def test_site_sections_are_read_once_per_page(client, content, url):
+    pause("documents")
+    assert site_sections_reads(client, url) == 1
+
+
+@pytest.mark.django_db
+def test_admin_event_list_reads_site_sections_once(admin_client, make_event):
+    for days in (1, 2, 3):
+        make_event(days=days)
+    pause("events")
+    assert site_sections_reads(admin_client, reverse("admin:portal_event_changelist")) == 1
+
+
+@pytest.mark.django_db
+def test_outside_a_request_each_check_reads_fresh():
+    from portal.sections import is_on
+
+    assert is_on("news")
+    pause("news")
+    assert not is_on("news")
 
 
 @pytest.mark.django_db

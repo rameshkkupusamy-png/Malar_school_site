@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.utils.functional import SimpleLazyObject
 
-from .models import SiteSections, SocialLink, UrgentNotice
+from .models import SocialLink, UrgentNotice
+from .sections import current
 
 
 def school(request):
@@ -14,5 +15,5 @@ def school(request):
         "social_links": SocialLink.objects.published(),
         "urgent_notices": UrgentNotice.objects.showing(),
         # Not "sections": the search page already uses that name for its results.
-        "site_sections": SimpleLazyObject(SiteSections.load),
+        "site_sections": SimpleLazyObject(current),
     }

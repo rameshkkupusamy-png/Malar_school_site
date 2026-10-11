@@ -56,6 +56,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",  # serves static files when DEBUG is off
     "django.contrib.sessions.middleware.SessionMiddleware",
     "portal.middleware.SiteLanguageMiddleware",
+    "portal.sections.SiteSectionsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

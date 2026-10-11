@@ -434,6 +434,9 @@ main.page { padding-block: 2.5rem 4.5rem; }
   background: var(--blue);
 }
 
+/* The last part of the page: the line stops where the content does, not at the footer. */
+.split--end::before { inset-block: 0 clamp(3.5rem, 8vw, 6rem); }
+
 .split--reverse .split-intro { order: 2; }
 .split-intro { text-align: right; }
 .split--reverse .split-intro { text-align: left; }

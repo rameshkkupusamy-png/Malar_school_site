@@ -8,7 +8,7 @@ from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
 
-from portal.models import Event, Subscriber
+from portal.models import Event, SiteSections, Subscriber
 from portal.notifications import send_reminders
 
 
@@ -118,3 +118,11 @@ def test_time_and_place_sit_on_consecutive_lines(event, parents, mailoutbox):
     lines = mailoutbox[0].body.splitlines()
     place = lines.index("School field")
     assert lines[place - 1].strip() != ""
+
+
+def test_command_says_when_events_are_paused(event, parents, mailoutbox):
+    SiteSections(events=False).save()
+    out = StringIO()
+    call_command("send_reminders", stdout=out)
+    assert out.getvalue().strip() == "Events is paused in Site sections, so no reminders were sent."
+    assert mailoutbox == []

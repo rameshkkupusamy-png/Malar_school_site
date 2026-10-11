@@ -25,19 +25,18 @@ from .models import (
     Event,
     Pibg,
     SchoolContact,
-    SiteSections,
     Subscriber,
     month_range,
 )
 from .search import LIMIT, MAX_LENGTH, find, words
-from .sections import is_on, paused_page, section
+from .sections import current, is_on, paused_page, section
 
 PAGE_SIZE = 10
 PAST_MEETINGS = 5
 
 
 def home(request):
-    on = SiteSections.load()
+    on = current()
     # News leads the page: the pinned update (or the latest one) fills the big top section.
     # With no news at all, the next event takes its place.
     news = list(Announcement.objects.published()[:4]) if on.news else []
@@ -357,7 +356,7 @@ def contact(request):
 
 @section("pibg")
 def pibg(request):
-    on = SiteSections.load()
+    on = current()
     info = Pibg.load()
     # Meetings and documents link to their own sections, so they go when those are paused.
     meetings = Event.objects.published().filter(kind=Event.PIBG)

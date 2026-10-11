@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from portal.notifications import reminder_events, send_reminders
+from portal.sections import is_on
 
 
 class Command(BaseCommand):
@@ -10,6 +11,9 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
+        if not is_on("events"):
+            self.stdout.write("Events is paused in Site sections, so no reminders were sent.")
+            return
         events = reminder_events()
         sent = send_reminders(events)
         self.stdout.write(f"Sent {sent} reminder email(s) about {len(events)} event(s).")

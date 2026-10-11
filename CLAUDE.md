@@ -23,6 +23,7 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
   `SiteSections` record; `@section(key)` on views answers 503 with `section_paused.html`, and
   templates check `site_sections.<key>` (not `sections`, which the search page uses). Paused
   Events also stops sign-ups and event emails. New public views in a section need the decorator
+  Read it with `sections.current()` / `is_on()` (cached once per request), not `SiteSections.load()`
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests

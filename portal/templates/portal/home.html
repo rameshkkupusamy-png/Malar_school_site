@@ -4,9 +4,10 @@
 {% block main_class %}home{% endblock %}
 
 {% block content %}
+{# The rounded line runs from part to part; each part only carries it on when another follows. #}
 <section class="band band--hero{% if hero_image %} band--photo{% endif %}" aria-labelledby="lead-title">
   {% if hero_image %}<img class="band-img" src="{{ hero_image.url }}" alt="">{% endif %}
-  <div class="band-frame band-frame--down" aria-hidden="true"></div>
+  <div class="band-frame{% if site_sections.news or site_sections.events or band_photo %} band-frame--down{% endif %}" aria-hidden="true"></div>
   <div class="band-body wrap">
     {% if lead_news %}
       <p class="chip{% if lead_news.is_pinned %} chip--pinned{% endif %}">
@@ -26,7 +27,7 @@
       <p><a class="button button--torch" href="{{ hero_event.get_absolute_url }}">{% translate "See event details" %}</a></p>
     {% else %}
       <h1 id="lead-title">{% blocktranslate %}Welcome to {{ school_name }}{% endblocktranslate %}</h1>
-      <p class="band-lead">{% translate "News, events and photos from school, for parents and guardians." %}</p>
+      <p class="band-lead">{% translate "Updates from school, for parents and guardians." %}</p>
       {% if site_sections.events %}<p><a class="button button--torch" href="#subscribe-title">{% translate "Get event emails" %}</a></p>{% endif %}
     {% endif %}
   </div>
@@ -34,7 +35,7 @@
 </section>
 
 {% if site_sections.news %}
-<section class="split wrap" aria-labelledby="news-title">
+<section class="split{% if not site_sections.events and not band_photo %} split--end{% endif %} wrap" aria-labelledby="news-title">
   <div class="split-intro">
     <h2 id="news-title">{% if lead_news %}{% translate "More news" %}{% else %}{% translate "News from school" %}{% endif %}</h2>
     <p class="meta">{% translate "Updates from teachers and the school office." %}</p>
@@ -78,7 +79,7 @@
 {% if featured_album and band_photo %}
 <section class="band band--photo band--album" aria-labelledby="album-title">
   <img class="band-img" src="{{ band_photo.image.url }}" alt="">
-  <div class="band-frame band-frame--up band-frame--down" aria-hidden="true"></div>
+  <div class="band-frame band-frame--up{% if site_sections.events %} band-frame--down{% endif %}" aria-hidden="true"></div>
   <div class="band-body band-body--end wrap">
     <h2 id="album-title">{{ featured_album.title }}</h2>
     {% if featured_album.description %}<p class="band-lead">{{ featured_album.description|truncatewords:30 }}</p>{% endif %}
