@@ -19,6 +19,10 @@ sign up for event emails. Staff edit everything in the Django admin (`/admin/`).
 - PIBG page (`/pibg/`): one `Pibg` record (term, about text, shared contact) with `CommitteeMember`
   rows edited inline; meetings are events with type PIBG, documents use the PIBG group. Committee
   names are public on that page only: never add them to search
+- `portal/sections.py` pausing sections (Admin → Site sections, superusers only): one
+  `SiteSections` record; `@section(key)` on views answers 503 with `section_paused.html`, and
+  templates check `site_sections.<key>` (not `sections`, which the search page uses). Paused
+  Events also stops sign-ups and event emails. New public views in a section need the decorator
 - `portal/templates/portal/` templates; `_*.html` are partials
 - `portal/static/portal/style.css` all styles
 - `tests/` pytest-django tests

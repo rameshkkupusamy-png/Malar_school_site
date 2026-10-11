@@ -735,7 +735,7 @@ msgstr "எதுவும் கிடைக்கவில்லை. வேற
 
 #: portal/templates/portal/section_paused.html:4 portal/templates/portal/section_paused.html:9
 msgid "This section is not available right now"
-msgstr "இந்தப் பகுதி இப்போது கிடைக்கவில்லை"
+msgstr "இந்தப் பகுதி இப்போது இல்லை"
 
 #: portal/templates/portal/section_paused.html:10
 msgid "Please check back later."

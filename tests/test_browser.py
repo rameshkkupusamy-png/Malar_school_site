@@ -17,6 +17,7 @@ from portal.models import (
     CommitteeMember,
     Event,
     Pibg,
+    SiteSections,
     Subscriber,
     UrgentNotice,
 )
@@ -206,3 +207,20 @@ def test_parent_can_search_and_open_a_result(page, live_server, site):
     page.get_by_role("link", name=site["event"].title).click()
 
     assert page.url == live_server.url + site["event"].get_absolute_url()
+
+
+@pytest.mark.parametrize("language", ["ta", "ms"])
+def test_paused_page_fits_a_phone(page, live_server, site, language):
+    SiteSections(news=False).save()
+    use_language(page, live_server, language)
+    page.set_viewport_size(PHONE)
+
+    response = page.goto(live_server.url + "/news/")
+
+    assert response.status == 503
+    assert page.locator("h1").count() == 1
+    assert page.locator('.site-nav a[href="/news/"]').count() == 0
+    overflow = page.evaluate(
+        "document.documentElement.scrollWidth - document.documentElement.clientWidth"
+    )
+    assert overflow <= 0, f"paused page scrolls sideways by {overflow}px"
