@@ -11,7 +11,13 @@ from django.urls import reverse
 from django.utils import translation
 from PIL import Image
 
-from portal.models import Achievement, AchievementPhoto, AchievementPupil, short_name
+from portal.models import (
+    Achievement,
+    AchievementPhoto,
+    AchievementPupil,
+    SiteSections,
+    short_name,
+)
 from portal.whatsapp import share_message
 
 
@@ -307,6 +313,14 @@ def test_staff_can_see_held_back_photos(achievement, admin_client):
     item = achievement(pupils=[("Meera", "5 Mutiara", False)])
     photo = AchievementPhoto.objects.create(achievement=item, image=jpeg())
     assert admin_client.get(photo.image.url).status_code == 200
+
+
+def test_staff_can_see_photos_while_achievements_are_paused(achievement, admin_client, client):
+    item = achievement(pupils=[("Meera", "5 Mutiara", True)])
+    photo = AchievementPhoto.objects.create(achievement=item, image=jpeg())
+    SiteSections(achievements=False).save()
+    assert admin_client.get(photo.image.url).status_code == 200
+    assert client.get(photo.image.url).status_code == 503
 
 
 @pytest.mark.django_db

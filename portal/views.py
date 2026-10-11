@@ -30,7 +30,7 @@ from .models import (
     month_range,
 )
 from .search import LIMIT, MAX_LENGTH, find, words
-from .sections import is_on, section
+from .sections import is_on, paused_page, section
 
 PAGE_SIZE = 10
 PAST_MEETINGS = 5
@@ -263,16 +263,19 @@ def achievement_detail(request, pk):
     return render(request, "portal/achievement_detail.html", {"achievement": achievement})
 
 
-@section("achievements")
 def private_media(request, name):
     """Achievement photos: sent only while the achievement is published and every pupil listed
     has their parents' agreement, or to staff who manage achievements."""
+    staff = request.user.has_perm("portal.view_achievementphoto")
+    # Staff keep seeing photos while Achievements is paused, so they can prepare posts.
+    if not staff and not is_on("achievements"):
+        return paused_page(request)
     photo = AchievementPhoto.objects.select_related("achievement").filter(image=name).first()
     if photo is None:
         raise Http404
     item = photo.achievement
     public = item.is_published and item.photos_allowed
-    if not public and not request.user.has_perm("portal.view_achievementphoto"):
+    if not public and not staff:
         raise Http404
     try:
         response = FileResponse(photo.image.open("rb"))
