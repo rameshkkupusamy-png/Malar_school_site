@@ -14,7 +14,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
-from .models import Achievement, Album, Announcement, Document, Event
+from .models import Achievement, Album, Announcement, Document, Event, SiteSections
 
 MAX_LENGTH = 100
 MIN_LENGTH = 2
@@ -79,8 +79,11 @@ def find(query: str) -> list[Section]:
         ),
         ("photos", _("Photos"), Album.objects.filter(is_published=True), ("title", "description")),
     ]
+    on = SiteSections.load()
     sections = []
     for key, heading, queryset, fields in searches:
+        if not getattr(on, key):
+            continue
         found = queryset.filter(matching(fields, terms))
         total = found.count()
         if total:

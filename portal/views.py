@@ -25,27 +25,31 @@ from .models import (
     Event,
     Pibg,
     SchoolContact,
+    SiteSections,
     Subscriber,
     month_range,
 )
 from .search import LIMIT, MAX_LENGTH, find, words
-from .sections import section
+from .sections import is_on, section
 
 PAGE_SIZE = 10
 PAST_MEETINGS = 5
 
 
 def home(request):
+    on = SiteSections.load()
     # News leads the page: the pinned update (or the latest one) fills the big top section.
     # With no news at all, the next event takes its place.
-    news = list(Announcement.objects.published()[:4])
+    news = list(Announcement.objects.published()[:4]) if on.news else []
     lead_news = news[0] if news else None
-    upcoming = list(Event.objects.published().upcoming()[:5])
+    upcoming = list(Event.objects.published().upcoming()[:5]) if on.events else []
     hero_event = upcoming[0] if upcoming and lead_news is None else None
     coming_up = [e for e in upcoming if e != hero_event][:4]
 
-    albums_with_photos = Album.objects.filter(is_published=True, photos__isnull=False).distinct()
-    featured_album = albums_with_photos.prefetch_related("photos").first()
+    featured_album = None
+    if on.photos:
+        albums_with_photos = Album.objects.filter(is_published=True, photos__isnull=False)
+        featured_album = albums_with_photos.distinct().prefetch_related("photos").first()
     album_photos = list(featured_album.photos.all()) if featured_album else []
 
     # The big top photo: the event's own picture when an event leads, else the newest album's
@@ -153,7 +157,7 @@ def event_list(request):
 @section("events")
 def event_detail(request, pk):
     event = get_object_or_404(Event.objects.published(), pk=pk)
-    albums = event.albums.filter(is_published=True)
+    albums = event.albums.filter(is_published=True) if is_on("photos") else []
     return render(request, "portal/event_detail.html", {"event": event, "albums": albums})
 
 
@@ -350,14 +354,21 @@ def contact(request):
 
 @section("pibg")
 def pibg(request):
+    on = SiteSections.load()
     info = Pibg.load()
+    # Meetings and documents link to their own sections, so they go when those are paused.
     meetings = Event.objects.published().filter(kind=Event.PIBG)
+    if not on.events:
+        meetings = meetings.none()
+    documents = Document.objects.published().filter(group=Document.PIBG)
+    if not on.documents:
+        documents = documents.none()
     context = {
         "pibg": info,
         "committee": info.members(),
         "upcoming": list(meetings.upcoming().order_by("starts_at")),
         "past": list(meetings.past().order_by("-starts_at")[:PAST_MEETINGS]),
-        "documents": list(Document.objects.published().filter(group=Document.PIBG)),
+        "documents": list(documents),
     }
     parts = ("committee", "upcoming", "past", "documents")
     context["is_empty"] = not (info.about or info.has_contact or any(context[p] for p in parts))

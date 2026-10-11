@@ -1,3 +1,4 @@
+import io
 from datetime import timedelta
 
 import pytest
@@ -6,6 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
 from django.utils import timezone
+from PIL import Image
 
 from portal.models import (
     Achievement,
@@ -13,9 +15,11 @@ from portal.models import (
     Announcement,
     Document,
     Event,
+    Photo,
     SiteSections,
     Subscriber,
 )
+from portal.search import find
 
 KEYS = ["news", "events", "photos", "documents", "pibg", "achievements", "search"]
 
@@ -174,3 +178,118 @@ def test_unknown_section_key_is_a_mistake():
 
     with pytest.raises(ValueError):
         section("newz")
+
+
+MENU = {
+    "news": "/news/",
+    "events": "/events/",
+    "photos": "/gallery/",
+    "documents": "/documents/",
+    "pibg": "/pibg/",
+    "achievements": "/achievements/",
+    "search": "/search/",
+}
+
+
+@pytest.mark.parametrize("key", KEYS)
+@pytest.mark.django_db
+def test_paused_section_leaves_the_menu_and_footer(client, key):
+    contact = client.get(reverse("portal:contact")).content.decode()
+    assert contact.count(f'href="{MENU[key]}"') == 2
+    pause(key)
+    contact = client.get(reverse("portal:contact")).content.decode()
+    assert f'href="{MENU[key]}"' not in contact
+
+
+@pytest.mark.django_db
+def test_menu_is_complete_on_the_search_page(client):
+    html = client.get("/search/?q=sports").content.decode()
+    assert 'href="/news/"' in html
+
+
+@pytest.mark.django_db
+def test_home_without_news(client, content):
+    pause("news")
+    html = client.get("/").content.decode()
+    assert "Sports day news" not in html
+    assert "All news" not in html
+    assert "Sports day" in html  # the next event leads instead
+
+
+@pytest.mark.django_db
+def test_home_without_events_has_no_events_or_sign_up(client, content):
+    pause("events", "news")
+    html = client.get("/").content.decode()
+    assert "Coming up" not in html
+    assert 'action="/subscribe/"' not in html
+    assert "Get event emails" not in html
+    assert "/events/" not in html
+
+
+@pytest.mark.django_db
+def test_home_without_photos_uses_no_album(client, content):
+    album = Album.objects.get()
+    buffer = io.BytesIO()
+    Image.new("RGB", (40, 30), (200, 30, 30)).save(buffer, "JPEG")  # Photo.save() shrinks it
+    Photo.objects.create(album=album, image=SimpleUploadedFile("a.jpg", buffer.getvalue()))
+    assert "See the photos" in client.get("/").content.decode()
+    pause("photos")
+    html = client.get("/").content.decode()
+    assert "See the photos" not in html
+    assert "/gallery/" not in html
+
+
+@pytest.mark.django_db
+def test_home_with_everything_paused_is_just_the_welcome(client, content):
+    pause(*KEYS)
+    response = client.get("/")
+    html = response.content.decode()
+    assert response.status_code == 200
+    assert "Welcome to" in html
+    for path in MENU.values():
+        assert f'href="{path}' not in html
+
+
+@pytest.mark.django_db
+def test_pibg_page_hides_events_and_documents_that_are_paused(client, content):
+    Event.objects.create(
+        title="PIBG AGM", kind=Event.PIBG, starts_at=timezone.now() + timedelta(days=5)
+    )
+    Document.objects.create(
+        title="PIBG minutes", group=Document.PIBG, file=SimpleUploadedFile("m.pdf", b"%PDF-1.4")
+    )
+    pause("events", "documents")
+    html = client.get("/pibg/").content.decode()
+    assert "PIBG AGM" not in html
+    assert "All PIBG events" not in html
+    assert "PIBG minutes" not in html
+
+
+@pytest.mark.django_db
+def test_event_and_album_pages_drop_links_to_paused_sections(client, content):
+    event = Event.objects.get(title="Sports day")
+    album = Album.objects.get()
+    pause("photos")
+    assert album.get_absolute_url() not in client.get(event.get_absolute_url()).content.decode()
+    record = SiteSections.load()
+    record.photos, record.events = True, False
+    record.save()
+    assert event.get_absolute_url() not in client.get(album.get_absolute_url()).content.decode()
+
+
+@pytest.mark.django_db
+def test_unsubscribe_page_offers_sign_up_only_while_events_are_on(client):
+    subscriber = Subscriber.objects.create(email="parent@example.com", is_active=False)
+    url = subscriber.get_unsubscribe_url()
+    assert "Sign up again on the home page" in client.get(url).content.decode()
+    pause("events")
+    assert "Sign up again on the home page" not in client.get(url).content.decode()
+
+
+@pytest.mark.parametrize("key", ["events", "news", "documents", "achievements", "photos"])
+def test_search_leaves_out_paused_sections(content, key):
+    assert key in [s.key for s in find("sports day")]
+    pause(key)
+    keys = [s.key for s in find("sports day")]
+    assert key not in keys
+    assert len(keys) == 4

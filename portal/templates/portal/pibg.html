@@ -37,7 +37,7 @@
     <ul class="event-list">
       {% for event in upcoming %}{% include "portal/_event_row.html" %}{% endfor %}
     </ul>
-    <p><a href="{% url 'portal:event_list' %}?type=pibg">{% translate "All PIBG events" %}</a></p>
+    {% if site_sections.events %}<p><a href="{% url 'portal:event_list' %}?type=pibg">{% translate "All PIBG events" %}</a></p>{% endif %}
   </section>
 {% endif %}
 

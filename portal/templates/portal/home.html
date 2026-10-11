@@ -27,12 +27,13 @@
     {% else %}
       <h1 id="lead-title">{% blocktranslate %}Welcome to {{ school_name }}{% endblocktranslate %}</h1>
       <p class="band-lead">{% translate "News, events and photos from school, for parents and guardians." %}</p>
-      <p><a class="button button--torch" href="#subscribe-title">{% translate "Get event emails" %}</a></p>
+      {% if site_sections.events %}<p><a class="button button--torch" href="#subscribe-title">{% translate "Get event emails" %}</a></p>{% endif %}
     {% endif %}
   </div>
   {% if hero_credit %}<p class="band-credit">{{ hero_credit }}</p>{% endif %}
 </section>
 
+{% if site_sections.news %}
 <section class="split wrap" aria-labelledby="news-title">
   <div class="split-intro">
     <h2 id="news-title">{% if lead_news %}{% translate "More news" %}{% else %}{% translate "News from school" %}{% endif %}</h2>
@@ -51,7 +52,9 @@
     {% endif %}
   </div>
 </section>
+{% endif %}
 
+{% if site_sections.events %}
 <section class="split split--reverse wrap" aria-labelledby="events-title">
   <div class="split-intro">
     <h2 id="events-title">{% translate "Coming up" %}</h2>
@@ -70,6 +73,7 @@
     {% endif %}
   </div>
 </section>
+{% endif %}
 
 {% if featured_album and band_photo %}
 <section class="band band--photo band--album" aria-labelledby="album-title">
@@ -84,6 +88,7 @@
 </section>
 {% endif %}
 
+{% if site_sections.events %}
 <section class="band band--signup" aria-labelledby="subscribe-title">
   <div class="band-frame band-frame--up" aria-hidden="true"></div>
   <div class="band-body wrap">
@@ -103,4 +108,5 @@
     </form>
   </div>
 </section>
+{% endif %}
 {% endblock %}

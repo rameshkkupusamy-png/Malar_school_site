@@ -1,6 +1,7 @@
 from django.conf import settings
+from django.utils.functional import SimpleLazyObject
 
-from .models import SocialLink, UrgentNotice
+from .models import SiteSections, SocialLink, UrgentNotice
 
 
 def school(request):
@@ -12,4 +13,6 @@ def school(request):
         # Lazy: only queried on pages that show the footer.
         "social_links": SocialLink.objects.published(),
         "urgent_notices": UrgentNotice.objects.showing(),
+        # Not "sections": the search page already uses that name for its results.
+        "site_sections": SimpleLazyObject(SiteSections.load),
     }

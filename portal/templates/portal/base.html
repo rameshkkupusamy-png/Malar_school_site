@@ -36,13 +36,13 @@
       </a>
       <div class="header-end">
         <nav class="site-nav" aria-label="{% translate 'Main' %}">
-          <a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>{% translate "News" %}</a>
-          <a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>{% translate "Events" %}</a>
-          <a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>{% translate "Photos" %}</a>
-          <a href="{% url 'portal:document_list' %}"{% if "document" in current %} aria-current="page"{% endif %}>{% translate "Documents" %}</a>
-          <a href="{% url 'portal:pibg' %}"{% if current == "pibg" %} aria-current="page"{% endif %}>{% translate "PIBG" %}</a>
-          <a href="{% url 'portal:achievement_list' %}"{% if "achievement" in current %} aria-current="page"{% endif %}>{% translate "Achievements" %}</a>
-          <a href="{% url 'portal:search' %}"{% if current == "search" %} aria-current="page"{% endif %}>{% translate "Search" %}</a>
+          {% if site_sections.news %}<a href="{% url 'portal:announcement_list' %}"{% if "announcement" in current %} aria-current="page"{% endif %}>{% translate "News" %}</a>{% endif %}
+          {% if site_sections.events %}<a href="{% url 'portal:event_list' %}"{% if "event" in current %} aria-current="page"{% endif %}>{% translate "Events" %}</a>{% endif %}
+          {% if site_sections.photos %}<a href="{% url 'portal:album_list' %}"{% if "album" in current %} aria-current="page"{% endif %}>{% translate "Photos" %}</a>{% endif %}
+          {% if site_sections.documents %}<a href="{% url 'portal:document_list' %}"{% if "document" in current %} aria-current="page"{% endif %}>{% translate "Documents" %}</a>{% endif %}
+          {% if site_sections.pibg %}<a href="{% url 'portal:pibg' %}"{% if current == "pibg" %} aria-current="page"{% endif %}>{% translate "PIBG" %}</a>{% endif %}
+          {% if site_sections.achievements %}<a href="{% url 'portal:achievement_list' %}"{% if "achievement" in current %} aria-current="page"{% endif %}>{% translate "Achievements" %}</a>{% endif %}
+          {% if site_sections.search %}<a href="{% url 'portal:search' %}"{% if current == "search" %} aria-current="page"{% endif %}>{% translate "Search" %}</a>{% endif %}
         </nav>
         {% include "portal/_language_switcher.html" %}
       </div>
@@ -69,13 +69,13 @@
         </div>
       </div>
       <nav class="footer-links" aria-label="{% translate 'Footer' %}">
-        <a href="{% url 'portal:announcement_list' %}">{% translate "News" %}</a>
-        <a href="{% url 'portal:event_list' %}">{% translate "Events" %}</a>
-        <a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>
-        <a href="{% url 'portal:document_list' %}">{% translate "Documents" %}</a>
-        <a href="{% url 'portal:pibg' %}">{% translate "PIBG" %}</a>
-        <a href="{% url 'portal:achievement_list' %}">{% translate "Achievements" %}</a>
-        <a href="{% url 'portal:search' %}">{% translate "Search" %}</a>
+        {% if site_sections.news %}<a href="{% url 'portal:announcement_list' %}">{% translate "News" %}</a>{% endif %}
+        {% if site_sections.events %}<a href="{% url 'portal:event_list' %}">{% translate "Events" %}</a>{% endif %}
+        {% if site_sections.photos %}<a href="{% url 'portal:album_list' %}">{% translate "Photos" %}</a>{% endif %}
+        {% if site_sections.documents %}<a href="{% url 'portal:document_list' %}">{% translate "Documents" %}</a>{% endif %}
+        {% if site_sections.pibg %}<a href="{% url 'portal:pibg' %}">{% translate "PIBG" %}</a>{% endif %}
+        {% if site_sections.achievements %}<a href="{% url 'portal:achievement_list' %}">{% translate "Achievements" %}</a>{% endif %}
+        {% if site_sections.search %}<a href="{% url 'portal:search' %}">{% translate "Search" %}</a>{% endif %}
         <a href="{% url 'portal:contact' %}">{% translate "Contact the school" %}</a>
         <a href="{% url 'admin:index' %}">{% translate "Staff sign in" %}</a>
       </nav>

@@ -6,7 +6,7 @@
 {% block content %}
 <header class="page-head">
   <h1>{{ album.title }}</h1>
-  {% if album.event %}<p class="meta">{% translate "From" %} <a href="{{ album.event.get_absolute_url }}">{{ album.event.title }}</a></p>{% endif %}
+  {% if album.event and site_sections.events %}<p class="meta">{% translate "From" %} <a href="{{ album.event.get_absolute_url }}">{{ album.event.title }}</a></p>{% endif %}
   {% if album.description %}<div class="prose">{{ album.description|linebreaks }}</div>{% endif %}
 </header>
 

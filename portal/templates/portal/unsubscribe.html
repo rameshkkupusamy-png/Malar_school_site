@@ -14,7 +14,7 @@
     </form>
   {% else %}
     <p>{% blocktranslate with email=subscriber.email %}{{ email }} already doesn't get event emails.{% endblocktranslate %}
-      <a href="{% url 'portal:home' %}#subscribe-title">{% translate "Sign up again on the home page" %}</a></p>
+      {% if site_sections.events %}<a href="{% url 'portal:home' %}#subscribe-title">{% translate "Sign up again on the home page" %}</a>{% endif %}</p>
   {% endif %}
 </section>
 {% endblock %}
