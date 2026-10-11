@@ -1,9 +1,21 @@
+from datetime import timedelta
+
 import pytest
 from django.contrib.auth.models import Group, Permission, User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.urls import reverse
+from django.utils import timezone
 
-from portal.models import SiteSections
+from portal.models import (
+    Achievement,
+    Album,
+    Announcement,
+    Document,
+    Event,
+    SiteSections,
+    Subscriber,
+)
 
 KEYS = ["news", "events", "photos", "documents", "pibg", "achievements", "search"]
 
@@ -77,3 +89,88 @@ def test_editor_given_the_permission_by_hand_still_cannot_open_it(client):
     SiteSections().save()
     url = reverse("admin:portal_sitesections_change", args=[1])
     assert client.get(url).status_code == 403
+
+
+@pytest.fixture
+def content(db, settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path
+    event = Event.objects.create(title="Sports day", starts_at=timezone.now() + timedelta(days=3))
+    news = Announcement.objects.create(title="Sports day news", body="x")
+    album = Album.objects.create(title="Sports day photos", event=event)
+    document = Document.objects.create(
+        title="Sports day form", file=SimpleUploadedFile("form.pdf", b"%PDF-1.4")
+    )
+    achievement = Achievement.objects.create(
+        title="Sports day gold",
+        category=Achievement.CATEGORIES[0][0],
+        level=Achievement.LEVELS[0][0],
+    )
+    return {
+        "news": ["/news/", f"/news/{news.pk}/"],
+        "events": [
+            "/events/",
+            f"/events/{event.pk}/",
+            f"/events/{event.pk}/calendar.ics",
+            "/events/calendar.ics",
+        ],
+        "photos": ["/gallery/", f"/gallery/{album.pk}/"],
+        "documents": ["/documents/", f"/documents/{document.pk}/"],
+        "pibg": ["/pibg/"],
+        "achievements": ["/achievements/", f"/achievements/{achievement.pk}/"],
+        "search": ["/search/?q=sports"],
+    }
+
+
+@pytest.mark.django_db
+def test_every_section_page_opens_by_default(client, content):
+    for paths in content.values():
+        for path in paths:
+            assert client.get(path).status_code < 400, path
+
+
+@pytest.mark.parametrize("key", KEYS)
+def test_paused_section_shows_the_paused_page_and_others_still_open(client, content, key):
+    pause(key)
+    for path in content[key]:
+        response = client.get(path)
+        html = response.content.decode()
+        assert response.status_code == 503, path
+        assert "This section is not available right now" in html
+        assert '<meta name="robots" content="noindex">' in html
+        assert 'href="/contact/"' in html
+    for other, paths in content.items():
+        if other != key:
+            for path in paths:
+                assert client.get(path).status_code < 400, path
+
+
+@pytest.mark.django_db
+def test_paused_detail_link_that_never_existed_is_still_paused(client):
+    pause("news", "achievements")
+    assert client.get("/news/99999/").status_code == 503
+    assert client.get("/private/achievements/nothing.jpg").status_code == 503
+
+
+@pytest.mark.django_db
+def test_switching_a_section_back_on_restores_it(client, content):
+    pause("news")
+    assert client.get("/news/").status_code == 503
+    record = SiteSections.load()
+    record.news = True
+    record.save()
+    assert client.get("/news/").status_code == 200
+
+
+@pytest.mark.django_db
+def test_paused_events_refuse_new_sign_ups(client):
+    pause("events")
+    response = client.post(reverse("portal:subscribe"), {"email": "parent@example.com"})
+    assert response.status_code == 503
+    assert not Subscriber.objects.exists()
+
+
+def test_unknown_section_key_is_a_mistake():
+    from portal.sections import section
+
+    with pytest.raises(ValueError):
+        section("newz")

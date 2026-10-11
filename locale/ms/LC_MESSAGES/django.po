@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: school-portal VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-10 20:57+0800\n"
+"POT-Creation-Date: 2026-10-11 10:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ms\n"
@@ -149,11 +149,11 @@ msgid "Exam"
 msgstr "Peperiksaan"
 
 #: portal/models.py:78 portal/models.py:422 portal/templates/portal/base.html:43
-#: portal/templates/portal/base.html:76 portal/views.py:82
+#: portal/templates/portal/base.html:76 portal/views.py:83
 msgid "PIBG"
 msgstr "PIBG"
 
-#: portal/models.py:79 portal/models.py:824 portal/views.py:83
+#: portal/models.py:79 portal/models.py:858 portal/views.py:84
 msgid "Sports"
 msgstr "Sukan"
 
@@ -213,48 +213,48 @@ msgstr "Penasihat"
 msgid "Committee member"
 msgstr "Ahli Jawatankuasa"
 
-#: portal/models.py:823
+#: portal/models.py:857
 msgid "Academic"
 msgstr "Akademik"
 
-#: portal/models.py:825
+#: portal/models.py:859
 msgid "Arts and culture"
 msgstr "Seni dan budaya"
 
-#: portal/models.py:826
+#: portal/models.py:860
 msgid "Tamil language"
 msgstr "Bahasa Tamil"
 
-#: portal/models.py:827
+#: portal/models.py:861
 msgid "Other"
 msgstr "Lain-lain"
 
-#: portal/models.py:837
+#: portal/models.py:871
 msgid "School"
 msgstr "Sekolah"
 
-#: portal/models.py:838
+#: portal/models.py:872
 msgid "District"
 msgstr "Daerah"
 
-#: portal/models.py:839
+#: portal/models.py:873
 msgid "State"
 msgstr "Negeri"
 
-#: portal/models.py:840
+#: portal/models.py:874
 msgid "National"
 msgstr "Kebangsaan"
 
-#: portal/models.py:841
+#: portal/models.py:875
 msgid "International"
 msgstr "Antarabangsa"
 
-#: portal/models.py:923
+#: portal/models.py:957
 #, python-format
 msgid "a Year %(year)s pupil"
 msgstr "seorang murid Tahun %(year)s"
 
-#: portal/models.py:923
+#: portal/models.py:957
 msgid "a pupil"
 msgstr "seorang murid"
 
@@ -414,6 +414,7 @@ msgstr "Kaki halaman"
 
 #: portal/templates/portal/base.html:79 portal/templates/portal/contact.html:4
 #: portal/templates/portal/contact.html:8 portal/templates/portal/search.html:49
+#: portal/templates/portal/section_paused.html:13
 msgid "Contact the school"
 msgstr "Hubungi sekolah"
 
@@ -734,6 +735,18 @@ msgstr "Menunjukkan %(shown)s yang pertama daripada %(total)s. Cuba perkataan ya
 msgid "Nothing matched. Try another word."
 msgstr "Tiada yang sepadan. Cuba perkataan lain."
 
+#: portal/templates/portal/section_paused.html:4 portal/templates/portal/section_paused.html:9
+msgid "This section is not available right now"
+msgstr "Bahagian ini tidak tersedia buat masa ini"
+
+#: portal/templates/portal/section_paused.html:10
+msgid "Please check back later."
+msgstr "Sila semak semula kemudian."
+
+#: portal/templates/portal/section_paused.html:12
+msgid "Go to the home page"
+msgstr "Pergi ke laman utama"
+
 #: portal/templates/portal/unsubscribe.html:4 portal/templates/portal/unsubscribe.html:8
 msgid "Stop event emails"
 msgstr "Hentikan e-mel acara"
@@ -760,32 +773,32 @@ msgstr "Daftar semula di halaman utama"
 msgid "Open the document:"
 msgstr "Buka dokumen:"
 
-#: portal/views.py:79 portal/views.py:203
+#: portal/views.py:80 portal/views.py:212
 msgid "All"
 msgstr "Semua"
 
-#: portal/views.py:80
+#: portal/views.py:81
 msgid "Holidays"
 msgstr "Cuti"
 
-#: portal/views.py:81
+#: portal/views.py:82
 msgid "Exams"
 msgstr "Peperiksaan"
 
-#: portal/views.py:84
+#: portal/views.py:85
 msgid "Celebrations"
 msgstr "Perayaan"
 
-#: portal/views.py:355
+#: portal/views.py:372
 msgid "Enter a valid email address to get event emails."
 msgstr "Masukkan alamat e-mel yang sah untuk menerima e-mel acara."
 
-#: portal/views.py:373
+#: portal/views.py:390
 #, python-format
 msgid "You'll get an email at %(email)s when events are added."
 msgstr "Anda akan menerima e-mel di %(email)s apabila acara ditambah."
 
-#: portal/views.py:384
+#: portal/views.py:401
 #, python-format
 msgid "%(email)s won't get event emails any more."
 msgstr "%(email)s tidak akan menerima e-mel acara lagi."

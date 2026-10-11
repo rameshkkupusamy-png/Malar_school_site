@@ -29,6 +29,7 @@ from .models import (
     month_range,
 )
 from .search import LIMIT, MAX_LENGTH, find, words
+from .sections import section
 
 PAGE_SIZE = 10
 PAST_MEETINGS = 5
@@ -107,6 +108,7 @@ def month_query(first_day: date, kind: str) -> str:
     return "?" + urlencode(params)
 
 
+@section("events")
 def event_list(request):
     month = chosen_month(request.GET.get("month"))
     kind = request.GET.get("type", "")
@@ -148,6 +150,7 @@ def event_list(request):
     )
 
 
+@section("events")
 def event_detail(request, pk):
     event = get_object_or_404(Event.objects.published(), pk=pk)
     albums = event.albums.filter(is_published=True)
@@ -160,12 +163,14 @@ def calendar_response(body: str, filename: str) -> HttpResponse:
     return response
 
 
+@section("events")
 def event_calendar(request, pk):
     """One event as a calendar file, in the language the parent is reading the site in."""
     event = get_object_or_404(Event.objects.published(), pk=pk)
     return calendar_response(build_calendar([event]), f"event-{event.pk}.ics")
 
 
+@section("events")
 def calendar_feed(request):
     """Every published event from the last three months on, for parents' phone calendars.
 
@@ -179,22 +184,26 @@ def calendar_feed(request):
     return calendar_response(body, "school-events.ics")
 
 
+@section("news")
 def announcement_list(request):
     page = Paginator(Announcement.objects.published(), PAGE_SIZE).get_page(request.GET.get("page"))
     return render(request, "portal/announcement_list.html", {"page": page})
 
 
+@section("news")
 def announcement_detail(request, pk):
     announcement = get_object_or_404(Announcement.objects.published(), pk=pk)
     return render(request, "portal/announcement_detail.html", {"announcement": announcement})
 
 
+@section("photos")
 def album_list(request):
     albums = Album.objects.filter(is_published=True).prefetch_related("photos")
     page = Paginator(albums, 12).get_page(request.GET.get("page"))
     return render(request, "portal/album_list.html", {"page": page})
 
 
+@section("photos")
 def album_detail(request, pk):
     album = get_object_or_404(Album.objects.filter(is_published=True), pk=pk)
     return render(request, "portal/album_detail.html", {"album": album})
@@ -212,6 +221,7 @@ def achievement_query(year: int | None, category: str) -> str:
     return "?" + urlencode(params)
 
 
+@section("achievements")
 def achievement_list(request):
     category = request.GET.get("type", "")
     if category not in dict(Achievement.CATEGORIES):
@@ -241,6 +251,7 @@ def achievement_list(request):
     )
 
 
+@section("achievements")
 def achievement_detail(request, pk):
     achievement = get_object_or_404(
         Achievement.objects.published().prefetch_related("pupils", "photos"), pk=pk
@@ -248,6 +259,7 @@ def achievement_detail(request, pk):
     return render(request, "portal/achievement_detail.html", {"achievement": achievement})
 
 
+@section("achievements")
 def private_media(request, name):
     """Achievement photos: sent only while the achievement is published and every pupil listed
     has their parents' agreement, or to staff who manage achievements."""
@@ -267,6 +279,7 @@ def private_media(request, name):
     return response
 
 
+@section("documents")
 def document_list(request):
     documents = list(Document.objects.published())
     groups = [(label, [d for d in documents if d.group == key]) for key, label in Document.GROUPS]
@@ -277,6 +290,7 @@ def document_list(request):
     )
 
 
+@section("documents")
 def document_open(request, pk):
     """The permanent link for a document, used on the page and in WhatsApp messages.
 
@@ -286,6 +300,7 @@ def document_open(request, pk):
     return redirect(document.file.url)
 
 
+@section("search")
 def search(request):
     query = request.GET.get("q", "")
     return render(
@@ -333,6 +348,7 @@ def contact(request):
     return render(request, "portal/contact.html", {"contact": SchoolContact.load()})
 
 
+@section("pibg")
 def pibg(request):
     info = Pibg.load()
     meetings = Event.objects.published().filter(kind=Event.PIBG)
@@ -349,6 +365,7 @@ def pibg(request):
 
 
 @require_POST
+@section("events")
 def subscribe(request):
     form = SubscribeForm(request.POST)
     if not form.is_valid():
