@@ -22,3 +22,8 @@ ignore = ["RUF012"]
 [tool.ruff.lint.per-file-ignores]
 # Tests build local wall-clock times and pass them through timezone.make_aware().
 "tests/*" = ["DTZ001"]
+# The spreadsheet import parses dates and times with strptime and keeps only the .date() or
+# .time() part, so no naive datetime escapes. Kept here, not as noqa comments: ruff 0.17
+# stopped flagging these lines and reports the comments as unused (RUF100), while 0.16 still
+# needs them.
+"portal/imports.py" = ["DTZ007"]
