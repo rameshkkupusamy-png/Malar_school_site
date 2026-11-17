@@ -224,3 +224,56 @@ def test_paused_page_fits_a_phone(page, live_server, site, language):
         "document.documentElement.scrollWidth - document.documentElement.clientWidth"
     )
     assert overflow <= 0, f"paused page scrolls sideways by {overflow}px"
+
+
+SMALL_PHONE = {"width": 320, "height": 640}
+
+
+@pytest.mark.parametrize("language", ["ta", "ms", "en"])
+def test_headings_are_not_cut_off_on_a_small_phone(page, live_server, site, language):
+    use_language(page, live_server, language)
+    page.set_viewport_size(SMALL_PHONE)
+
+    for path in page_paths(site):
+        page.goto(live_server.url + path)
+        page.evaluate("document.fonts.ready")
+        clipped = page.evaluate(
+            """() => [...document.querySelectorAll('h1, h2')]
+                .filter(h => h.scrollWidth > h.clientWidth + 1)
+                .map(h => h.textContent.trim())"""
+        )
+        assert clipped == [], f"{path}: headings wider than their box: {clipped}"
+
+
+def test_focus_ring_has_a_dark_edge_for_white_pages(page, live_server, site):
+    page.goto(live_server.url + "/events/")
+    link = page.locator(".month-nav a").first
+    link.focus()
+    shadow = link.evaluate("el => getComputedStyle(el).boxShadow")
+    assert "rgb(20, 41, 95)" in shadow, "yellow alone is too faint on white"
+
+
+@pytest.mark.parametrize("selector", [".language-switcher button", ".month-nav a"])
+def test_phone_tap_targets_are_at_least_44px(page, live_server, site, selector):
+    page.set_viewport_size(PHONE)
+    page.goto(live_server.url + "/events/")
+    heights = page.locator(selector).evaluate_all(
+        "els => els.map(el => el.getBoundingClientRect().height)"
+    )
+    assert heights and min(heights) >= 44, f"{selector}: {heights}"
+
+
+@pytest.mark.parametrize("language", ["ta", "ms", "en"])
+def test_phone_header_keeps_the_language_switcher_on_the_crest_line(
+    page, live_server, site, language
+):
+    use_language(page, live_server, language)
+    page.set_viewport_size(PHONE)
+    page.goto(live_server.url + "/")
+    page.evaluate("document.fonts.ready")  # measure with the real fonts, not the fallbacks
+
+    brand = page.locator(".brand").bounding_box()
+    switcher = page.locator(".language-switcher").bounding_box()
+    header = page.locator(".site-header").bounding_box()
+    assert switcher["y"] < brand["y"] + brand["height"], "switcher dropped below the crest"
+    assert header["height"] < 200, f"phone header is {header['height']}px tall"

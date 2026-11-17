@@ -16,3 +16,7 @@ site-photos/
 translation-review.xlsx
 important.txt
 backups/
+
+# Local files: graphify knowledge graph and media backups
+graphify-out/
+media.zip
