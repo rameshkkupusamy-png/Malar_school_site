@@ -106,7 +106,7 @@ def parse_date(value) -> date | None:
     text = str(value).strip()
     for fmt in DATE_FORMATS:
         try:
-            return datetime.strptime(text, fmt).date()  # noqa: DTZ007 - only the date part is used
+            return datetime.strptime(text, fmt).date()
         except ValueError:
             continue
     raise ValueError(f"'{text}' isn't a date. Use a format like 14/10/2026")
@@ -125,7 +125,7 @@ def parse_time(value) -> time | None:
     text = str(value).strip().upper().replace(".M.", "M").replace("A.M", "AM").replace("P.M", "PM")
     for fmt in TIME_FORMATS:
         try:
-            return datetime.strptime(text, fmt).time()  # noqa: DTZ007 - only the time part is used
+            return datetime.strptime(text, fmt).time()
         except ValueError:
             continue
     raise ValueError(f"'{value}' isn't a time. Use a format like 09:30 or 2:30 PM")
